@@ -1,0 +1,8 @@
+App/Enclave_u.c
+App/Enclave_u.h
+Enclave/Enclave_t.c
+Enclave/Enclave_t.h
+*.o
+.config*
+app
+*.so
