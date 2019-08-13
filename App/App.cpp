@@ -191,16 +191,18 @@ int SGX_CDECL main(int argc, char *argv[])
         return -1; 
     }
  
-    /* Utilize edger8r attributes */
-    edger8r_array_attributes();
-    edger8r_pointer_attributes();
-    edger8r_type_attributes();
-    edger8r_function_attributes();
+    // /* Utilize edger8r attributes */
+    // edger8r_array_attributes();
+    // edger8r_pointer_attributes();
+    // edger8r_type_attributes();
+    // edger8r_function_attributes();
     
-    /* Utilize trusted libraries */
-    ecall_libc_functions();
-    ecall_libcxx_functions();
-    ecall_thread_functions();
+    // /* Utilize trusted libraries */
+    // ecall_libc_functions();
+    // ecall_libcxx_functions();
+    // ecall_thread_functions();
+
+    do_something(global_eid);
 
     /* Destroy the enclave */
     sgx_destroy_enclave(global_eid);

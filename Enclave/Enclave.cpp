@@ -49,3 +49,7 @@ int printf(const char* fmt, ...)
     ocall_print_string(buf);
     return (int)strnlen(buf, BUFSIZ - 1) + 1;
 }
+
+void do_something(void){
+    printf("This is do_something\n");
+}
