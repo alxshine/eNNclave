@@ -52,6 +52,7 @@ enclave {
 
     trusted {
         public void do_something();
+        public int multiply(int a, int b);
     };
 
     /* 

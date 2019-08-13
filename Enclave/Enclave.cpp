@@ -53,3 +53,7 @@ int printf(const char* fmt, ...)
 void do_something(void){
     printf("This is do_something\n");
 }
+
+int multiply(int a, int b){
+    return a*b;
+}

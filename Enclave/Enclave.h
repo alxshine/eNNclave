@@ -41,6 +41,7 @@ extern "C" {
 
 int printf(const char* fmt, ...);
 void do_something(void);
+int multiply(int a, int b);
 
 #if defined(__cplusplus)
 }
