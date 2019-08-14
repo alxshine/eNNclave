@@ -6,3 +6,4 @@ Enclave/Enclave_t.h
 .config*
 app
 *.so
+.cquery_cached_index

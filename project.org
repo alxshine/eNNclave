@@ -1,0 +1,32 @@
+* NN SGX
+Running the dense part of CNNs inside the trusted enclave to reduce leakage and protect against model stealing.
+We hope to make this as robust against model stealing as online oracles.
+
+** People
+RBO, CPA, ASC
+
+** Project Diary
+[2019-08-14 Wed]
+The project unfortunately only runs on Ubuntu 18.04 and some other OSes, and not on my own machine...
+I'm currently developing inside a VM.
+
+The project currently consists of a minimal Makefile for a single enclave and app that runs in simulation mode.
+Adding functions to the enclave requires their definition in the header file, and implementation, as for regular C code.
+Additionally, it requires addition to the ~trusted~ block in [[file:Enclave/Enclave.edl::trusted%20{][Enclave/Enclave.edl]], with publicly accessible functions having the ~public~ keyword added to them.
+
+In the app, the functions are then called with a slightly different signature.
+The return value of enclave functions is always an sgx_status, and the ~global_eid~ is added to the parameters.
+Return values of the function are set by the SGX wrapper through pointers, C-style.
+
+* Next steps
+** TODO Add simple matrix multiplication
+Add some code that does naive matrix multiplication, just to get the hang of it.
+** TODO Think of a meaningful interface
+The interface for our code is the most important part.
+Rainer had the idea to somehow automatically split the network in a TF GPU part and an enclave part.
+This would allow specifying "I want this part to run fast, and I want this part to be secure".
+I'm not sure if this is too large a step for now.
+
+Maybe a good starting point would be to look at the Tensorflow C++ API, and see how functions are called there.
+
+** TODO Try and extract weights from TF models
