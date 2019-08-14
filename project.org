@@ -21,6 +21,7 @@ Return values of the function are set by the SGX wrapper through pointers, C-sty
 * Next steps
 ** TODO Add simple matrix multiplication
 Add some code that does naive matrix multiplication, just to get the hang of it.
+
 ** TODO Think of a meaningful interface
 The interface for our code is the most important part.
 Rainer had the idea to somehow automatically split the network in a TF GPU part and an enclave part.
@@ -30,3 +31,7 @@ I'm not sure if this is too large a step for now.
 Maybe a good starting point would be to look at the Tensorflow C++ API, and see how functions are called there.
 
 ** TODO Try and extract weights from TF models
+
+** TODO Figure out how many bits the enclave uses for floats
+This could cause some weird results and incompatibilities.
+It's also not perfectly clear if the enclave even supports floats.
