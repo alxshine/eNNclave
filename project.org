@@ -5,7 +5,30 @@ We hope to make this as robust against model stealing as online oracles.
 ** People
 RBO, CPA, ASC
 
-** Project Diary
+** Project Outline
+*** First prototype [1/5]
+**** DONE Create working environment for Testing and Development
+     CLOSED: [2019-08-20 Tue 19:55]
+**** TODO Extract Weights from Tensorflow Tensors
+**** TODO Choose test network for first prototype
+**** TODO Do naive matrix multiplication inside the SGX enclave
+**** TODO Feed result back into tensorflow, or calculate softmax
+
+*** Improvements for paper [0/3]
+**** TODO Test on actual hardware
+**** TODO Automate memory layout inside SGX
+We might have to do some memory magic because otherwise we might run out of memory inside the SGX.
+The first prototype can do this explicitly for the chosen network, but for publishing we should do this automatically.
+
+*** Future Work [0/1]
+**** TODO Integrate with the Tensorflow API
+Rainer said it would be nice to integrate the SGX with the tensorflow API
+
+** Unforeseen events
+*** TODO Figure out how many bits the enclave uses for floats
+This could cause some weird results and incompatibilities.
+It's also not perfectly clear if the enclave even supports floats.
+* Project Diary
 [2019-08-14 Wed]
 The project unfortunately only runs on Ubuntu 18.04 and some other OSes, and not on my own machine...
 I'm currently developing inside a VM.
@@ -18,20 +41,3 @@ In the app, the functions are then called with a slightly different signature.
 The return value of enclave functions is always an sgx_status, and the ~global_eid~ is added to the parameters.
 Return values of the function are set by the SGX wrapper through pointers, C-style.
 
-* Next steps
-** TODO Add simple matrix multiplication
-Add some code that does naive matrix multiplication, just to get the hang of it.
-
-** TODO Think of a meaningful interface
-The interface for our code is the most important part.
-Rainer had the idea to somehow automatically split the network in a TF GPU part and an enclave part.
-This would allow specifying "I want this part to run fast, and I want this part to be secure".
-I'm not sure if this is too large a step for now.
-
-Maybe a good starting point would be to look at the Tensorflow C++ API, and see how functions are called there.
-
-** TODO Try and extract weights from TF models
-
-** TODO Figure out how many bits the enclave uses for floats
-This could cause some weird results and incompatibilities.
-It's also not perfectly clear if the enclave even supports floats.
