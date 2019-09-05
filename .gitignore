@@ -7,3 +7,4 @@ Enclave/Enclave_t.h
 app
 *.so
 .cquery_cached_index
+python/data

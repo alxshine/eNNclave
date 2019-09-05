@@ -9,26 +9,6 @@ RBO, CPA, ASC
 *** First prototype [1/5]
 **** DONE Create working environment for Testing and Development
      CLOSED: [2019-08-20 Tue 19:55]
-**** TODO Extract Weights from Tensorflow Tensors
-**** TODO Choose test network for first prototype
-**** TODO Do naive matrix multiplication inside the SGX enclave
-**** TODO Feed result back into tensorflow, or calculate softmax
-
-*** Improvements for paper [0/3]
-**** TODO Test on actual hardware
-**** TODO Automate memory layout inside SGX
-We might have to do some memory magic because otherwise we might run out of memory inside the SGX.
-The first prototype can do this explicitly for the chosen network, but for publishing we should do this automatically.
-
-*** Future Work [0/1]
-**** TODO Integrate with the Tensorflow API
-Rainer said it would be nice to integrate the SGX with the tensorflow API
-
-** Unforeseen events
-*** TODO Figure out how many bits the enclave uses for floats
-This could cause some weird results and incompatibilities.
-It's also not perfectly clear if the enclave even supports floats.
-* Project Diary
 [2019-08-14 Wed]
 The project unfortunately only runs on Ubuntu 18.04 and some other OSes, and not on my own machine...
 I'm currently developing inside a VM.
@@ -41,3 +21,44 @@ In the app, the functions are then called with a slightly different signature.
 The return value of enclave functions is always an sgx_status, and the ~global_eid~ is added to the parameters.
 Return values of the function are set by the SGX wrapper through pointers, C-style.
 
+**** TODO Extract Weights from neural net
+I can store the weights of a model in HDF5 format, and then load that using their C++ API.
+Then I could either load the weights from inside the enclave (which gives us no benefit at all), or hardcode them.
+
+I need the activation functions anyway, so hardcoding is probably the way to go.
+
+[2019-09-03 Tue 09:40]
+FUCK TENSORFLOW
+The C++ API requires building from source, and that requires bazel, and then everything together is a massive house of cards where the cards randomly self ignite, and then the example doesn't compile and everything...
+That seems like an unreasonable amount of super annoying work, which I don't want to do.
+
+So, instead I will try to create the NN in python, and create cython bindings for my C++ code.
+This probably means I will have to write a wrapper app for the enclave code, and maybe later make calls to the enclave directly.
+
+[2019-09-04 Wed 14:24]
+Does it have to be Tensorflow?
+PyTorch seems to do the same thing but nicer, because it gives us more granular access to the underlying matrices.
+
+**** TODO Choose test network for first prototype
+
+**** TODO Do naive matrix multiplication inside the SGX enclave
+**** TODO Feed result back into tensorflow, or calculate softmax
+
+*** Improvements for paper [0/3]
+**** TODO Test on actual hardware
+**** TODO Automate memory layout inside SGX
+We might have to do some memory magic because otherwise we might run out of memory inside the SGX.
+The first prototype can do this explicitly for the chosen network, but for publishing we should do this automatically.
+
+Alternative we could also generate a fixed function from sparse matrix multiplication.
+This would mean that we go through the output cell by cell, calculating all immediate steps in a row.
+Using this would throw away any shared results, and be much slower.
+However, this could help us avoid memory issues.
+*** Future Work [0/1]
+**** TODO Integrate with the framework API
+Rainer said it would be nice to integrate the SGX with the tensorflow API (or pytorch, whatever)
+
+** Unforeseen events
+*** TODO Figure out how many bits the enclave uses for floats
+This could cause some weird results and incompatibilities.
+It's also not perfectly clear if the enclave even supports floats.
