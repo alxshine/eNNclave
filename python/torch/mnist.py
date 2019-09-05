@@ -1,6 +1,8 @@
 """ Test script for a pytorch MNIST CNN"""
 
 import argparse
+import os
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -23,8 +25,8 @@ class Net(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.max_pool2d(x, 2, 2)
         x = x.view(-1, 4 * 4 * 50)
-        x = F.relu(self.fc1(x)) # move to C
-        x = self.fc2(x) # move to C
+        x = F.relu(self.fc1(x))  # move to C
+        x = self.fc2(x)  # move to C
         return F.log_softmax(x, dim=1)
 
 
@@ -66,7 +68,7 @@ def test(args, model, device, test_loader):
             100. * correct / len(test_loader.dataset)))
 
 
-def main():
+if __name__ == '__main__':
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
     parser.add_argument('--batch-size',
@@ -149,13 +151,14 @@ def main():
                           lr=args.lr,
                           momentum=args.momentum)
 
-    for epoch in range(1, args.epochs + 1):
-        train(args, model, device, train_loader, optimizer, epoch)
-        test(args, model, device, test_loader)
+    save_file = "mnist_cnn.pt"
+    if os.path.isfile(save_file):
+        print('loading from %s' % save_file)
+        model.load_state_dict(torch.load(save_file), strict=False)
+    else:
+        for epoch in range(1, args.epochs + 1):
+            train(args, model, device, train_loader, optimizer, epoch)
+            test(args, model, device, test_loader)
 
-    if args.save_model:
-        torch.save(model.state_dict(), "mnist_cnn.pt")
-
-
-if __name__ == '__main__':
-    main()
+        if args.save_model:
+            torch.save(model.state_dict(), save_file)
