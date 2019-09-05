@@ -6,7 +6,7 @@ We hope to make this as robust against model stealing as online oracles.
 RBO, CPA, ASC
 
 ** Project Outline
-*** First prototype [1/5]
+*** First prototype [2/8]
 **** DONE Create working environment for Testing and Development
      CLOSED: [2019-08-20 Tue 19:55]
 [2019-08-14 Wed]
@@ -22,27 +22,41 @@ The return value of enclave functions is always an sgx_status, and the ~global_e
 Return values of the function are set by the SGX wrapper through pointers, C-style.
 
 **** TODO Extract Weights from neural net
-I can store the weights of a model in HDF5 format, and then load that using their C++ API.
-Then I could either load the weights from inside the enclave (which gives us no benefit at all), or hardcode them.
+     I can store the weights of a model in HDF5 format, and then load that using their C++ API.
+     Then I could either load the weights from inside the enclave (which gives us no benefit at all), or hardcode them.
 
-I need the activation functions anyway, so hardcoding is probably the way to go.
+     I need the activation functions anyway, so hardcoding is probably the way to go.
 
-[2019-09-03 Tue 09:40]
-FUCK TENSORFLOW
-The C++ API requires building from source, and that requires bazel, and then everything together is a massive house of cards where the cards randomly self ignite, and then the example doesn't compile and everything...
-That seems like an unreasonable amount of super annoying work, which I don't want to do.
+     [2019-09-03 Tue 09:40]
+     FUCK TENSORFLOW
+     The C++ API requires building from source, and that requires bazel, and then everything together is a massive house of cards where the cards randomly selgf ignite, and then the example doesn't compile and nothing works.
+     That seems like an unreasonable amount of super annoying work, which I don't want to do.
 
-So, instead I will try to create the NN in python, and create cython bindings for my C++ code.
-This probably means I will have to write a wrapper app for the enclave code, and maybe later make calls to the enclave directly.
+     So, instead I will try to create the NN in python, and create cython bindings for my C++ code.
+     This probably means I will have to write a wrapper app for the enclave code, and maybe later make calls to the enclave directly.
 
-[2019-09-04 Wed 14:24]
-Does it have to be Tensorflow?
-PyTorch seems to do the same thing but nicer, because it gives us more granular access to the underlying matrices.
+     [2019-09-04 Wed 14:24]
+     Does it have to be Tensorflow?
+     PyTorch seems to do the same thing but nicer, because it gives us more granular access to the underlying matrices.
 
-**** TODO Choose test network for first prototype
+**** TODO Write a script that generates C arrays from pytorch weight matrices
+     Because the weights should be hardcoded into the enclave (this avoids decryption during loading for now), I need a script to extract weights from a ~.pt~ file and generate C array definitions from it.
+
+**** TODO Understand biases in Pytorch NNS
+     I need to understand how biases are used in pytorch, so I can correctly model that behaviour.
+
+**** DONE Choose test network for first prototype
+     CLOSED: [2019-09-05 Thu 10:54]
+     Just use MNIST CNN, I have working code for torch
+
+**** TODO Move the fully connected layers to naive matrix multiplication in C
+     In the forward function of the network, instead of invoking ~nn.Linear~ I can call a C function.
+     This means that pytorch doesn't know how to backpropagate, but it doesn't need to anymore.
 
 **** TODO Do naive matrix multiplication inside the SGX enclave
+
 **** TODO Feed result back into tensorflow, or calculate softmax
+
 
 *** Improvements for paper [0/3]
 **** TODO Test on actual hardware

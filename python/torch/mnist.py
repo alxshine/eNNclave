@@ -23,8 +23,8 @@ class Net(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.max_pool2d(x, 2, 2)
         x = x.view(-1, 4 * 4 * 50)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.relu(self.fc1(x)) # move to C
+        x = self.fc2(x) # move to C
         return F.log_softmax(x, dim=1)
 
 
