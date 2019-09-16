@@ -6,7 +6,7 @@ We hope to make this as robust against model stealing as online oracles.
 RBO, CPA, ASC
 
 ** Project Outline
-*** First prototype [2/8]
+*** First prototype [5/8]
 **** DONE Create working environment for Testing and Development
      CLOSED: [2019-08-20 Tue 19:55]
 [2019-08-14 Wed]
@@ -21,7 +21,8 @@ In the app, the functions are then called with a slightly different signature.
 The return value of enclave functions is always an sgx_status, and the ~global_eid~ is added to the parameters.
 Return values of the function are set by the SGX wrapper through pointers, C-style.
 
-**** TODO Extract Weights from neural net
+**** DONE Extract Weights from neural net
+     CLOSED: [2019-09-16 Mon 16:50]
      I can store the weights of a model in HDF5 format, and then load that using their C++ API.
      Then I could either load the weights from inside the enclave (which gives us no benefit at all), or hardcode them.
 
@@ -65,12 +66,19 @@ Return values of the function are set by the SGX wrapper through pointers, C-sty
         return torch.Tensor(x)
 #+END_SRC
      
-**** TODO Understand biases in Pytorch NNS
+**** DONE Understand biases in Pytorch NNS
+     CLOSED: [2019-09-16 Mon 16:50]
      I need to understand how biases are used in pytorch, so I can correctly model that behaviour.
 
+     [2019-09-16 Mon 16:50]
+     They are simply added after the input is multiplied with the weight.
+     Then the sum of the multiplication result and the biases is run through the nonlinearity.
 
-**** TODO Write a script that generates C arrays from pytorch weight matrices
+**** DONE Write a script that generates C arrays from pytorch weight matrices
+     CLOSED: [2019-09-16 Mon 16:51]
      Because the weights should be hardcoded into the enclave (this avoids decryption during loading for now), I need a script to extract weights from a ~.pt~ file and generate C array definitions from it.
+
+     See [[./python/torch/gen_headers.py][this script]].
 
 **** DONE Choose test network for first prototype
      CLOSED: [2019-09-05 Thu 10:54]
