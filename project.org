@@ -44,6 +44,27 @@ Return values of the function are set by the SGX wrapper through pointers, C-sty
      Now I can load the weights from the state_dict and then do the computation using custom built functions for the matrix multiplication.
      This should serve as a good starting point for moving that first to C and then to the SGX enclave.
      
+     [2019-09-16 Mon 15:30]
+     Finished moving the dense NN calculation to plain numpy.
+     It's actually fairly simple, I just need to remember to transpose the weight matrix.
+     Here's the source code for it:
+#+BEGIN_SRC python
+    def dense(self, x):
+        state = self.state_dict()
+        # breakpoint()
+        w1 = state['fc1.weight'].detach().numpy().T
+        b1 = state['fc1.bias'].detach().numpy()
+        x = x.detach().numpy()
+        tmp = np.matmul(x, w1) + b1
+        x = np.maximum(tmp, 0)
+
+        w2 = state['fc2.weight'].detach().numpy().T
+        b2 = state['fc2.bias'].detach().numpy()
+        tmp = np.matmul(x, w2) + b2
+        x = np.maximum(tmp, 0)
+        return torch.Tensor(x)
+#+END_SRC
+     
 **** TODO Understand biases in Pytorch NNS
      I need to understand how biases are used in pytorch, so I can correctly model that behaviour.
 
