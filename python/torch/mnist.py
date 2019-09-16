@@ -3,6 +3,8 @@
 import argparse
 import os
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,8 +18,27 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 20, 5, 1)
         self.conv2 = nn.Conv2d(20, 50, 5, 1)
-        self.fc1 = nn.Linear(4 * 4 * 50, 500)
-        self.fc2 = nn.Linear(500, 10)
+        self.fc1 = nn.Linear(4 * 4 * 50, 500, bias=True)
+        self.fc2 = nn.Linear(500, 10, bias=True)
+
+    def dense(self, x):
+        state = self.state_dict()
+        # breakpoint()
+        w1 = state['fc1.weight'].detach().numpy().T
+        b1 = state['fc1.bias'].detach().numpy()
+        x = x.detach().numpy()
+        tmp = np.matmul(x, w1) + b1
+        x = np.maximum(tmp, 0)
+
+        w2 = state['fc2.weight'].detach().numpy().T
+        b2 = state['fc2.bias'].detach().numpy()
+        tmp = np.matmul(x, w2) + b2
+        x = np.maximum(tmp, 0)
+        return torch.Tensor(x)
+
+        # ReLu is just setting negative values to 0
+        # x = F.relu(self.fc1(x))
+        # return self.fc2(x)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -25,9 +46,9 @@ class Net(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.max_pool2d(x, 2, 2)
         x = x.view(-1, 4 * 4 * 50)
-        x = F.relu(self.fc1(x))  # move to C
-        x = self.fc2(x)  # move to C
+        x = self.dense(x)  # move to C
         return F.log_softmax(x, dim=1)
+        # return torch.zeros([x.shape[0], x.shape[1]])
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -73,9 +94,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
     parser.add_argument('--batch-size',
                         type=int,
-                        default=64,
+                        default=128,
                         metavar='N',
-                        help='input batch size for training (default: 64)')
+                        help='input batch size for training (default: 128)')
     parser.add_argument('--test-batch-size',
                         type=int,
                         default=1000,
@@ -83,7 +104,7 @@ if __name__ == '__main__':
                         help='input batch size for testing (default: 1000)')
     parser.add_argument('--epochs',
                         type=int,
-                        default=10,
+                        default=1,
                         metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr',
@@ -160,5 +181,5 @@ if __name__ == '__main__':
             train(args, model, device, train_loader, optimizer, epoch)
             test(args, model, device, test_loader)
 
-        if args.save_model:
-            torch.save(model.state_dict(), save_file)
+        # if args.save_model:
+        torch.save(model.state_dict(), save_file)

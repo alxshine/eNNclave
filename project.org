@@ -29,7 +29,7 @@ Return values of the function are set by the SGX wrapper through pointers, C-sty
 
      [2019-09-03 Tue 09:40]
      FUCK TENSORFLOW
-     The C++ API requires building from source, and that requires bazel, and then everything together is a massive house of cards where the cards randomly selgf ignite, and then the example doesn't compile and nothing works.
+     The C++ API requires building from source, and that requires bazel, and then everything together is a massive house of cards where the cards randomly self ignite, and then the example doesn't compile and nothing works.
      That seems like an unreasonable amount of super annoying work, which I don't want to do.
 
      So, instead I will try to create the NN in python, and create cython bindings for my C++ code.
@@ -39,11 +39,17 @@ Return values of the function are set by the SGX wrapper through pointers, C-sty
      Does it have to be Tensorflow?
      PyTorch seems to do the same thing but nicer, because it gives us more granular access to the underlying matrices.
 
-**** TODO Write a script that generates C arrays from pytorch weight matrices
-     Because the weights should be hardcoded into the enclave (this avoids decryption during loading for now), I need a script to extract weights from a ~.pt~ file and generate C array definitions from it.
-
+     [2019-09-16 Mon 14:39]
+     I moved the code for executing the dense layers to their own function in the ~Net~ class.
+     Now I can load the weights from the state_dict and then do the computation using custom built functions for the matrix multiplication.
+     This should serve as a good starting point for moving that first to C and then to the SGX enclave.
+     
 **** TODO Understand biases in Pytorch NNS
      I need to understand how biases are used in pytorch, so I can correctly model that behaviour.
+
+
+**** TODO Write a script that generates C arrays from pytorch weight matrices
+     Because the weights should be hardcoded into the enclave (this avoids decryption during loading for now), I need a script to extract weights from a ~.pt~ file and generate C array definitions from it.
 
 **** DONE Choose test network for first prototype
      CLOSED: [2019-09-05 Thu 10:54]
