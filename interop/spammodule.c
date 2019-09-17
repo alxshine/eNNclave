@@ -32,14 +32,14 @@ static PyObject *spam_print_array(PyObject *self, PyObject *args) {
   printf("sts: %d\n", sts);
   printf("data_length: %d\n", (int)data_length);
 
-  for (Py_ssize_t i = 0; i < data_length; ++i)
-    printf("%02x ", data[i]);
-  printf("\n");
+  /* for (Py_ssize_t i = 0; i < data_length; ++i) */
+    /* printf("%02x ", data[i]); */
+  /* printf("\n"); */
 
-  int *ints = (int*) data;
+  float *array = (float*) data;
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < cols; ++j) {
-      printf("%d ", ints[i*cols+j]);
+      printf("%f ", array[i*cols+j]);
     }
     printf("\n");
   }
