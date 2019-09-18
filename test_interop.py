@@ -1,6 +1,6 @@
 import numpy as np
 
-import pymatutil
+import interop.pymatutil as pymatutil
 
 w1 = 3
 h1 = 2
