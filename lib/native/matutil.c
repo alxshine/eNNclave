@@ -25,7 +25,7 @@ int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
   for (int y = 0; y < rr; ++y) { // coordinates in ret
     for (int x = 0; x < cr; ++x) {
       ret[y * cr + x] = 0;
-      for (int i = 0, j = 0; i < r1; ++i, ++j) {
+      for (int i = 0, j = 0; i < c1; ++i, ++j) {
         ret[y * cr + x] += m1[y * c1 + j] * m2[i * c2 + x];
       }
     }
