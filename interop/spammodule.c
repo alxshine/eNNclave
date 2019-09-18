@@ -10,7 +10,7 @@ static PyObject *spam_print(PyObject *self, PyObject *args) {
 
   if (!PyArg_ParseTuple(args, "s", &command))
     return NULL;
-  printf("I'm being printed from C\n");
+  printf("Being printed from C:\n");
   printf("%s\n", command);
 
   Py_RETURN_NONE;
@@ -28,8 +28,8 @@ static PyObject *spam_print_array(PyObject *self, PyObject *args) {
 
   printf("Got dimensions: %dx%d\n", cols, rows);
 
-  int sts = PyBytes_AsStringAndSize((PyObject *)bytes, &data, &data_length);
-  printf("sts: %d\n", sts);
+  if(PyBytes_AsStringAndSize((PyObject *)bytes, &data, &data_length))
+    return NULL;
   printf("data_length: %d\n", (int)data_length);
 
   /* for (Py_ssize_t i = 0; i < data_length; ++i) */
