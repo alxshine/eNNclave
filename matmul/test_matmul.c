@@ -16,7 +16,9 @@ int main(void) {
   int wret, hret;
   matmul_get_new_dimensions(w1,h1,w2,h2, &wret, &hret);
   float mret[wret*hret];
-  matmul_multiply(m1, w1, h1, m2, w2, h2, mret);
+  if(matmul_multiply(m1, w1-1, h1, m2, w2, h2, mret)){
+    return 1;
+  };
 
   printf("mret:\n");
   matmul_dump_matrix(mret, wret, hret);
