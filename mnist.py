@@ -21,24 +21,24 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(4 * 4 * 50, 500, bias=True)
         self.fc2 = nn.Linear(500, 10, bias=True)
 
-    def dense(self, x):
+    def dense(self, batch):
         state = self.state_dict()
-        # breakpoint()
         w1 = state['fc1.weight'].detach().numpy().T.astype(np.float32)
         b1 = state['fc1.bias'].detach().numpy()
-        x = x.detach().numpy()
-        tmpb = np.matmul(x, w1) + b1
-        x = np.maximum(tmp, 0)
-
         w2 = state['fc2.weight'].detach().numpy().T.astype(np.float32)
         b2 = state['fc2.bias'].detach().numpy()
-        tmp = np.matmul(x, w2) + b2
-        x = np.maximum(tmp, 0)
-        return torch.Tensor(x)
 
-        # ReLu is just setting negative values to 0
-        # x = F.relu(self.fc1(x))
-        # return self.fc2(x)
+        output = np.zeros((batch.shape[0], self.fc2.out_features))
+
+        for i, x in enumerate(batch):
+            x = x.detach().numpy()
+            tmp = np.matmul(x, w1) + b1
+            fc1_out = np.maximum(tmp, 0)
+
+            fc2_out = np.matmul(fc1_out, w2) + b2
+            output[i] = fc2_out
+
+        return torch.Tensor(output)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -46,9 +46,19 @@ class Net(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.max_pool2d(x, 2, 2)
         x = x.view(-1, 4 * 4 * 50)
-        x = self.dense(x)  # move to C
-        return F.log_softmax(x, dim=1)
-        # return torch.zeros([x.shape[0], x.shape[1]])
+
+        x_test = F.relu(self.fc1(x))
+        x_test = self.fc2(x_test)
+        ret_test = F.log_softmax(x_test, dim=1)
+
+        x_self = self.dense(x)  # move to C
+        ret_self = F.log_softmax(x_self, dim=1)
+        # breakpoint()
+
+        print(np.array_equal(
+            ret_test.argmax(dim=1),
+            ret_self.argmax(dim=1)))  # check my dense code for correct labels
+        return ret_self
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -183,3 +193,6 @@ if __name__ == '__main__':
 
         # if args.save_model:
         torch.save(model.state_dict(), save_file)
+
+    # run some eval code
+    test(args, model, device, test_loader)
