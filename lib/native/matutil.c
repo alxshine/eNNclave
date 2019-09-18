@@ -36,7 +36,7 @@ int matutil_multiply(float *m1, int w1, int h1, float *m2, int w2, int h2,
 }
 
 int matutil_add(float *m1, int w1, int h1, float *m2, int w2, int h2, float *ret){
-  if(w1 != w2 || w2 != h2){
+  if(w1 != w2 || h1 != h2){
     fprintf(stderr, "Matrices have incompatible dimensions for addition %dx%d and %dx%d\n",
             w1, h1, w2, h2);
     return -1;
