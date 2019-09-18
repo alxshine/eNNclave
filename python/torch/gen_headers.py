@@ -2,7 +2,7 @@ import torch
 
 state = torch.load("mnist_cnn.pt")
 f = open('state.h', 'w+')
-f.write('#ifndef _STATE\n#define _STATE\n')
+f.write('#ifndef STATE_H\n#define STATE_H\n')
 
 w1 = state['fc1.weight'].detach().numpy().T
 w1_w = w1.shape[0]

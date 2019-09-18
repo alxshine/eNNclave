@@ -24,13 +24,13 @@ class Net(nn.Module):
     def dense(self, x):
         state = self.state_dict()
         # breakpoint()
-        w1 = state['fc1.weight'].detach().numpy().T
+        w1 = state['fc1.weight'].detach().numpy().T.astype(np.float32)
         b1 = state['fc1.bias'].detach().numpy()
         x = x.detach().numpy()
-        tmp = np.matmul(x, w1) + b1
+        tmpb = np.matmul(x, w1) + b1
         x = np.maximum(tmp, 0)
 
-        w2 = state['fc2.weight'].detach().numpy().T
+        w2 = state['fc2.weight'].detach().numpy().T.astype(np.float32)
         b2 = state['fc2.bias'].detach().numpy()
         tmp = np.matmul(x, w2) + b2
         x = np.maximum(tmp, 0)
