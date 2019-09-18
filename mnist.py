@@ -11,6 +11,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 
+import interop.pymatutil as pymatutil
+
 
 class Net(nn.Module):
     """ Defines the neural net for testing """
@@ -23,20 +25,35 @@ class Net(nn.Module):
 
     def dense(self, batch):
         state = self.state_dict()
-        w1 = state['fc1.weight'].detach().numpy().T.astype(np.float32)
-        b1 = state['fc1.bias'].detach().numpy()
-        w2 = state['fc2.weight'].detach().numpy().T.astype(np.float32)
-        b2 = state['fc2.bias'].detach().numpy()
+        m1 = state['fc1.weight'].detach().numpy().astype(
+            np.float32).T
+        r1 = m1.shape[0]
+        c1 = m1.shape[1]
+        mb1 = m1.tobytes()
+        bb1 = state['fc1.bias'].detach().numpy().tobytes()
+
+        m2 = state['fc2.weight'].detach().numpy().astype(
+            np.float32).T
+        r2 = m2.shape[0]
+        c2 = m2.shape[1]
+        mb2 = m2.tobytes()
+        bb2 = state['fc2.bias'].detach().numpy().tobytes()
 
         output = np.zeros((batch.shape[0], self.fc2.out_features))
 
         for i, x in enumerate(batch):
-            x = x.detach().numpy()
-            tmp = np.matmul(x, w1) + b1
-            fc1_out = np.maximum(tmp, 0)
+            x = x.detach().numpy().astype(np.float32)
+            xr = 1
+            xc = x.shape[0]
+            xb = x.tobytes()
+            
+            mul1 = pymatutil.multiply(xb, xr, xc, mb1, r1, c1)
+            add1 = pymatutil.add(mul1, xr, c1, bb1, xr, c1)
+            fc1_out = pymatutil.relu(add1, xr, c1)
 
-            fc2_out = np.matmul(fc1_out, w2) + b2
-            output[i] = fc2_out
+            mul2 = pymatutil.multiply(fc1_out, xr, c1, mb2, r2, c2)
+            add2 = pymatutil.add(mul2, xr, c2, bb2, xr, c2)
+            output[i] = np.frombuffer(add2, dtype=np.float32)
 
         return torch.Tensor(output)
 
