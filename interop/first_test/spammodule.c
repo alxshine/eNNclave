@@ -1,6 +1,3 @@
-#ifndef SPAMMODULE_H
-#define SPAMMODULE_H
-
 #define PY_SSIZE_T_CLEAN
 #include <python3.7m/Python.h>
 
@@ -66,5 +63,3 @@ PyMODINIT_FUNC // macro declares return type, special linkage, and "extern C"
 PyInit_spam(void) {
   return PyModule_Create(&spammodule);
 }
-
-#endif /* SPAMMODULE_H */

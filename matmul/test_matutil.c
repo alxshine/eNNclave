@@ -3,6 +3,8 @@
 #include "matutil.h"
 
 int main(void) {
+  matutil_initialize();
+  
   int w1 = 3, h1 = 2;
   float m1[] = {1, 2, 3, 4, 5, 6};
   int w2 = 2, h2 = 3;
@@ -36,5 +38,6 @@ int main(void) {
   printf("mret2:\n");
   matutil_dump_matrix(mret2, wret, hret);
 
+  matutil_teardown();
   return 0;
 }

@@ -1,5 +1,13 @@
 #include "matutil.h"
 
+int matutil_initialize(void){
+  return 0;
+}
+
+int matutil_teardown(void){
+  return 0;
+}
+
 void matutil_get_new_dimensions(int w1, int h1, int w2, int h2, int *wr,
                                int *hr) {
   *wr = w2;
