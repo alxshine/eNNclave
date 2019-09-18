@@ -13,7 +13,7 @@ void matutil_get_new_dimensions(int r1, int c1, int r2, int c2, int *rr,
 int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
                      float *ret) {
   // check dimensions
-  if (r1 != c2) {
+  if (c1 != r2) {
     fprintf(stderr,
             "Matrices have incompatible dimensions for multiplication %dx%d "
             "and %dx%d\n",
