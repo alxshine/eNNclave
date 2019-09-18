@@ -6,7 +6,7 @@ We hope to make this as robust against model stealing as online oracles.
 RBO, CPA, ASC
 
 ** Project Outline
-*** First prototype [6/9]
+*** First prototype [6/10]
 **** DONE Create working environment for Testing and Development
      CLOSED: [2019-08-20 Tue 19:55]
 [2019-08-14 Wed]
@@ -95,10 +95,15 @@ Just simple stuff, including testing
      In the forward function of the network, instead of invoking ~nn.Linear~ I can call a C function.
      This means that pytorch doesn't know how to backpropagate, but it doesn't need to anymore.
 
+**** TODO Combine C functions into one ~dense~ function
+     This function can then be moved to the enclave, otherwise it leaks intermediate values
+
 **** TODO Do naive matrix multiplication inside the SGX enclave
+     Move the aforementioned code function to the enclave.
+     With a well enough defined interface this shouldn't be too much work
 
-**** TODO Feed result back into tensorflow, or calculate softmax
-
+**** TODO Feed result back into pytorch, or calculate softmax
+     As we want this to be an oracle, I should execute the "softmax" (just taking the maximum)
 
 *** Improvements for paper [0/3]
 **** TODO Test on actual hardware
