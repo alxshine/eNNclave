@@ -1,6 +1,6 @@
-all: matmul.c test_matmul.c
-	clang matmul.c test_matmul.c -o test_matmul
+all: matutil.c test_matutil.c
+	clang -g matutil.c test_matutil.c -o test_matutil
 
 .PHONY:
 clean:
-	rm -rf *.o test_matmul
+	rm -rf *.o test_matutil
