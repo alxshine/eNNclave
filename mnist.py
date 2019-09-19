@@ -25,15 +25,13 @@ class Net(nn.Module):
 
     def dense(self, batch):
         state = self.state_dict()
-        m1 = state['fc1.weight'].detach().numpy().astype(
-            np.float32).T
+        m1 = state['fc1.weight'].detach().numpy().astype(np.float32).T
         r1 = m1.shape[0]
         c1 = m1.shape[1]
         mb1 = m1.tobytes()
         bb1 = state['fc1.bias'].detach().numpy().tobytes()
 
-        m2 = state['fc2.weight'].detach().numpy().astype(
-            np.float32).T
+        m2 = state['fc2.weight'].detach().numpy().astype(np.float32).T
         r2 = m2.shape[0]
         c2 = m2.shape[1]
         mb2 = m2.tobytes()
@@ -46,7 +44,7 @@ class Net(nn.Module):
             xr = 1
             xc = x.shape[0]
             xb = x.tobytes()
-            
+
             mul1 = pymatutil.multiply(xb, xr, xc, mb1, r1, c1)
             add1 = pymatutil.add(mul1, xr, c1, bb1, xr, c1)
             fc1_out = pymatutil.relu(add1, xr, c1)
@@ -56,6 +54,17 @@ class Net(nn.Module):
             output[i] = np.frombuffer(add2, dtype=np.float32)
 
         return torch.Tensor(output)
+
+    def full_dense(self, batch):
+        labels = np.empty((batch.shape[0]))
+        for i, x in enumerate(batch):
+            x = x.detach().numpy().astype(np.float32)
+            xr = 1
+            xc = x.shape[0]
+            xb = x.tobytes()
+
+            labels[i] = pymatutil.dense(xb, xr, xc)
+        return labels
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -68,14 +77,18 @@ class Net(nn.Module):
         x_test = self.fc2(x_test)
         ret_test = F.log_softmax(x_test, dim=1)
 
-        x_self = self.dense(x)  # move to C
-        ret_self = F.log_softmax(x_self, dim=1)
+        # x_self = self.dense(x)  # move to C
+        # ret_self = F.log_softmax(x_self, dim=1)
         # breakpoint()
 
-        print(np.array_equal(
-            ret_test.argmax(dim=1),
-            ret_self.argmax(dim=1)))  # check my dense code for correct labels
-        return ret_self
+        labels = self.full_dense(x)
+
+        if not np.array_equal(ret_test.argmax(
+                dim=1), labels):  # check my dense code for correct labels
+            print(
+                "ERROR: Labels are NOT identical with reference torch output")
+
+        return labels
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -101,17 +114,12 @@ def test(args, model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += F.nll_loss(
-                output, target, reduction='sum').item()  # sum up batch loss
-            pred = output.argmax(
-                dim=1,
-                keepdim=True)  # get the index of the max log-probability
-            correct += pred.eq(target.view_as(pred)).sum().item()
+            correct += (output == target.numpy()).sum()
 
     test_loss /= len(test_loader.dataset)
 
     print(
-        '\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        '\nTest set: Accuracy: {}/{} ({:.0f}%)\n'.format(
             test_loss, correct, len(test_loader.dataset),
             100. * correct / len(test_loader.dataset)))
 

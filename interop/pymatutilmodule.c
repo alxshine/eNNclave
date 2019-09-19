@@ -42,23 +42,23 @@ static PyObject *pymatutil_multiply(PyObject *self, PyObject *args) {
 
   float *m1, *m2;
   m1 = (float *)PyBytes_AsString((PyObject *)b1);
-  if(!m1)
+  if (!m1)
     return NULL;
   m2 = (float *)PyBytes_AsString((PyObject *)b2);
-  if(!m2)
+  if (!m2)
     return NULL;
-  
+
   int wr, hr;
   matutil_get_new_dimensions(w1, h1, w2, h2, &wr, &hr);
-  float mret[wr*hr];
+  float mret[wr * hr];
   int status = matutil_multiply(m1, w1, h1, m2, w2, h2, mret);
-  if(status)
-    return NULL; //TODO: do some meaningful error handling/exception raising
+  if (status)
+    return NULL; // TODO: do some meaningful error handling/exception raising
 
-  return PyBytes_FromStringAndSize((char *)mret, wr*hr*sizeof(float));
+  return PyBytes_FromStringAndSize((char *)mret, wr * hr * sizeof(float));
 }
 
-static PyObject *pymatutil_add(PyObject *self, PyObject *args){
+static PyObject *pymatutil_add(PyObject *self, PyObject *args) {
   const PyBytesObject *b1, *b2;
   int w1, h1, w2, h2;
 
@@ -67,37 +67,53 @@ static PyObject *pymatutil_add(PyObject *self, PyObject *args){
 
   float *m1, *m2;
   m1 = (float *)PyBytes_AsString((PyObject *)b1);
-  if(!m1)
+  if (!m1)
     return NULL;
   m2 = (float *)PyBytes_AsString((PyObject *)b2);
-  if(!m2)
+  if (!m2)
     return NULL;
-  
+
   int wr, hr;
   matutil_get_new_dimensions(w1, h1, w2, h2, &wr, &hr);
-  float mret[wr*hr];
+  float mret[wr * hr];
   int status = matutil_add(m1, w1, h1, m2, w2, h2, mret);
-  if(status)
-    return NULL; //TODO: do some meaningful error handling/exception raising
+  if (status)
+    return NULL; // TODO: do some meaningful error handling/exception raising
 
-  return PyBytes_FromStringAndSize((char *)mret, wr*hr*sizeof(float));
+  return PyBytes_FromStringAndSize((char *)mret, wr * hr * sizeof(float));
 }
 
-static PyObject *pymatutil_relu(PyObject *self, PyObject *args){
+static PyObject *pymatutil_relu(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
-  int w,h;
+  int w, h;
 
   if (!PyArg_ParseTuple(args, "Sii", &b, &w, &h))
     return NULL;
 
-  float *m = (float*) PyBytes_AsString((PyObject*) b);
-  if(!m)
-    return NULL; //TODO: raise exception
+  float *m = (float *)PyBytes_AsString((PyObject *)b);
+  if (!m)
+    return NULL; // TODO: raise exception
 
-  float mret[w*h];
-  memcpy(mret, m, w*h*sizeof(float));
+  float mret[w * h];
+  memcpy(mret, m, w * h * sizeof(float));
   matutil_relu(mret, w, h);
-  return PyBytes_FromStringAndSize((char *)mret, w*h*sizeof(float));
+  return PyBytes_FromStringAndSize((char *)mret, w * h * sizeof(float));
+}
+
+static PyObject *pymatutil_dense(PyObject *self, PyObject *args) {
+  const PyBytesObject *b;
+  int r, c;
+
+  if (!PyArg_ParseTuple(args, "Sii", &b, &r, &c))
+    return NULL;
+
+  float *m = (float *)PyBytes_AsString((PyObject *)b);
+  int label;
+  int sts = matutil_dense(m, r, c, &label);
+  if (sts)
+    return NULL; // TODO: do some error handling
+
+  return PyLong_FromLong(label);
 }
 
 static PyMethodDef PymatutilMethods[] = {
@@ -106,6 +122,7 @@ static PyMethodDef PymatutilMethods[] = {
     {"multiply", pymatutil_multiply, METH_VARARGS, "Multiply matrices"},
     {"add", pymatutil_add, METH_VARARGS, "Add matrices"},
     {"relu", pymatutil_relu, METH_VARARGS, "Execute ReLU on matrix"},
+    {"dense", pymatutil_dense, METH_VARARGS, "Execute full all operations of dense part of NN"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
 

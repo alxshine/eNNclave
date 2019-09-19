@@ -6,7 +6,7 @@ We hope to make this as robust against model stealing as online oracles.
 RBO, CPA, ASC
 
 ** Project Outline
-*** First prototype [8/11]
+*** First prototype [9/12]
 **** DONE Create working environment for Testing and Development
      CLOSED: [2019-08-20 Tue 19:55]
 [2019-08-14 Wed]
@@ -112,8 +112,12 @@ The numpy and C variants do give slightly different results than the pure pytorc
 Jakob thinks this is more than just rounding errors, so I should check that out.
 See [[*Compare results of torch, numpy and my C code][this TODO]]
 
-**** TODO Combine C functions into one ~dense~ function
+**** DONE Combine C functions into one ~dense~ function
+     CLOSED: [2019-09-19 Thu 12:06]
      This function can then be moved to the enclave, otherwise it leaks intermediate values
+
+**** TODO Move compilation structure to CMake
+This should make the recursive build structure easier
 
 **** TODO Do naive matrix multiplication inside the SGX enclave
      Move the aforementioned code function to the enclave.

@@ -76,7 +76,7 @@ if __name__ == '__main__':
     IN_FEATURES = 4 * 4 * 50
     OUT_FEATURES = 500
 
-    for i in range(100):
+    for i in range(10):
         fc = nn.Linear(IN_FEATURES, OUT_FEATURES, bias=False)
         w = fc.weight.detach().numpy().T
         x = np.random.normal(size=((1, IN_FEATURES)))
