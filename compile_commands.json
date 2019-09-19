@@ -1,0 +1,29 @@
+[
+    {
+        "arguments": [
+            "clang",
+            "-c",
+            "-fPIC",
+            "-g",
+            "-I/home/alex/Projects/nn-sgx/inc",
+            "-o",
+            "pymatutil.so",
+            "pymatutilmodule.c"
+        ],
+        "directory": "/home/alex/Projects/nn-sgx/interop",
+        "file": "pymatutilmodule.c"
+    },
+    {
+        "arguments": [
+            "clang",
+            "-c",
+            "-g",
+            "-I/home/alex/Projects/nn-sgx/inc",
+            "-o",
+            "test_native",
+            "test_matutil.c"
+        ],
+        "directory": "/home/alex/Projects/nn-sgx/lib",
+        "file": "test_matutil.c"
+    }
+]
