@@ -6,7 +6,7 @@ We hope to make this as robust against model stealing as online oracles.
 RBO, CPA, ASC
 
 ** Project Outline
-*** First prototype [10/12]
+*** First prototype [11/12]
 **** DONE Create working environment for Testing and Development
      CLOSED: [2019-08-20 Tue 19:55]
 [2019-08-14 Wed]
@@ -121,10 +121,11 @@ See [[*Compare results of torch, numpy and my C code][this TODO]]
 Added a single recursive Makefile, which can be wrapped using bear
 
 **** TODO Do naive matrix multiplication inside the SGX enclave
-     Move the aforementioned code function to the enclave.
-     With a well enough defined interface this shouldn't be too much work
+Move the aforementioned code function to the enclave.
+With a well enough defined interface this shouldn't be too much work
 
-**** TODO Feed result back into pytorch, or calculate softmax
+**** DONE Feed result back into pytorch, or calculate softmax
+     CLOSED: [2019-09-19 Thu 14:25]
 As we want this to be an oracle, I should execute the "softmax" (just taking the maximum)
 
 [2019-09-19 Thu 14:21]
