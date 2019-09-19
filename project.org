@@ -6,7 +6,7 @@ We hope to make this as robust against model stealing as online oracles.
 RBO, CPA, ASC
 
 ** Project Outline
-*** First prototype [6/10]
+*** First prototype [8/11]
 **** DONE Create working environment for Testing and Development
      CLOSED: [2019-08-20 Tue 19:55]
 [2019-08-14 Wed]
@@ -91,9 +91,26 @@ Just simple stuff, including testing
 - [X] matrix matrix addition
 - [X] nonlinearity
 
-**** TODO Move the fully connected layers to naive matrix multiplication in C
-     In the forward function of the network, instead of invoking ~nn.Linear~ I can call a C function.
-     This means that pytorch doesn't know how to backpropagate, but it doesn't need to anymore.
+**** DONE Compare results of torch, numpy and my C code
+     CLOSED: [2019-09-19 Thu 10:29]
+There seem to be some differences in results that can't entirely be blamed on rounding errors.
+The differences are currently in the range of e-7, which is more than numpy uses for its ~np.allclose~ function (e-8).
+I will build a small network and then compare all three methods of computation, to see what is happening and where it starts to diverge.
+
+[2019-09-19 Thu 10:26]
+Finished evaluation, see [[file:test_correctness.py::fc%20=%20nn.Linear(IN_FEATURES,%20OUT_FEATURES,%20bias=False)][test_correctness.py]].
+Even though the differences are around e-6, they seem to be normal distributed, and the max/min increases with increased matrix size (which strengthens my belief in the normal distribution).
+I don't think it is a problem, and if it becomes one I already have a test script set up for evaluation.
+
+**** DONE Move the fully connected layers to naive matrix multiplication in C
+     CLOSED: [2019-09-19 Thu 10:29]
+In the forward function of the network, instead of invoking ~nn.Linear~ I can call a C function.
+This means that pytorch doesn't know how to backpropagate, but it doesn't need to anymore.
+
+[2019-09-18 Wed 17:10]
+The numpy and C variants do give slightly different results than the pure pytorch variant (in the e-7 range).
+Jakob thinks this is more than just rounding errors, so I should check that out.
+See [[*Compare results of torch, numpy and my C code][this TODO]]
 
 **** TODO Combine C functions into one ~dense~ function
      This function can then be moved to the enclave, otherwise it leaks intermediate values
