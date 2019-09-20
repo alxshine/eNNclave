@@ -4,10 +4,11 @@ LIB=${ROOT}/lib
 MODE:=native
 
 all:
-	$(MAKE) lib
-	$(MAKE) test
+	@$(MAKE) lib
+	@$(MAKE) test
 
 lib:
+	@echo "\n\nMaking library in $(MODE) mode\n\n"
 	$(MAKE) -C $(MODE)
 
 test: test_matutil.c

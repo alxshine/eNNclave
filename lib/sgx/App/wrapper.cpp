@@ -224,3 +224,10 @@ int matutil_teardown(){
   /* Destroy the enclave */
   return sgx_destroy_enclave(global_eid);
 }
+
+int matutil_dense(float *m, int r, int c, int *label){
+  int matutil_status;
+  sgx_status_t sgx_status = dense(global_eid, &matutil_status, m, r, c, label);
+  //TODO: handle sgx errors
+  return matutil_status;
+}
