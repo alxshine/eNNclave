@@ -112,7 +112,7 @@ App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 wrapper_cpp_objects := $(wrapper_cpp_files:.cpp=.o)
 
 App_Name := app
-wrapper_name := libwrapper.so
+wrapper_name := libmatutil_sgx.so
 
 ######## Enclave Settings ########
 
@@ -243,12 +243,12 @@ $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
 	@echo "LINK =>  $@"
 
 $(wrapper_name): App/Enclave_u.o $(wrapper_cpp_objects)
-	$(CXX) $^ -shared -fPIC -o $@ $(App_Link_Flags)
+	@$(CXX) $^ -shared -fPIC -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
-wrapper_test: test.c libwrapper.so
+wrapper_test: test.c $(wrapper_name)
 	@echo "Building test.c"
-	@$(CXX) test.c $(SGX_COMMON_CXXFLAGS) $(App_Cpp_Flags) $(App_Link_Flags) -L. -lwrapper -o test
+	@$(CXX) test.c $(SGX_COMMON_CXXFLAGS) $(App_Cpp_Flags) $(App_Link_Flags) -L. -lmatutil_sgx -o test
 
 
 ######## Enclave Objects ########
