@@ -249,7 +249,7 @@ $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
-$(wrapper_name): App/Enclave_u.o $(wrapper_cpp_objects)
+$(wrapper_name): App/Enclave_u.o $(wrapper_cpp_objects) Enclave/state.cpp
 	@$(CXX) $^ -shared -fPIC -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
