@@ -14,4 +14,3 @@ clean: $(SUBDIRSCLEAN)
 %clean: %
 	$(MAKE) -C $< clean
 
-.PHONY: $(SUBDIRS)

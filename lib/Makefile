@@ -2,11 +2,20 @@ ROOT=${HOME}/Projects/nn-sgx
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
-all: test_native
+all: native sgx test_native
+
+native:
+	$(MAKE) -C native
+
+sgx:
+	$(MAKE) -C sgx
+	cp sgx/enclave.so sgx/libmatutil_sgx.so .
 
 test_native: test_matutil.c
-	clang -g test_matutil.c -lmatutil_native -I${INC} -L${LIB} -o test_native
+	$(CC) -g test_matutil.c -lmatutil_native -I${INC} -L${LIB} -o test_native
 
-.PHONY:
+.PHONY: native sgx
 clean:
-	rm -rf *.o test_native
+	rm -rf *.o test_native *.so
+	make -C native clean
+	make -C sgx clean

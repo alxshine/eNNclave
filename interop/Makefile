@@ -3,7 +3,7 @@ INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
 all: pymatutilmodule.c
-	clang -fPIC -g -shared pymatutilmodule.c -I${INC} -L${LIB} -lmatutil_native -o pymatutil.so
+	$(CC) -fPIC -g -shared pymatutilmodule.c -I${INC} -L${LIB} -lmatutil_native -o pymatutil.so
 
 .PHONY:
 clean:
