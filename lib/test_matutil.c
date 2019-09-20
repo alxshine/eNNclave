@@ -4,6 +4,7 @@
 
 int main(void) {
   matutil_initialize();
+  printf("Matutil initialized\n");
 
   int r1 = 2, c1 = 3;
   float m1[] = {1, 2, 3, 4, 5, 6};
@@ -48,5 +49,6 @@ int main(void) {
   printf("Output label: %d, should be 5\n", label);
   
   matutil_teardown();
+  printf("Matutil torn down\n");
   return 0;
 }
