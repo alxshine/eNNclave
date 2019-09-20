@@ -5,6 +5,10 @@
 
 #include "state.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 int matutil_initialize();
 
 int matutil_teardown();
@@ -20,5 +24,9 @@ void matutil_relu(float *m, int r, int c);
 int matutil_dense(float *m, int r, int c, int *label);
 
 void matutil_dump_matrix(float *m, int r, int c);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* MATUTIL_H */
