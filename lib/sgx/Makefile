@@ -29,6 +29,12 @@
 #
 #
 
+######## Project ########
+
+export ROOT:=${HOME}/Projects/nn-sgx
+export INC:=${ROOT}/inc
+export LIB:=${ROOT}/lib
+
 ######## SGX SDK Settings ########
 
 SGX_SDK ?= /opt/intel/sgxsdk
@@ -83,7 +89,7 @@ endif
 
 App_Cpp_Files := App/App.cpp $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp)
 wrapper_cpp_files := App/wrapper.cpp $(wildcard App/Edger8rSyntax/*.cpp) $(wildcard App/TrustedLibrary/*.cpp)
-App_Include_Paths := -IInclude -IApp -I$(SGX_SDK)/include
+App_Include_Paths := -IInclude -IApp -I$(SGX_SDK)/include -I$(INC)
 
 App_C_Flags := -fPIC -Wno-attributes $(App_Include_Paths)
 
@@ -126,7 +132,7 @@ endif
 Crypto_Library_Name := sgx_tcrypto
 
 Enclave_Cpp_Files := Enclave/Enclave.cpp $(wildcard Enclave/Edger8rSyntax/*.cpp) $(wildcard Enclave/TrustedLibrary/*.cpp)
-Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/libcxx
+Enclave_Include_Paths := -IInclude -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/libcxx -I$(INC)
 
 Enclave_C_Flags := $(Enclave_Include_Paths) -nostdinc -fvisibility=hidden -fpie -ffunction-sections -fdata-sections
 CC_BELOW_4_9 := $(shell expr "`$(CC) -dumpversion`" \< "4.9")

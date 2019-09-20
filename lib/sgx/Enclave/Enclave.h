@@ -34,6 +34,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include "matutil.h"
 
 #if defined(__cplusplus)
 extern "C" {
