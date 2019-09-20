@@ -3,7 +3,9 @@ INC=${ROOT}/inc
 LIB=${ROOT}/lib
 MODE:=native
 
-all: lib test
+all:
+	$(MAKE) lib
+	$(MAKE) test
 
 lib:
 	$(MAKE) -C $(MODE)
