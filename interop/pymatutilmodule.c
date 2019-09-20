@@ -1,5 +1,9 @@
 #define PY_SSIZE_T_CLEAN
+#ifdef HOST
 #include <python3.7m/Python.h>
+#else
+#include <python3.6m/Python.h>
+#endif
 
 #include "matutil.h"
 
