@@ -1,16 +1,16 @@
-SUBDIRS := interop lib
+SUBDIRS := lib interop
+SUBDIRSCLEAN=$(addsuffix clean,$(SUBDIRS))
 
 export ROOT:=$(shell pwd)
 export INC:=${ROOT}/inc
 export LIB:=${ROOT}/lib
 
-all: $(SUBDIRS)
-$(SUBDIRS):
-	$(MAKE) -C $@ -e
+all:
+	$(MAKE) -C lib -e
+	$(MAKE) -C interop -e
 
-SUBDIRSCLEAN=$(addsuffix clean,$(SUBDIRS))
-clean: $(SUBDIRSCLEAN)
+clean:
+	$(MAKE) -C lib clean
+	$(MAKE) -C interop clean
 
-%clean: %
-	$(MAKE) -C $< clean
-
+.PHONY: clean
