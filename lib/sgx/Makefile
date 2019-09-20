@@ -112,7 +112,7 @@ App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 wrapper_cpp_objects := $(wrapper_cpp_files:.cpp=.o)
 
 App_Name := app
-wrapper_name := libmatutil_sgx.so
+wrapper_name := libmatutil.so
 
 ######## Enclave Settings ########
 
@@ -185,6 +185,7 @@ endif
 .PHONY: all target run
 all: .config_$(Build_Mode)_$(SGX_ARCH)
 	@$(MAKE) target
+	@cp enclave.so enclave.signed.so libmatutil.so -d ..
 
 ifeq ($(Build_Mode), HW_RELEASE)
 target:  $(App_Name) $(wrapper_name) $(Enclave_Name) wrapper_test

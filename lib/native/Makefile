@@ -3,8 +3,8 @@ INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
 all: matutil.c
-	$(CC) -g -shared -fPIC -I${INC} matutil.c -o libmatutil_native.so
-	mv libmatutil_native.so ..
+	$(CC) -g -shared -fPIC -I${INC} matutil.c -o libmatutil.so
+	cp libmatutil.so ..
 
 .PHONY:
 clean:
