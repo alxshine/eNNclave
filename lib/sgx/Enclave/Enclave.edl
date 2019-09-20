@@ -53,7 +53,7 @@ enclave {
     trusted {
         public void do_something();
         public int multiply(int a, int b);
-	public int matutil_dense([in] float *m, int r, int c, [out] int *label);
+	public int dense([in] float *m, int r, int c, [out] int *label);
     };
 
     /* 

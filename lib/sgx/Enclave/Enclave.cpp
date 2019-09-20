@@ -51,14 +51,14 @@ int printf(const char* fmt, ...)
 }
 
 void do_something(void){
-    printf("This is do_something\n");
+    printf("If you can see this, the enclave works\n");
 }
 
 int multiply(int a, int b){
     return a*b;
 }
 
-int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
+int matmul(float *m1, int r1, int c1, float *m2, int r2, int c2,
                      float *ret) {
   // check dimensions
   if (c1 != r2)
@@ -76,7 +76,7 @@ int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
   return 0;
 }
 
-int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
+int add(float *m1, int r1, int c1, float *m2, int r2, int c2,
                 float *ret) {
   if (r1 != r2 || c1 != c2) 
     return 2;
@@ -90,32 +90,32 @@ int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
   return 0;
 }
 
-void matutil_relu(float *m, int r, int c) {
+void relu(float *m, int r, int c) {
   for (int i = 0; i < r * c; i++)
     if (m[i] < 0)
       m[i] = 0;
 }
 
-int matutil_dense(float *m, int r, int c, int *label) {
+int dense(float *m, int r, int c, int *label) {
   if (r != 1 || c != w1_r)
     return 3;
   int sts;
 
   // fc1
   float tmp1[w1_c];
-  if ((sts = matutil_multiply(m, r, c, w1, w1_r, w1_c, tmp1)))
+  if ((sts = matmul(m, r, c, w1, w1_r, w1_c, tmp1)))
     return sts;
-  if ((sts = matutil_add(tmp1, 1, w1_c, b1, 1, b1_c, tmp1)))
+  if ((sts = add(tmp1, 1, w1_c, b1, 1, b1_c, tmp1)))
     return sts;
-  matutil_relu(tmp1, 1, w1_c);
+  relu(tmp1, 1, w1_c);
 
   // fc1
   float tmp2[w2_c];
-  if ((sts = matutil_multiply(tmp1, 1, w1_c, w2, w2_r, w2_c, tmp2)))
+  if ((sts = matmul(tmp1, 1, w1_c, w2, w2_r, w2_c, tmp2)))
     return sts;
-  if ((sts = matutil_add(tmp2, 1, w2_c, b2, 1, b2_c, tmp2)))
+  if ((sts = add(tmp2, 1, w2_c, b2, 1, b2_c, tmp2)))
     return sts;
-  matutil_relu(tmp2, 1, w2_c);
+  relu(tmp2, 1, w2_c);
 
   // get maximum for label
   int max_index = 0;

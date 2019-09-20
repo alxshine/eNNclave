@@ -34,7 +34,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "matutil.h"
+#include "state.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -43,6 +43,7 @@ extern "C" {
 int printf(const char* fmt, ...);
 void do_something(void);
 int multiply(int a, int b);
+int dense(float *m, int r, int c, int *label);
 
 #if defined(__cplusplus)
 }

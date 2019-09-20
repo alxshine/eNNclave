@@ -177,14 +177,12 @@ void ocall_print_string(const char *str)
 }
 
 
-/* Application entry */
-int print_multiply(void)
+void test(void)
 {
     /* Initialize the enclave */
     if(initialize_enclave() < 0){
         printf("Enter a character before exit ...\n");
         getchar();
-        return -1; 
     }
  
     // /* Utilize edger8r attributes */
@@ -210,6 +208,19 @@ int print_multiply(void)
 
     printf("Enter a character before exit ...\n");
     getchar();
-    return 0;
 }
 
+int matutil_initialize(){
+  /* Initialize the enclave */
+  if(initialize_enclave() < 0){
+    printf("Enter a character before exit ...\n");
+    getchar();
+    return -1; 
+  }
+  return 0;
+}
+
+int matutil_teardown(){
+  /* Destroy the enclave */
+  return sgx_destroy_enclave(global_eid);
+}

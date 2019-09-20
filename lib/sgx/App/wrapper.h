@@ -58,17 +58,21 @@ extern sgx_enclave_id_t global_eid;    /* global enclave id */
 extern "C" {
 #endif
 
-void edger8r_array_attributes(void);
-void edger8r_type_attributes(void);
-void edger8r_pointer_attributes(void);
-void edger8r_function_attributes(void);
+  void edger8r_array_attributes(void);
+  void edger8r_type_attributes(void);
+  void edger8r_pointer_attributes(void);
+  void edger8r_function_attributes(void);
+  
+  void ecall_libc_functions(void);
+  void ecall_libcxx_functions(void);
+  void ecall_thread_functions(void);
 
-void ecall_libc_functions(void);
-void ecall_libcxx_functions(void);
-void ecall_thread_functions(void);
+  int matutil_initialize();
+  int matutil_teardown();
+  int matutil_dense(float *m, int r, int c, int *label);
 
-int print_multiply(void);
-
+  void test();
+  
 #if defined(__cplusplus)
 }
 #endif
