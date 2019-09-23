@@ -114,8 +114,10 @@ static PyObject *pymatutil_dense(PyObject *self, PyObject *args) {
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   int label;
   int sts = matutil_dense(m, r, c, &label);
-  if (sts)
+  if (sts){
+    PyErr_SetString(PyExc_IOError, "Error in enclave");
     return NULL; // TODO: do some error handling
+  }
 
   return PyLong_FromLong(label);
 }

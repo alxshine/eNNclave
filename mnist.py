@@ -206,6 +206,6 @@ if __name__ == '__main__':
         torch.save(model.state_dict(), save_file)
 
     # run some eval code
-    pymatutil.initialize()
+    # pymatutil.initialize()
     test(args, model, device, test_loader)
     pymatutil.teardown()
