@@ -14,7 +14,12 @@ RUN apt-get install -y linux-headers-generic build-essential
 RUN echo "Linux SGX driver will be at ${driver}"
 RUN git clone https://github.com/alxshine/linux-sgx-driver.git ${driver}
 WORKDIR ${driver}
+
+#build linux-sgx-driver
 RUN make
+
+#install linux-sgx-driver
+# mkdir -p "/lib/modules/
 
 # RUN apt-get install -y build-essential python3-dev
 
