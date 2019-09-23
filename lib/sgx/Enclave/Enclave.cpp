@@ -86,8 +86,8 @@ int matmul(float *m1, int s1, int r1, int c1, float *m2, int s2, int r2, int c2,
   return 0;
 }
 
-int add(float *m1, int r1, int c1, float *m2, int r2, int c2,
-                float *ret) {
+int add(float *m1, int s1, int r1, int c1, float *m2, int s2, int r2, int c2,
+	float *ret, int sr) {
   if (r1 != r2 || c1 != c2) 
     return 2;
   

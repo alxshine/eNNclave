@@ -237,26 +237,18 @@ int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
                      float *ret) {
   int status;
   matmul(global_eid, &status, m1, r1*c1, r1, c1, m2, r2*c2, r2, c2, ret, r1*c2);
+  if(status)
+    fprintf(stderr, "Incompatible matrix dimensions for multiplication %dx%d and %dx%d\n", r1, c1, r2, c2);
   return status;
 }
 
 int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
                 float *ret) {
-  if (r1 != r2 || c1 != c2) {
-    fprintf(
-        stderr,
-        "Matrices have incompatible dimensions for addition %dx%d and %dx%d\n",
-        r1, c1, r2, c2);
-    return -1;
-  }
-
-  for (int i = 0; i < r1; ++i) {
-    for (int j = 0; j < c1; ++j) {
-      int coord = i * c1 + j;
-      ret[coord] = m1[coord] + m2[coord];
-    }
-  }
-  return 0;
+  int status;
+  add(global_eid, &status, m1, r1*c1, r1, c1, m2, r2*c2, r2, c2, ret, r1*c2);
+  if(status)
+    fprintf(stderr, "Incompatible matrix dimensions for addition %dx%d and %dx%d\n", r1, c1, r2, c2);
+  return status;
 }
 
 void matutil_relu(float *m, int r, int c) {
