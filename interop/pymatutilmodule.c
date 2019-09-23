@@ -120,7 +120,19 @@ static PyObject *pymatutil_dense(PyObject *self, PyObject *args) {
   return PyLong_FromLong(label);
 }
 
+static PyObject *pymatutil_initialize(PyObject *self, PyObject *args){
+  matutil_initialize();
+  return Py_None;
+}
+
+static PyObject *pymatutil_teardown(PyObject *self, PyObject *args){
+  matutil_teardown();
+  return Py_None;
+}
+
 static PyMethodDef PymatutilMethods[] = {
+    {"initialize", pymatutil_initialize, METH_VARARGS, "Initialize matutil"},
+    {"teardown", pymatutil_teardown, METH_VARARGS, "Teardown matutil"},
     {"dump_matrix", pymatutil_dump_matrix, METH_VARARGS, "Dump matrix"},
     {"test_bytes", pymatutil_test_bytes, METH_VARARGS, "Test bytes"},
     {"multiply", pymatutil_multiply, METH_VARARGS, "Multiply matrices"},

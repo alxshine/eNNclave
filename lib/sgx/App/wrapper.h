@@ -41,6 +41,8 @@
 #include "sgx_error.h"       /* sgx_status_t */
 #include "sgx_eid.h"     /* sgx_enclave_id_t */
 
+#include "matutil.h"
+
 #ifndef TRUE
 # define TRUE 1
 #endif
@@ -67,15 +69,15 @@ extern "C" {
   void ecall_libcxx_functions(void);
   void ecall_thread_functions(void);
 
-  int matutil_initialize();
-  int matutil_teardown();
-  void matutil_get_new_dimensions(int r1, int c1, int r2, int c2, int *rr,
-				  int *cr);
-  int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2, float *ret);
-  int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2, float *ret);
-  void matutil_relu(float *m, int r, int c);
-  int matutil_dense(float *m, int r, int c, int *label);
-  void matutil_dump_matrix(float *m, int r, int c);
+  /* int matutil_initialize(); */
+  /* int matutil_teardown(); */
+  /* void matutil_get_new_dimensions(int r1, int c1, int r2, int c2, int *rr, */
+  /* 				  int *cr); */
+  /* int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2, float *ret); */
+  /* int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2, float *ret); */
+  /* void matutil_relu(float *m, int r, int c); */
+  /* int matutil_dense(float *m, int r, int c, int *label); */
+  /* void matutil_dump_matrix(float *m, int r, int c); */
 
   void test();
   
