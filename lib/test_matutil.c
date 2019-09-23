@@ -17,8 +17,10 @@ int main(void) {
   matutil_dump_matrix(m2, r2, c2);
 
   int rret, cret;
+  printf("get_new_dimensions\n");
   matutil_get_new_dimensions(r1, c1, r2, c2, &rret, &cret);
   float mret[rret * cret];
+  printf("multiply\n");
   if (matutil_multiply(m1, r1, c1, m2, r2, c2, mret)) {
     return 1;
   };
@@ -27,6 +29,7 @@ int main(void) {
   matutil_dump_matrix(mret, rret, cret);
 
   float mret2[rret * cret];
+  printf("add\n");
   if (matutil_add(mret, rret, cret, mret, rret, cret, mret2))
     return 1;
 
@@ -34,6 +37,7 @@ int main(void) {
   matutil_dump_matrix(mret2, rret, cret);
 
   mret2[2] = -1;
+  printf("relu\n");
   matutil_relu(mret2, rret, cret);
 
   printf("mret2:\n");
@@ -45,6 +49,7 @@ int main(void) {
   }
 
   int label;
+  printf("dense\n");
   matutil_dense(input, 1, 800, &label);
   printf("Output label: %d, should be 5\n", label);
   

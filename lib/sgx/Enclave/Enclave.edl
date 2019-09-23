@@ -53,12 +53,14 @@ enclave {
     trusted {
         public void do_something();
         public int multiply(int a, int b);
-	public int matmul([in] float *m1, int r1, int c1, [in] float *m2, int r2, int c2,
-	     [out] float *ret);
+	public int matmul([in,count=s1] float *m1, int s1, int r1, int c1, [in,count=s2] float *m2, int s2, int r2, int c2,
+	     [out, count=sr] float *ret, int sr);
 	public int add([in] float *m1, int r1, int c1, [in] float *m2, int r2, int c2,
 	  [out] float *ret);
 	public void relu([in,out] float *m, int r, int c);
 	public int dense([in] float *m, int r, int c, [out] int *label);
+	public void dump_matrix([in, count=s] float *m, int s, int r, int c);
+
     };
 
     /* 

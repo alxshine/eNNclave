@@ -190,22 +190,15 @@ int SGX_CDECL main(int argc, char *argv[])
         getchar();
         return -1; 
     }
- 
-    // /* Utilize edger8r attributes */
-    // edger8r_array_attributes();
-    // edger8r_pointer_attributes();
-    // edger8r_type_attributes();
-    // edger8r_function_attributes();
-    
-    // /* Utilize trusted libraries */
-    // ecall_libc_functions();
-    // ecall_libcxx_functions();
-    // ecall_thread_functions();
 
     do_something(global_eid);
     int result;
     multiply(global_eid, &result, 2,4);
     printf("result: %d\n", result);
+
+    int r1=2, c1=3;
+    float m1[] = {1,2,3,4,5,6};
+    dump_matrix(global_eid, m1, r1*c1, r1, c1);
 
     /* Destroy the enclave */
     sgx_destroy_enclave(global_eid);
