@@ -100,7 +100,7 @@ int add(float *m1, int s1, int r1, int c1, float *m2, int s2, int r2, int c2,
   return 0;
 }
 
-void relu(float *m, int r, int c) {
+void relu(float *m, int s, int r, int c) {
   for (int i = 0; i < r * c; i++)
     if (m[i] < 0)
       m[i] = 0;

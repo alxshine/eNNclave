@@ -252,9 +252,7 @@ int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
 }
 
 void matutil_relu(float *m, int r, int c) {
-  for (int i = 0; i < r * c; i++)
-    if (m[i] < 0)
-      m[i] = 0;
+  relu(global_eid, m, r*c, r, c);
 }
 
 
