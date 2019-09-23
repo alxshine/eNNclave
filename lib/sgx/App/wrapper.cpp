@@ -257,35 +257,10 @@ void matutil_relu(float *m, int r, int c) {
 
 
 int matutil_dense(float *m, int r, int c, int *label){
-  // if (r != 1 || c != w1_r) {
-  //   fprintf(stderr, "Input should be 1x%d\n", w1_r);
-  //   return -1;
-  // }
-  // int sts;
-
-  // // fc1
-  // float tmp1[w1_c];
-  // if ((sts = matutil_multiply(m, r*c, r, c, w1, w1_r*w1_c, w1_r, w1_c, tmp1)))
-  //   return sts;
-  // if ((sts = matutil_add(tmp1, 1, w1_c, b1, 1, b1_c, tmp1)))
-  //   return sts;
-  // matutil_relu(tmp1, 1, w1_c);
-
-  // // fc1
-  // float tmp2[w2_c];
-  // if ((sts = matutil_multiply(tmp1, w1_c, 1, w1_c, w2, w2_r*w2_c, w2_r, w2_c, tmp2)))
-  //   return sts;
-  // if ((sts = matutil_add(tmp2, 1, w2_c, b2, 1, b2_c, tmp2)))
-  //   return sts;
-  // matutil_relu(tmp2, 1, w2_c);
-
-  // // get maximum for label
-  // int max_index = 0;
-  // for (int i = 1; i < w2_c; ++i) 
-  //   max_index = tmp2[i] > tmp2[max_index] ? i : max_index;
-
-  // *label = max_index;
-  return 0;
+  int sts;
+  *label=-1; //so invalid results are visible
+  dense(global_eid, &sts, m, r*c, r, c, label);    
+  return sts;
 }
 
 void matutil_dump_matrix(float *m, int r, int c) {

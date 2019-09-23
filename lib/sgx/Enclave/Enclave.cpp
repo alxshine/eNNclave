@@ -106,32 +106,32 @@ void relu(float *m, int s, int r, int c) {
       m[i] = 0;
 }
 
-int dense(float *m, int r, int c, int *label) {
-//   if (r != 1 || c != w1_r)
-//     return 3;
-//   int sts;
+int dense(float *m, int s, int r, int c, int *label) {
+  if (r != 1 || c != w1_r)
+    return 3;
+  int sts;
 
-//   // fc1
-//   float tmp1[w1_c];
-//   if ((sts = matmul(m, r, c, w1, w1_r, w1_c, tmp1)))
-//     return sts;
-//   if ((sts = add(tmp1, 1, w1_c, b1, 1, b1_c, tmp1)))
-//     return sts;
-//   relu(tmp1, 1, w1_c);
+  // fc1
+  float tmp1[w1_c];
+  if ((sts = matmul(m, r*c, r, c, w1, w1_r*w1_c, w1_r, w1_c, tmp1, w1_c)))
+    return sts;
+  if ((sts = add(tmp1, w1_c, 1, w1_c, b1, b1_c, 1, b1_c, tmp1, w1_c)))
+    return sts;
+  relu(tmp1, w1_c, 1, w1_c);
 
-//   // fc1
-//   float tmp2[w2_c];
-//   if ((sts = matmul(tmp1, 1, w1_c, w2, w2_r, w2_c, tmp2)))
-//     return sts;
-//   if ((sts = add(tmp2, 1, w2_c, b2, 1, b2_c, tmp2)))
-//     return sts;
-//   relu(tmp2, 1, w2_c);
+  // fc1
+  float tmp2[w2_c];
+  if ((sts = matmul(tmp1, w1_c, 1, w1_c, w2, w2_r*w2_c, w2_r, w2_c, tmp2, w2_c)))
+    return sts;
+  if ((sts = add(tmp2, w2_c, 1, w2_c, b2, b2_c, 1, b2_c, tmp2, w2_c)))
+    return sts;
+  relu(tmp2, w2_c, 1, w2_c);
 
-//   // get maximum for label
-//   int max_index = 0;
-//   for (int i = 1; i < w2_c; ++i) 
-//     max_index = tmp2[i] > tmp2[max_index] ? i : max_index;
+  // get maximum for label
+  int max_index = 0;
+  for (int i = 1; i < w2_c; ++i) 
+    max_index = tmp2[i] > tmp2[max_index] ? i : max_index;
 
-//   *label = max_index;
+  *label = max_index;
   return 0;
 }
