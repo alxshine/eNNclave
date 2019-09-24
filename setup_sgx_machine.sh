@@ -44,10 +44,15 @@ source ${sgx_dir}/sgxsdk/environment
 cd ${sdk_dir}/linux/installer/deb
 sudo dpkg -i ./libsgx-urts_2.6.100.51363-disco1_amd64.deb ./libsgx-enclave-common_2.6.100.51363-disco1_amd64.deb ./libsgx-enclave-common-dev_2.6.100.51363-disco1_amd64.deb
 
-echo "\n\nSGX SUCCESSFULLY INSTALLED"
+echo ""
+echo ""
+echo "SGX SUCCESSFULLY INSTALLED"
 echo "You will need to install the python requirements listed in requirements.txt"
 echo "Also, for the SGX SDK to work correctly, you need to run 'source ${sgx_dir}/sgxsdk/environment'"
 echo "A corresponding line has been added to your .bashrc file, so this will be done automatically for future terminals"
+echo ""
+echo "For the code in this repository to work correctly, please run 'source ./setup_ld_path.sh'"
+echo "Without this the program will not find the shared libraries generated during compilation"
 
 #setup pip3
 # pip3 install --user -r requirements.txt
