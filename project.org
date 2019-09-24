@@ -152,7 +152,35 @@ Added some error handling to pymatutil.
 
 *** Improvements for paper [0/3]
 **** TODO Test on actual hardware
-**** TODO 
+**** TODO Find out how model architectures are stored
+We want to be able to specify a cut similar to current SOTA architecture visualization tools.
+***** PyTorch
+PyTorch uses the python classes for model definition, usually only storing the state_dict.
+However, it is also possible to store the entire *module* where the model is defined, using Python's [[https://docs.python.org/3/library/pickle.html][pickle]] module.
+Internally this does the same thing as keeping the file containing the python class and loading the state_dict, as it stores that file as well.
+This means it is dependent on the containing folder structure, which might lead to some very weird errors.
+
+PyTorch has no innate visualization tool, it instead is directed more at a programmer's view of things, as it allows for debugging the actual code of the ~forward~ function.
+What one can do is export the model to [[ONNX][ONNX]] format, and then visualize it using something like [[https://github.com/PaddlePaddle/VisualDL][VisualDL]].
+
+For our separation we could create some macro, wrapper, whatever that is then easily plugged into the definition of ~forward~.
+
+***** Tensorflow
+For Tensorflow, everything is in the session.
+The graph that describes the model, the state of layers, optimizers etc.
+The problem is that this way I'm not sure if my code would even work, as this would mean rebuilding everything so it works with Tensorflow.
+
+Tensorflow visualizes its graphs using Tensorboard, and gets the info for that from the log directory.
+A link to this is [[https://www.tensorflow.org/guide/graph_viz][here]].
+I'm not sure how easy we can use Tensorboard for input, as Tensorflow in general is hard to edit.
+
+***** Open Neural Network Exchange - <<ONNX>>
+[[https://github.com/onnx/onnx][ONNX]] is meant to be a framework independent way of specifying models, complete with data types and operators.
+There are ways to *export* to ONNX format from most common tools, but not many have a way of *importing*.
+This makes it very difficult to use for our purposes, as my code would then still be framework dependent, just using an independent way to specify the model.
+
+ONNX does have its own runtime, and I could try and move dense parts of that to the SGX enclave, but that would make comparison harder for the (I assume) not super broadly adopted ONNX runtime.
+
 **** TODO Automate memory layout inside SGX
 We might have to do some memory magic because otherwise we might run out of memory inside the SGX.
 The first prototype can do this explicitly for the chosen network, but for publishing we should do this automatically.
