@@ -211,17 +211,39 @@ Alternatively Keras offers a ~model.summary()~ function which prints a summary o
 
 For these reasons, *Keras* seems to be the best choice, offering the versatility and customizability we need along with nice tooling for training, storing and loading, as well as visualization.
 
-**** TODO Design a splitting functionality for Keras [/]
+**** TODO Design a splitting functionality for Keras [1/2]
 RBO wants to have a good way of specifying split position and visualization of it before we try and run the code.
 The best way to do this is writing a Keras layer container (similar to Sequential).
 This way we have control over how the underlying layers function.
 
-***** TODO Fix plotting for composed Keras models
+***** DONE Fix plotting for composed Keras models
+      CLOSED: [2019-09-25 Wed 15:56]
 Keras models can be composed from each other.
 There is a concat function, but one model can actually just contain another model.
 For both the ~model.summary()~ function and the ~plot~ function however, the contained model is not summarized recursively.
 It is just listed as ~sequential_2~.
 This will be the first step.
+
+[2019-09-25 Wed 15:55]
+~plot_model~ has a parameter for expanding submodules, called ~expand_nested~.
+Setting this to true gives output like in [[file:python/mnist_cnn.png][this image]].
+
+***** TODO Write extension to Keras Sequential [0/7]
+We want to have a container similar to Keras's ~Sequential~ model that can also generate C code for the contained layers.
+It should be possible to iterate over all contained layers and store the ~output_shape~ along the way.
+Then I also need to store the ~input_shape~ of the first layer and the weights and biases of all layers.
+Getting the activation functions could be a bit trickier.
+Here it is probably best to either call the C functions like the Keras names, or introduce a mapping.
+I'm not sure right now if I can actually get the name of the activation function or not, which could increase difficulty.
+
+Next steps summarized:
+- [ ] Extend Keras ~Sequential~
+- [ ] Store input shape of the first layer
+- [ ] Store output shapes of all layers
+- [ ] Store weights of layers
+- [ ] Store biases if applicable
+- [ ] Generate matrix multiplications
+- [ ] Generate activation functions
 
 **** TODO Test the splitting with several popular architectures
 We should test the splitting with several common architectures.
