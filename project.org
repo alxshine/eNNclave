@@ -211,7 +211,7 @@ Alternatively Keras offers a ~model.summary()~ function which prints a summary o
 
 For these reasons, *Keras* seems to be the best choice, offering the versatility and customizability we need along with nice tooling for training, storing and loading, as well as visualization.
 
-**** TODO Design a splitting functionality for Keras [1/2]
+**** TODO Design a splitting functionality for Keras [2/3]
 RBO wants to have a good way of specifying split position and visualization of it before we try and run the code.
 The best way to do this is writing a Keras layer container (similar to Sequential).
 This way we have control over how the underlying layers function.
@@ -228,6 +228,10 @@ This will be the first step.
 ~plot_model~ has a parameter for expanding submodules, called ~expand_nested~.
 Setting this to true gives output like in [[file:python/mnist_cnn.png][this image]].
 
+***** DONE Finish test code for MNIST in Keras
+      CLOSED: [2019-09-25 Wed 16:25]
+In order to evaluate I need fully working code for MNIST
+
 ***** TODO Write extension to Keras Sequential [0/7]
 We want to have a container similar to Keras's ~Sequential~ model that can also generate C code for the contained layers.
 It should be possible to iterate over all contained layers and store the ~output_shape~ along the way.
@@ -236,7 +240,15 @@ Getting the activation functions could be a bit trickier.
 Here it is probably best to either call the C functions like the Keras names, or introduce a mapping.
 I'm not sure right now if I can actually get the name of the activation function or not, which could increase difficulty.
 
+[2019-09-25 Wed 18:32]
+When executing a Keras Sequential (e.g. for ~predict()~) at the execution at one point starts calling backend functions.
+This is something I can't really trace, and try and emulate this with my extension to ~Sequential~.
+Due to this it's smarter to build a function that takes a sequential model and builds the C code from that.
+This could then be wrapped in a custom Keras layer that calls the C code.
+I would first however have to test whether calling C code from a Keras layer works at all.
+
 Next steps summarized:
+- [ ] Test calling C Code from a custom Keras layer
 - [ ] Extend Keras ~Sequential~
 - [ ] Store input shape of the first layer
 - [ ] Store output shapes of all layers
@@ -244,6 +256,10 @@ Next steps summarized:
 - [ ] Store biases if applicable
 - [ ] Generate matrix multiplications
 - [ ] Generate activation functions
+
+**** TODO Build custom Keras layer for C code execution
+After the C code is generated, the custom Sequential model should either call that instead of the underlying layers, or replace itself with a new layer.
+That new layer would then either call the Enclave or native C code.
 
 **** TODO Test the splitting with several popular architectures
 We should test the splitting with several common architectures.
