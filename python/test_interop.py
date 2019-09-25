@@ -2,16 +2,16 @@ import numpy as np
 
 import interop.pymatutil as pymatutil
 
-w1 = 3
-h1 = 2
-m1 = np.arange(6).reshape((h1, w1))
+r1 = 2
+c1 = 3
+m1 = np.arange(6).reshape((r1, c1))
 b1 = m1.astype(np.float32).tobytes()
 print("m1:")
 print(m1)
 
-w2 = 2
-h2 = 3
-m2 = np.arange(6).reshape((h2, w2))
+r2 = 3
+c2 = 2
+m2 = np.arange(6).reshape((r2, c2))
 b2 = m2.astype(np.float32).tobytes()
 print("m2:")
 print(m2)
@@ -22,7 +22,7 @@ print(pret)
 btest = pret.astype(np.float32).tobytes()
 
 print("Result in C:")
-bret = pymatutil.multiply(b1, w1, h1, b2, w2, h2)
+bret = pymatutil.multiply(b1, r1, c1, b2, r2, c2)
 mret = np.frombuffer(bret, dtype=np.float32).reshape((2, 2))
 print(mret)
 
