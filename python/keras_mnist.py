@@ -4,7 +4,7 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
-import keras_enclave
+from keras_enclave import Enclave, HelloLayer
 
 import os
 
@@ -56,7 +56,8 @@ else:
         Conv2D(20,5, name='conv1', input_shape=(28,28,1)),
         Conv2D(50,5, name='conv2'),
         Flatten(name='flatten'),
-        dense_part
+        dense_part,
+        HelloLayer(10)
     ], name='Model API')
 
 
@@ -67,7 +68,7 @@ else:
     model.fit(x_train, y_train,
           batch_size=batch_size,
           epochs=epochs,
-          verbose=1,
+          verbose=False,
           validation_data=(x_test, y_test))
     
     print("Storing newly created model in %s" % model_name)
@@ -76,5 +77,4 @@ else:
 # score = model.evaluate(x_test, y_test, verbose=0)
 # print('Test loss:', score[0])
 # print('Test accuracy:', score[1])
-breakpoint()
 model.predict(x_test[0:1])

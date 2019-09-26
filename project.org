@@ -232,7 +232,7 @@ Setting this to true gives output like in [[file:python/mnist_cnn.png][this imag
       CLOSED: [2019-09-25 Wed 16:25]
 In order to evaluate I need fully working code for MNIST
 
-***** TODO Write extension to Keras Sequential [0/7]
+***** TODO Write extension to Keras Sequential [2/9]
 We want to have a container similar to Keras's ~Sequential~ model that can also generate C code for the contained layers.
 It should be possible to iterate over all contained layers and store the ~output_shape~ along the way.
 Then I also need to store the ~input_shape~ of the first layer and the weights and biases of all layers.
@@ -247,16 +247,43 @@ Due to this it's smarter to build a function that takes a sequential model and b
 This could then be wrapped in a custom Keras layer that calls the C code.
 I would first however have to test whether calling C code from a Keras layer works at all.
 
-Next steps summarized:
-- [ ] Test calling C Code from a custom Keras layer
-- [ ] Extend Keras ~Sequential~
-- [ ] Store input shape of the first layer
-- [ ] Store output shapes of all layers
-- [ ] Store weights of layers
-- [ ] Store biases if applicable
-- [ ] Generate matrix multiplications
-- [ ] Generate activation functions
+[2019-09-26 Thu 10:52]
+I took a debugging dive into the ~model.predict()~ function.
+It's fairly easy to follow until Keras hands off execution to the Tensorflow backend.
+The model is collapsed into a single function, which makes extensive use of the TF session model (ugh...).
+This function is then wrapped into a Keras ~Function~ object, which is also a TF ~GraphExecutionFunction~ object when using the TF backend.
 
+****** DONE Test control flow for custom Keras layers
+       CLOSED: [2019-09-26 Thu 12:02]
+[2019-09-26 Thu 11:54]
+Keras only sits on top of whatever backend it uses.
+This means that any custom Keras layer really only generates TF tensors.
+The contents of their [[https://keras.io/layers/writing-your-own-keras-layers/][~call()~]] function are really only called once, where they are converted to TF Graphexecution functions.
+Also, the ~x~ input is a backend tensor, so there is not really any way to call my C function.
+For that I would need the actual values, which they don't have at that point, because they are only placeholders...
+
+The real problem is the inherent lazyness of TF 1.14.
+*HOWEVER*, there is a way to add eager functions to it, by wrapping them with [[https://www.tensorflow.org/api_docs/python/tf/py_function][~tf.py_func~]].
+This is a tensor wrapping a regular C function.
+With this I can wrap my ~pymatutil~ function in a regular python function, taking numpy arrays as input.
+
+Keras doesn't really have an equivalent.
+I'm currently not sure whether it's smarter to switch to TF in general or just use the TF function in Keras.
+I will check how easy it is to get weights out of TF NNs.
+
+With TF 2.0 (which is currently available as a beta) eager execution is the default, so this would make things a lot easier.
+
+****** CANCELED Test calling C Code from a custom Keras layer
+       CLOSED: [2019-09-26 Thu 11:57]
+Does not make sense, see [[*Test control flow for custom Keras layers][this point]], lazyness is super annoying.
+
+****** TODO Extend Keras ~Sequential~
+****** TODO Store input shape of the first layer
+****** TODO Store output shapes of all layers
+****** TODO Store weights of layers
+****** TODO Store biases if applicable
+****** TODO Generate matrix multiplications
+****** TODO Generate activation functions
 **** TODO Build custom Keras layer for C code execution
 After the C code is generated, the custom Sequential model should either call that instead of the underlying layers, or replace itself with a new layer.
 That new layer would then either call the Enclave or native C code.

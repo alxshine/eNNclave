@@ -6,3 +6,4 @@ data
 models
 *~
 venv_sgx
+**__pycache__
