@@ -232,7 +232,7 @@ Setting this to true gives output like in [[file:python/mnist_cnn.png][this imag
       CLOSED: [2019-09-25 Wed 16:25]
 In order to evaluate I need fully working code for MNIST
 
-***** TODO Write extension to Keras Sequential [2/9]
+***** TODO Write extension to Keras Sequential [2/10]
 We want to have a container similar to Keras's ~Sequential~ model that can also generate C code for the contained layers.
 It should be possible to iterate over all contained layers and store the ~output_shape~ along the way.
 Then I also need to store the ~input_shape~ of the first layer and the weights and biases of all layers.
@@ -272,6 +272,17 @@ I'm currently not sure whether it's smarter to switch to TF in general or just u
 I will check how easy it is to get weights out of TF NNs.
 
 With TF 2.0 (which is currently available as a beta) eager execution is the default, so this would make things a lot easier.
+
+[2019-09-26 Thu 16:00]
+So I switched to TF 2.0.0 rc2, because the eagerness seems to be exactly what I want.
+Unfortunately, during training it still switches to lazy execution, I guess for performance.
+However, once everything is done the environment is in eager mode again.
+I guess they never meant eager execution to work during full blown execution of the network.
+*HOWEVER*, this still helps me to write my code, as I can use the Keras bundled with TF, and use [[https://www.tensorflow.org/api_docs/python/tf/py_function][~tf.py_func~]] to call my code.
+Will test tomorrow.
+
+****** TODO Usue ~tf.py_func~ to call C code for testing
+It should probably be a simple operation like multiplying with 2.
 
 ****** CANCELED Test calling C Code from a custom Keras layer
        CLOSED: [2019-09-26 Thu 11:57]
