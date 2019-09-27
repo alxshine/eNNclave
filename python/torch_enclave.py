@@ -23,6 +23,16 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(4 * 4 * 50, 500, bias=True)
         self.fc2 = nn.Linear(500, 10, bias=True)
 
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2, 2)
+        x = x.view(-1, 4 * 4 * 50)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return F.log_softmax(x, dim=1)
+    
     def dense(self, batch):
         state = self.state_dict()
         m1 = state['fc1.weight'].detach().numpy().astype(np.float32).T
@@ -66,17 +76,7 @@ class Net(nn.Module):
             labels[i] = pymatutil.dense(xb, xr, xc)
         return labels
 
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.max_pool2d(x, 2, 2)
-        x = F.relu(self.conv2(x))
-        x = F.max_pool2d(x, 2, 2)
-        x = x.view(-1, 4 * 4 * 50)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return F.log_softmax(x, dim=1)
-    
-    def sgx_forward(self, x):
+    def enclave_forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.max_pool2d(x, 2, 2)
         x = F.relu(self.conv2(x))

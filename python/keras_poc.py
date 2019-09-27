@@ -7,6 +7,8 @@ from tensorflow.keras import Model
 
 import interop.pymatutil as pymatutil
 
+tf.enable_eager_execution()
+
 MODEL_FILE = 'models/mnist_tf_cnn.pt'
 
 MNIST = tf.keras.datasets.mnist

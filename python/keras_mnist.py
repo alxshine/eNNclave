@@ -1,16 +1,24 @@
-import keras
-from keras.datasets import mnist
-from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras import backend as K
-from keras_enclave import Enclave, HelloLayer
+'''Trains a simple convnet on the MNIST dataset.
+
+Gets to 99.25% test accuracy after 12 epochs
+(there is still a lot of margin for parameter tuning).
+16 seconds per epoch on a GRID K520 GPU.
+'''
 
 import os
+import json
+
+import tensorflow.keras as keras
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import Dense, Flatten, Dropout
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras import backend as K
 
 batch_size = 128
 num_classes = 10
-epochs = 1
+epochs = 12
+model_file = 'models/tf_mnist_cnn.h5'
 
 # input image dimensions
 img_rows, img_cols = 28, 28
@@ -39,42 +47,38 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-# load if possible
-model_name = "models/keras_mnist_cnn.h5"
-if os.path.exists(model_name):
-    print("Model found, loading from %s" % model_name)
-    model = load_model(model_name)
+if os.path.exists(model_file):
+    print('Model found, loading from %s' % model_file)
+    model = load_model(model_file)
 else:
-    print("No model found, creating")
-    dense_part = Enclave([
-        Dense(500, activation='relu',name='fc1'),
-        Dense(10, activation='relu',name='fc2'),
-        Dense(10, activation='softmax',name='softmax')],
-        name='SGX')
-
-    model = Sequential([
-        Conv2D(20,5, name='conv1', input_shape=(28,28,1)),
-        Conv2D(50,5, name='conv2'),
-        Flatten(name='flatten'),
-        dense_part,
-        HelloLayer(10)
-    ], name='Model API')
-
+    print('No model found, creating')
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(3, 3),
+                     activation='relu',
+                     input_shape=input_shape))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
 
     model.compile(loss=keras.losses.categorical_crossentropy,
                   optimizer=keras.optimizers.Adadelta(),
                   metrics=['accuracy'])
 
     model.fit(x_train, y_train,
-          batch_size=batch_size,
-          epochs=epochs,
-          verbose=False,
-          validation_data=(x_test, y_test))
-    
-    print("Storing newly created model in %s" % model_name)
-    model.save(model_name)
+              batch_size=batch_size,
+              epochs=epochs,
+              verbose=1,
+              validation_data=(x_test, y_test))
 
-# score = model.evaluate(x_test, y_test, verbose=0)
-# print('Test loss:', score[0])
-# print('Test accuracy:', score[1])
-model.predict(x_test[0:1])
+    print('Storing model at %s' % model_file)
+    model.save(model_file)
+
+print(model.summary())
+score = model.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+json.dumps(model.to_json(), indent=4, sort_keys=True)
