@@ -60,7 +60,10 @@ class Enclave(Sequential):
     def generate_dense(self, to_file='dense.cpp'):
         dense_file = open(to_file, 'w+')
 
-        dense = """
+        preamble = """
+#include "state.hpp"
+#include "matutil.hpp"
+
 int matutil_dense(float *m, int r, int c, int *label) {
   if (r != 1 || c != w1_r) {
     fprintf(stderr, "Input should be 1x%d\\n", w1_r);
@@ -69,7 +72,7 @@ int matutil_dense(float *m, int r, int c, int *label) {
   int sts;
 """
 
-        dense_file.write(dense)
+        dense_file.write(preamble)
         last_tmp_index = -1
         for i, l in enumerate(self.layers):
             if i == 0:
@@ -82,6 +85,11 @@ int matutil_dense(float *m, int r, int c, int *label) {
             dense_file.write(call_string)
             last_tmp_index = i
 
+        postamble ="""
+  return 0;
+}
+"""
+        dense_file.write(postamble)
         dense_file.close()
 
     @staticmethod
@@ -104,9 +112,38 @@ int matutil_dense(float *m, int r, int c, int *label) {
                 inputs, 1, w.shape[0], weight_name, w.shape[0], w.shape[1],
                 tmp_name)
             s += error_handling % mult
-            
+
+            if len(parameters) > 1:
+                # add bias
+                b = parameters[1]
+                bias_name = "b%d" % tmp_index
+                add = "matutil_add(%s, %d, %d, %s, %d, %d, %s)" % (
+                    tmp_name, 1, w.shape[1], bias_name, 1, b.shape[0],
+                    tmp_name)
+                s += error_handling % add
+
+            if layer.activation.__name__ == 'relu':  # TODO: do this cleaner
+                relu = "matutil_relu(%s, %d, %d);\n" % (
+                    tmp_name, 1, w.shape[1])
+                s += relu
+            elif layer.activation.__name__ == 'softmax':
+                # here we compute the actual label
+                softmax = """
+  // get maximum for label
+  int max_index = 0;
+  for (int i = 1; i < %d; ++i)
+    max_index = %s[i] > %s[max_index] ? i : max_index;
+
+  *label = max_index;
+""" % (w.shape[1], tmp_name, tmp_name)
+                s += softmax
+            else:
+                s += "ERROR: unknown activation function %s\n" % (
+                    layer.activation.__name__)
+                breakpoint()
         else:
             s = "//No call method generated for layer %s of type %s\n" % (
                 layer.name, type(layer))
 
+        return s
         return s
