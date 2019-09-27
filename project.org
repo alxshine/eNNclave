@@ -281,20 +281,24 @@ I guess they never meant eager execution to work during full blown execution of 
 *HOWEVER*, this still helps me to write my code, as I can use the Keras bundled with TF, and use [[https://www.tensorflow.org/api_docs/python/tf/py_function][~tf.py_func~]] to call my code.
 Will test tomorrow.
 
-****** TODO Usue ~tf.py_func~ to call C code for testing
+****** TODO Use ~tf.py_func~ to call C code for testing
 It should probably be a simple operation like multiplying with 2.
 
-****** CANCELED Test calling C Code from a custom Keras layer
+****** DONE Test calling C Code from a custom Keras layer
        CLOSED: [2019-09-26 Thu 11:57]
 Does not make sense, see [[*Test control flow for custom Keras layers][this point]], lazyness is super annoying.
 
-****** TODO Extend Keras ~Sequential~
-****** TODO Store input shape of the first layer
-****** TODO Store output shapes of all layers
-****** TODO Store weights of layers
-****** TODO Store biases if applicable
-****** TODO Generate matrix multiplications
-****** TODO Generate activation functions
+[2019-09-27 Fri 09:56]
+Actually, with TF as backend this still works (see [[file:python/tf_mnist.py::return%20tf.py_function(func=external_func,%20inp=%5Bx%5D,%20Tout=tf.float32)][this code]]).
+The input to ~Layer.call()~ is a TF tensor in that case, and I can use that as an input to a ~tf.py_function~.
+This ~tf.py_function~ can then call my interop code.
+
+****** TODO Extract weights, biases, etc.
+I should do this for TF first, then Keras, then PyTorch.
+
+****** TODO Generate ~dense()~
+Generate the calling code, currently without any template engine.
+
 **** TODO Build custom Keras layer for C code execution
 After the C code is generated, the custom Sequential model should either call that instead of the underlying layers, or replace itself with a new layer.
 That new layer would then either call the Enclave or native C code.

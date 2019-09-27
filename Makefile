@@ -4,15 +4,15 @@ export LIB:=${ROOT}/lib
 
 all:
 	$(MAKE) lib
-	$(MAKE) interop
+	$(MAKE) python
 
 lib:
 	$(MAKE) -C lib -e
-interop:
-	$(MAKE) -C interop -e
+python:
+	$(MAKE) -C python -e
 
 clean:
 	$(MAKE) -C lib clean
 	$(MAKE) -C interop clean
 
-.PHONY: lib interop clean
+.PHONY: lib python clean
