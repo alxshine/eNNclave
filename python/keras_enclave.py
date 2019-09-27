@@ -1,5 +1,6 @@
 from tensorflow.keras.models import Sequential
 import tensorflow as tf
+import numpy as np
 
 
 class Enclave(Sequential):
@@ -19,19 +20,19 @@ class Enclave(Sequential):
             parameters = l.get_weights()
             if len(parameters) > 0:
                 w = parameters[0]
-                lhs_string = "float w%d[]" % i
-                header_file.write(lhs_string + ";\n")
-                header_file.write("int w%d_r;\n" % i)
-                header_file.write("int w%d_c;\n\n" % i)
+                lhs_string = "float w%d[]" % (i)
+                header_file.write("extern " + lhs_string + ";\n")
+                header_file.write("extern int w%d_r;\n" % i)
+                header_file.write("extern int w%d_c;\n\n" % i)
 
                 cpp_file.write(Enclave.dump_matrix(w, lhs_string))
                 cpp_file.write("int w%d_r = %d;\n" % (i, w.shape[0]))
                 cpp_file.write("int w%d_c = %d;\n\n" % (i, w.shape[1]))
             if len(parameters) > 1:
                 b = parameters[1]
-                lhs_string = "float b%d[]" % i
-                header_file.write(lhs_string + ";\n")
-                header_file.write("int b%d_c;\n\n" % i)
+                lhs_string = "float b%d[]" % (i)
+                header_file.write("extern " + lhs_string + ";\n")
+                header_file.write("extern int b%d_c;\n\n" % i)
 
                 cpp_file.write(Enclave.dump_matrix(b, lhs_string))
                 cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
@@ -60,32 +61,34 @@ class Enclave(Sequential):
     def generate_dense(self, to_file='dense.cpp'):
         dense_file = open(to_file, 'w+')
 
+        expected_c = self.layers[0].get_weights()[0].shape[1]
         preamble = """
 #include "state.hpp"
 #include "matutil.hpp"
 
 int matutil_dense(float *m, int r, int c, int *label) {
-  if (r != 1 || c != w1_r) {
-    fprintf(stderr, "Input should be 1x%d\\n", w1_r);
+  if (r != 1 || c != %d) {
+    fprintf(stderr, "ERROR: Input should be 1x%d\\n");
     return -1;
   }
   int sts;
-"""
+""" % (expected_c, expected_c)
 
         dense_file.write(preamble)
-        last_tmp_index = -1
+        increase_tmp_index = -1
         for i, l in enumerate(self.layers):
             if i == 0:
                 inputs = 'm'
             else:
-                inputs = 'tmp%d' % (last_tmp_index)
+                inputs = 'tmp%d' % (increase_tmp_index)
 
-            call_string = Enclave.get_call_string(
+            call_string, increment_tmp_index = Enclave.get_call_string(
                 inputs, i, l)
             dense_file.write(call_string)
-            last_tmp_index = i
+            if increment_tmp_index:
+                increase_tmp_index = i
 
-        postamble ="""
+        postamble = """
   return 0;
 }
 """
@@ -98,6 +101,7 @@ int matutil_dense(float *m, int r, int c, int *label) {
   return sts;
 """
 
+        added_ops = True
         if type(layer) in [tf.keras.layers.Dense]:
             # the output of the dense layer will be a
             # row vector with ncols(w) elements
@@ -140,10 +144,9 @@ int matutil_dense(float *m, int r, int c, int *label) {
             else:
                 s += "ERROR: unknown activation function %s\n" % (
                     layer.activation.__name__)
-                breakpoint()
         else:
             s = "//No call method generated for layer %s of type %s\n" % (
                 layer.name, type(layer))
+            added_ops = False
 
-        return s
-        return s
+        return s, added_ops

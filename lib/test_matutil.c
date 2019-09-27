@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "matutil.h"
+#include "matutil.hpp"
 
 int main(void) {
   matutil_initialize();
