@@ -1,6 +1,7 @@
 from tensorflow.keras.models import Sequential
 import tensorflow as tf
 import numpy as np
+from format_strings import *
 
 
 class Enclave(Sequential):
@@ -62,17 +63,7 @@ class Enclave(Sequential):
         dense_file = open(to_file, 'w+')
 
         expected_c = self.layers[0].get_weights()[0].shape[1]
-        preamble = """
-#include "state.hpp"
-#include "matutil.hpp"
-
-int matutil_dense(float *m, int r, int c, int *label) {
-  if (r != 1 || c != %d) {
-    fprintf(stderr, "ERROR: Input should be 1x%d\\n");
-    return -1;
-  }
-  int sts;
-""" % (expected_c, expected_c)
+        preamble = preamble_template % (expected_c, expected_c)
 
         dense_file.write(preamble)
         increase_tmp_index = -1
@@ -80,73 +71,60 @@ int matutil_dense(float *m, int r, int c, int *label) {
             if i == 0:
                 inputs = 'm'
             else:
-                inputs = 'tmp%d' % (increase_tmp_index)
+                inputs = tmp_buffer_template % (increase_tmp_index)
 
             call_string, increment_tmp_index = Enclave.get_call_string(
                 inputs, i, l)
             dense_file.write(call_string)
             if increment_tmp_index:
                 increase_tmp_index = i
-
-        postamble = """
-  return 0;
-}
-"""
         dense_file.write(postamble)
         dense_file.close()
 
     @staticmethod
     def get_call_string(inputs, tmp_index, layer):
-        error_handling = """if ((sts = %s))
-  return sts;
-"""
 
         added_ops = True
         if type(layer) in [tf.keras.layers.Dense]:
             # the output of the dense layer will be a
             # row vector with ncols(w) elements
-            tmp_name = "tmp%d" % tmp_index
+            tmp_name = tmp_buffer_template % tmp_index
             parameters = layer.get_weights()
             w = parameters[0]
 
-            s = "float %s[%d];\n" % (
-                tmp_name, w.shape[1])
-            weight_name = "w%d" % tmp_index
-            mult = "matutil_multiply(%s, %d, %d, %s, %d, %d, %s)" % (
+            s = tmp_buffer_declaration_template % (
+                tmp_index, w.shape[1])
+            weight_name = weight_name_template % tmp_index
+            mult = mult_template % (
                 inputs, 1, w.shape[0], weight_name, w.shape[0], w.shape[1],
                 tmp_name)
-            s += error_handling % mult
+            s += error_handling_template % mult
 
             if len(parameters) > 1:
                 # add bias
                 b = parameters[1]
-                bias_name = "b%d" % tmp_index
-                add = "matutil_add(%s, %d, %d, %s, %d, %d, %s)" % (
+                bias_name = bias_name_template % tmp_index
+                add = add_template % (
                     tmp_name, 1, w.shape[1], bias_name, 1, b.shape[0],
                     tmp_name)
-                s += error_handling % add
+                s += error_handling_template % add
 
             if layer.activation.__name__ == 'relu':  # TODO: do this cleaner
-                relu = "matutil_relu(%s, %d, %d);\n" % (
+                relu = relu_template % (
                     tmp_name, 1, w.shape[1])
                 s += relu
             elif layer.activation.__name__ == 'softmax':
                 # here we compute the actual label
-                softmax = """
-  // get maximum for label
-  int max_index = 0;
-  for (int i = 1; i < %d; ++i)
-    max_index = %s[i] > %s[max_index] ? i : max_index;
-
-  *label = max_index;
-""" % (w.shape[1], tmp_name, tmp_name)
+                softmax = softmax_template % (w.shape[1], tmp_name, tmp_name)
                 s += softmax
             else:
                 s += "ERROR: unknown activation function %s\n" % (
                     layer.activation.__name__)
         else:
-            s = "//No call method generated for layer %s of type %s\n" % (
+            s = unknown_layer_template % (
                 layer.name, type(layer))
             added_ops = False
+
+        s += "\n"
 
         return s, added_ops
