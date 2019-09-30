@@ -7,3 +7,4 @@ models
 *~
 venv_sgx
 **__pycache__
+**.gdb_history

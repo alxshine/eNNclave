@@ -8,11 +8,11 @@ extern int w0_c;
 extern float b0[];
 extern int b0_c;
 
-extern float w1[];
-extern int w1_r;
-extern int w1_c;
+extern float w2[];
+extern int w2_r;
+extern int w2_c;
 
-extern float b1[];
-extern int b1_c;
+extern float b2[];
+extern int b2_c;
 
 #endif

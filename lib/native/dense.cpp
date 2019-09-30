@@ -3,29 +3,31 @@
 #include "matutil.hpp"
 
 int matutil_dense(float *m, int r, int c, int *label) {
-  if (r != 1 || c != 10) {
-    fprintf(stderr, "ERROR: Input should be 1x10, got %dx%d\n", r, c);
+  if (r != 1 || c != 9216) {
+    fprintf(stderr, "ERROR: Input should be 1x9216, got %dx%d\n", r, c);
     return -1;
   }
   int sts;
 
-  float tmp0[2];
-  if ((sts = matutil_multiply(m, 1, 10, w0, 10, 2, tmp0)))
+  float tmp0[128];
+  if ((sts = matutil_multiply(m, 1, 9216, w0, 9216, 128, tmp0)))
     return sts;
-  if ((sts = matutil_add(tmp0, 1, 2, b0, 1, 2, tmp0)))
+  if ((sts = matutil_add(tmp0, 1, 128, b0, 1, 128, tmp0)))
     return sts;
-  matutil_relu(tmp0, 1, 2);
+  matutil_relu(tmp0, 1, 128);
 
-  float tmp1[1];
-  if ((sts = matutil_multiply(tmp0, 1, 2, w1, 2, 1, tmp1)))
+  //No call method generated for layer dropout of type <class 'tensorflow.python.keras.layers.core.Dropout'>
+
+  float tmp2[10];
+  if ((sts = matutil_multiply(tmp0, 1, 128, w2, 128, 10, tmp2)))
     return sts;
-  if ((sts = matutil_add(tmp1, 1, 1, b1, 1, 1, tmp1)))
+  if ((sts = matutil_add(tmp2, 1, 10, b2, 1, 10, tmp2)))
     return sts;
 
   // get maximum for label
   int max_index = 0;
-  for (int i = 1; i < 1; ++i)
-    max_index = tmp1[i] > tmp1[max_index] ? i : max_index;
+  for (int i = 1; i < 10; ++i)
+    max_index = tmp2[i] > tmp2[max_index] ? i : max_index;
 
   *label = max_index;
 
