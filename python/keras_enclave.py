@@ -1,6 +1,27 @@
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Layer
 import tensorflow as tf
 from format_strings import *
+import interop.pymatutil as pymatutil
+import numpy as np
+
+
+class EnclaveLayer(Layer):
+    def wrap_matutil(self, x):
+        x = x.numpy()
+        label = pymatutil.dense(x.astype(np.float32).tobytes(),
+                                x.shape[0], x.shape[1])
+        ret = np.zeros(self.num_outputs, dtype=np.float32)
+        ret[label] = 1
+        return ret
+
+    def __init__(self, num_outputs):
+        super().__init__()
+        self.num_outputs = num_outputs
+
+    def call(self, inputs):
+        return tf.py_function(func=self.wrap_matutil,
+                              inp=[inputs], Tout=tf.float32)
 
 
 class Enclave(Sequential):
