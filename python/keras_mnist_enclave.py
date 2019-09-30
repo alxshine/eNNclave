@@ -82,7 +82,6 @@ else:
 # print('Test loss:', score[0])
 # print('Test accuracy:', score[1])
 # print(model.summary())
-enclave = model.get_layer('Enclave')
 # print(enclave.summary())
 enclave.generate_state()
 enclave.generate_dense()

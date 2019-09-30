@@ -2,6 +2,7 @@
 
 #include "matutil.hpp"
 #include "state.hpp"
+#include "dense.hpp"
 
 int matutil_initialize(void) { return 0; }
 
@@ -68,4 +69,8 @@ void matutil_dump_matrix(float *m, int r, int c) {
     }
     printf("\n");
   }
+}
+
+int matutil_dense(float *m, int r, int c, int *label){
+  return dense(m, r*c, r, c, label);
 }

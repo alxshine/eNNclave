@@ -1,8 +1,9 @@
 
 #include "state.hpp"
 #include "matutil.hpp"
+#include "dense.hpp"
 
-int matutil_dense(float *m, int r, int c, int *label) {
+int dense(float *m, int, int r, int c, int *label) {
   if (r != 1 || c != 9216) {
     fprintf(stderr, "ERROR: Input should be 1x9216, got %dx%d\n", r, c);
     return -1;
