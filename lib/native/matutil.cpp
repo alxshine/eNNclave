@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "matutil.hpp"
 #include "state.hpp"
@@ -73,4 +75,14 @@ void matutil_dump_matrix(float *m, int r, int c) {
 
 int matutil_dense(float *m, int r, int c, int *label){
   return dense(m, r*c, r, c, label);
+}
+
+int print_error(const char* fmt, ...){
+  char buf[BUFSIZ] = { '\0' };
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(buf, BUFSIZ, fmt, ap);
+  va_end(ap);
+  fprintf(stderr, "%s", buf);
+  return (int)strnlen(buf, BUFSIZ - 1) + 1;
 }
