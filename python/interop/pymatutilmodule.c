@@ -5,7 +5,7 @@
 #include <python3.6m/Python.h>
 #endif
 
-#include "matutil.h"
+#include "matutil.hpp"
 
 static PyObject *pymatutil_dump_matrix(PyObject *self, PyObject *args) {
   const PyBytesObject *bytes;
