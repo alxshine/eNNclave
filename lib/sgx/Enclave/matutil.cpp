@@ -16,7 +16,7 @@ int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
                      float *ret) {
   // check dimensions
   if (c1 != r2) {
-    perror(
+    print_error(
             "Matrices have incompatible dimensions for multiplication %dx%d "
             "and %dx%d\n",
             r1, c1, r2, c2);
@@ -38,7 +38,7 @@ int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
 int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
                 float *ret) {
   if (r1 != r2 || c1 != c2) {
-    perror(
+    print_error(
         "Matrices have incompatible dimensions for addition %dx%d and %dx%d\n",
         r1, c1, r2, c2);
     return -1;

@@ -5,7 +5,7 @@ preamble_template = """
 
 int dense(float *m, int, int r, int c, int *label) {
   if (r != 1 || c != %d) {
-    fprintf(stderr, "ERROR: Input should be 1x%d, got %%dx%%d\\n", r, c);
+    print_error("ERROR: Input should be 1x%d, got %%dx%%d\\n", r, c);
     return -1;
   }
   int sts;

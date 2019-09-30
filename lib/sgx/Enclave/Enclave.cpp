@@ -54,7 +54,7 @@ int printf(const char* fmt, ...)
  * perror: 
  *   Invokes OCALL to display the enclave buffer to the terminal.
  */
-int perror(const char* fmt, ...)
+int print_error(const char* fmt, ...)
 {
     char buf[BUFSIZ] = { '\0' };
     va_list ap;
