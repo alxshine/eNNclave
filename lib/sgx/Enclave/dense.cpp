@@ -1,11 +1,10 @@
-
 #include "state.hpp"
 #include "matutil.hpp"
 #include "dense.hpp"
 
 int dense(float *m, int, int r, int c, int *label) {
   if (r != 1 || c != 9216) {
-    fprintf(stderr, "ERROR: Input should be 1x9216, got %dx%d\n", r, c);
+    printf("ERROR: Input should be 1x9216, got %dx%d\n", r, c);
     return -1;
   }
   int sts;

@@ -42,8 +42,6 @@
 #include "wrapper.h"
 #include "Enclave_u.h"
 
-#include "state.h"
-
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
 
@@ -176,6 +174,10 @@ void ocall_print_string(const char *str)
      * the input string to prevent buffer overflow. 
      */
     printf("%s", str);
+}
+
+void ocall_perror_string(const char *str){
+  fprintf(stderr, "%s", str);
 }
 
 

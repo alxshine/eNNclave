@@ -1,7 +1,9 @@
 import os
 import numpy as np
 
-from keras_enclave import Enclave, EnclaveLayer
+from keras_enclave import Enclave
+from keras_enclave_layer import EnclaveLayer
+import interop.pymatutil as pymatutil
 
 import tensorflow.keras as keras
 from tensorflow.keras.datasets import mnist
@@ -83,6 +85,8 @@ else:
 # print(model.summary())
 # print(enclave.summary())
 
+pymatutil.initialize()
+
 enclave_model = Sequential(layers=model.layers[:5])
 enclave_model.add(EnclaveLayer(10))
 
@@ -104,3 +108,5 @@ if correct:
     print("Enclave results are CORRECT (identical with regular model)")
 else:
     print("Enclave results are INCORRECT")
+
+pymatutil.teardown()

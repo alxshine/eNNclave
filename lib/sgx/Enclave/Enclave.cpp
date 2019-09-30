@@ -50,6 +50,21 @@ int printf(const char* fmt, ...)
     return (int)strnlen(buf, BUFSIZ - 1) + 1;
 }
 
+/* 
+ * perror: 
+ *   Invokes OCALL to display the enclave buffer to the terminal.
+ */
+int perror(const char* fmt, ...)
+{
+    char buf[BUFSIZ] = { '\0' };
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, BUFSIZ, fmt, ap);
+    va_end(ap);
+    ocall_print_string(buf);
+    return (int)strnlen(buf, BUFSIZ - 1) + 1;
+}
+
 void do_something(void){
     printf("If you can see this, the enclave works\n");
 }
@@ -104,34 +119,4 @@ void relu(float *m, int s, int r, int c) {
   for (int i = 0; i < r * c; i++)
     if (m[i] < 0)
       m[i] = 0;
-}
-
-int dense(float *m, int s, int r, int c, int *label) {
-  if (r != 1 || c != w1_r)
-    return 3;
-  int sts;
-
-  // fc1
-  float tmp1[w1_c];
-  if ((sts = matmul(m, r*c, r, c, w1, w1_r*w1_c, w1_r, w1_c, tmp1, w1_c)))
-    return sts;
-  if ((sts = add(tmp1, w1_c, 1, w1_c, b1, b1_c, 1, b1_c, tmp1, w1_c)))
-    return sts;
-  relu(tmp1, w1_c, 1, w1_c);
-
-  // fc1
-  float tmp2[w2_c];
-  if ((sts = matmul(tmp1, w1_c, 1, w1_c, w2, w2_r*w2_c, w2_r, w2_c, tmp2, w2_c)))
-    return sts;
-  if ((sts = add(tmp2, w2_c, 1, w2_c, b2, b2_c, 1, b2_c, tmp2, w2_c)))
-    return sts;
-  relu(tmp2, w2_c, 1, w2_c);
-
-  // get maximum for label
-  int max_index = 0;
-  for (int i = 1; i < w2_c; ++i) 
-    max_index = tmp2[i] > tmp2[max_index] ? i : max_index;
-
-  *label = max_index;
-  return 0;
 }

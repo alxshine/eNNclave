@@ -176,6 +176,9 @@ void ocall_print_string(const char *str)
     printf("%s", str);
 }
 
+void ocall_perror_string(const char *str){
+  fprintf(stderr, "%s", str);
+}
 
 /* Application entry */
 int SGX_CDECL main(int argc, char *argv[])

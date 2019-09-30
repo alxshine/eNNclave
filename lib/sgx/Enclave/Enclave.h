@@ -34,13 +34,14 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "state.h"
+#include "state.hpp"
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
   int printf(const char* fmt, ...);
+  int perror(const char* fmt, ...);
   void do_something(void);
   int multiply(int a, int b);
   int matmul(float *m1, int s1, int r1, int c1, float *m2, int s2, int r2, int c2,

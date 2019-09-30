@@ -13,6 +13,6 @@ python:
 
 clean:
 	$(MAKE) -C lib clean
-	$(MAKE) -C interop clean
+	$(MAKE) -C python clean
 
 .PHONY: lib python clean
