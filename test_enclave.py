@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from enclave import Enclave
+from enclave_model import Enclave
 from enclave_layer import EnclaveLayer
 import interop.pymatutil as pymatutil
 

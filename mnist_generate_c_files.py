@@ -1,6 +1,6 @@
 import os
 
-from enclave import Enclave
+from enclave_model import Enclave
 
 import tensorflow.keras as keras
 from tensorflow.keras.datasets import mnist

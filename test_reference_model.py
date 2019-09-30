@@ -1,6 +1,6 @@
 import h5py
 from tensorflow.keras.layers import Dense
-from enclave import Enclave
+from enclave_model import Enclave
 import numpy as np
 
 enclave = Enclave(layers=[
