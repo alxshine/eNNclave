@@ -43,15 +43,16 @@ int main(void) {
   printf("mret2:\n");
   matutil_dump_matrix(mret2, rret, cret);
   
-  float input[800];
-  for (int i = 0; i<800; ++i) {
+  int c = 10;
+  float input[c];
+  for (int i = 0; i<c; ++i) {
     input[i] = i;
   }
 
-  int label;
+  int label = -1;
   printf("dense\n");
-  matutil_dense(input, 1, 800, &label);
-  printf("Output label: %d, should be 5\n", label);
+  matutil_dense(input, 1, c, &label);
+  printf("Output label: %d\n", label);
   
   matutil_teardown();
   printf("Matutil torn down\n");

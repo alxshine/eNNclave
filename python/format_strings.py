@@ -4,7 +4,7 @@ preamble_template = """
 
 int matutil_dense(float *m, int r, int c, int *label) {
   if (r != 1 || c != %d) {
-    fprintf(stderr, "ERROR: Input should be 1x%d\\n");
+    fprintf(stderr, "ERROR: Input should be 1x%d, got %%dx%%d\\n", r, c);
     return -1;
   }
   int sts;

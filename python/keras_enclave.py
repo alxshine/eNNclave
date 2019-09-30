@@ -1,6 +1,5 @@
 from tensorflow.keras.models import Sequential
 import tensorflow as tf
-import numpy as np
 from format_strings import *
 
 
@@ -19,8 +18,10 @@ class Enclave(Sequential):
         for i, l in enumerate(self.layers):
             # TODO: test if layer is dense here, like in get_call_string
             parameters = l.get_weights()
+
             if len(parameters) > 0:
                 w = parameters[0]
+
                 lhs_string = "float w%d[]" % (i)
                 header_file.write("extern " + lhs_string + ";\n")
                 header_file.write("extern int w%d_r;\n" % i)
@@ -62,7 +63,7 @@ class Enclave(Sequential):
     def generate_dense(self, to_file='dense.cpp'):
         dense_file = open(to_file, 'w+')
 
-        expected_c = self.layers[0].get_weights()[0].shape[1]
+        expected_c = self.layers[0].get_weights()[0].shape[0]
         preamble = preamble_template % (expected_c, expected_c)
 
         dense_file.write(preamble)
