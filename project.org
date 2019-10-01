@@ -156,7 +156,7 @@ So yeah, this one's on me.
 [2019-09-23 Mon 14:40]
 Added some error handling to pymatutil.
 
-*** Improvements for paper [1/6]
+*** Improvements for paper [2/6]
 **** TODO Test on actual hardware [1/2]
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
@@ -232,7 +232,7 @@ Setting this to true gives output like in [[file:python/mnist_cnn.png][this imag
       CLOSED: [2019-09-25 Wed 16:25]
 In order to evaluate I need fully working code for MNIST
 
-***** TODO Write extension to Keras Sequential [2/10]
+***** TODO Write extension to Keras Sequential [5/5]
 We want to have a container similar to Keras's ~Sequential~ model that can also generate C code for the contained layers.
 It should be possible to iterate over all contained layers and store the ~output_shape~ along the way.
 Then I also need to store the ~input_shape~ of the first layer and the weights and biases of all layers.
@@ -281,7 +281,8 @@ I guess they never meant eager execution to work during full blown execution of 
 *HOWEVER*, this still helps me to write my code, as I can use the Keras bundled with TF, and use [[https://www.tensorflow.org/api_docs/python/tf/py_function][~tf.py_func~]] to call my code.
 Will test tomorrow.
 
-****** TODO Use ~tf.py_func~ to call C code for testing
+****** DONE Use ~tf.py_func~ to call C code for testing
+       CLOSED: [2019-10-01 Tue 09:58]
 It should probably be a simple operation like multiplying with 2.
 
 ****** DONE Test calling C Code from a custom Keras layer
@@ -293,15 +294,25 @@ Actually, with TF as backend this still works (see [[file:python/tf_poc.py::retu
 The input to ~Layer.call()~ is a TF tensor in that case, and I can use that as an input to a ~tf.py_function~.
 This ~tf.py_function~ can then call my interop code.
 
-****** TODO Extract weights, biases, etc.
+****** DONE Extract weights, biases, etc.
+       CLOSED: [2019-10-01 Tue 09:58]
 Currently just for Keras, will be done by extending ~Sequential~
 
-****** TODO Generate ~dense()~
+****** DONE Generate ~dense()~
+       CLOSED: [2019-10-01 Tue 09:58]
 Generate the calling code, currently without any template engine.
 
-**** TODO Build custom Keras layer for C code execution
+[2019-10-01 Tue 09:58]
+The ~Enclave~ extension of ~Sequential~ has a ~generate_dense()~ function that will build the dense function out of matutil functions.
+This is done via format strings, which is not the best solution, but it works for now.
+
+**** DONE Build custom Keras layer for C code execution
+     CLOSED: [2019-10-01 Tue 10:00]
 After the C code is generated, the custom Sequential model should either call that instead of the underlying layers, or replace itself with a new layer.
 That new layer would then either call the Enclave or native C code.
+
+[2019-10-01 Tue 09:59]
+This is done by creating a custom Layer that builds a ~tf.py_function~, which calls the python function calling my C interop code.
 
 **** TODO Test the splitting with several popular architectures
 We should test the splitting with several common architectures.
