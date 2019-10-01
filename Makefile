@@ -4,12 +4,12 @@ export LIB:=${ROOT}/lib
 
 all:
 	$(MAKE) lib
-	$(MAKE) python
+	$(MAKE) interop
 
 lib:
 	$(MAKE) -C lib -e
-python:
-	$(MAKE) -C python -e
+interop:
+	$(MAKE) -C interop -e
 
 clean:
 	$(MAKE) -C lib clean

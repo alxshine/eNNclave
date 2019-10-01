@@ -8,7 +8,7 @@ all:
 	@$(MAKE) test
 
 lib:
-	@echo "\n\nMaking library in $(MODE) mode\n\n"
+	@printf "\n\nMaking library in $(MODE) mode\n\n\n"
 	$(MAKE) -C $(MODE)
 
 test: test_matutil.c
