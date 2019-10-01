@@ -1,8 +1,8 @@
 import os
 import numpy as np
 
-from keras_enclave import Enclave
-from keras_enclave_layer import EnclaveLayer
+from enclave import Enclave
+from enclave_layer import EnclaveLayer
 import interop.pymatutil as pymatutil
 
 import tensorflow.keras as keras

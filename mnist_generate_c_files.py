@@ -1,8 +1,6 @@
 import os
-import json
-from datetime import datetime
 
-from keras_enclave import Enclave
+from enclave import Enclave
 
 import tensorflow.keras as keras
 from tensorflow.keras.datasets import mnist

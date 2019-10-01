@@ -13,6 +13,6 @@ interop:
 
 clean:
 	$(MAKE) -C lib clean
-	$(MAKE) -C python clean
+	$(MAKE) -C interop clean
 
-.PHONY: lib python clean
+.PHONY: lib python interop clean

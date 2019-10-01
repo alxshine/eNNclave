@@ -1,7 +1,6 @@
 # coding: utf-8
-import interop.pymatutil as pymatutil
 import tensorflow as tf
-from keras_enclave import EnclaveLayer
+from enclave_layer import EnclaveLayer
 import numpy as np
 
 tf.compat.v1.enable_eager_execution()
