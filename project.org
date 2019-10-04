@@ -156,7 +156,7 @@ So yeah, this one's on me.
 [2019-09-23 Mon 14:40]
 Added some error handling to pymatutil.
 
-*** Improvements for paper [2/6]
+*** Improvements for paper [2/8]
 **** TODO Test on actual hardware [1/2]
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
@@ -164,8 +164,11 @@ According to [[https://software.intel.com/en-us/forums/intel-software-guard-exte
 
 ***** DONE Write an e-mail to Manuel
       CLOSED: [2019-09-25 Wed 13:31]
-***** WATING Set up the machine
+***** TODO Set up the machine
 I have a [[file:setup_sgx_machine.sh][setup script]] for Ubuntu 19.04, which I tested on VMs.
+
+[2019-10-04 Fri 12:00]
+The hardware is set up, it only needs a setup of Ubuntu, and network access.
 
 **** DONE Find out how model architectures are stored
      CLOSED: [2019-09-25 Wed 10:49]
@@ -335,13 +338,37 @@ I'm currently specifying intermediate matrices after every ~fc~ layer of the net
 
 This either means we are not as memory constrained as we thought, or the simulation simply has a larger amount of memory than the actual enclave would have.
 
+**** TODO Anwendungsfälle auflisten                                     :sgx:
+    [2019-10-04 Fri 11:36]
+
+***** Model stealing
+
+***** Offline ML-as-a-service
+Making content of ~dense()~ and network weights independent of launch code would allow MLAAS providers to sign an execution environment once, and then give signed and encrypted weights and architectures to their customers.
+This would require decrypting the models and dynamically generating the ~dense()~ function.
+
+By doing so we can move MLAAS from the cloud to offline, allowing for easier use, at least on desktop devices.
+While this doesn't necessarily work for mobile devices, it would allow users of MLAAS services to run the models themselves.
+
+The resulting classification could even be signed together with the input, thus verifying that the classification came from a certain model.
+*This would add accountability to every single classification.*
+
+Maybe we can spin an additional paper from this.
+
+***** Privacy -> Set Membership
+
+***** Lastverteilung zw. Edge, Cloud
 *** Future Work [0/2]
 **** TODO Integrate with the framework API
 Rainer said it would be nice to integrate the SGX with the tensorflow API (or pytorch, whatever)
-**** TODO Make content of ~dense()~ and network weights independent of launch code
-This would require decrypting the models and dynamically generating the ~dense()~ function.
-However, this would allow signing one single enclave and then moving ML-as-a-service networks to the user, while still only giving them access to an API.
-Not sure if this is too close to business applications, and maybe we want Google or Amazon to do this themselves.
+*** TODO [#A] Read related work                                         :sgx:
+   [2019-10-03 Thu 10:15]
+
+**** Privacy for ML:
+One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]] and the other is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
+
+**** Security in Enclave:
+[[file+sys:related_work/kaptchuk2019state.pdf][This paper]] uses ledgers to add state to the enclave, which guarantees that every state is only presented to it ones.
 
 ** Unforeseen events
 *** DONE Figure out how many bits the enclave uses for floats
@@ -354,7 +381,7 @@ The enclave supports floats.
 In all my tests there have been rounding errors (larger than the ~numpy~ default of 10^-8), but the results are identical.
 I think this is good enough.
 
-*** DONE Find out if our processors have the foreshadow mitigation      :sgx:
+*** DONE Find out what is needed for the foreshadow mitigation          :sgx:
     CLOSED: [2019-10-04 Fri 10:10]
    [2019-10-04 Fri 10:02]
  I should probably read [[https://foreshadowattack.eu/foreshadow.pdf][the paper]].
@@ -365,3 +392,9 @@ I think this is good enough.
  Intel released a [[https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00161.html][security advisory]] on foreshadow, as well as a summary of microcode updates.
  This means that having currenty microcode updates on our benchmark machines would make them resistant against foreshadow.
  At least as resistant as we can currently get.
+
+*** TODO Limitation: microcode updates and mitigations will carry performance reductions :sgx:
+*** TODO Test if our processors are vulnerable to foreshadow            :sgx:
+   [2019-10-04 Fri 11:46]
+
+ If they are, don't update, we want to measure performance impact of that update
