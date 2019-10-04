@@ -335,11 +335,33 @@ I'm currently specifying intermediate matrices after every ~fc~ layer of the net
 
 This either means we are not as memory constrained as we thought, or the simulation simply has a larger amount of memory than the actual enclave would have.
 
-*** Future Work [0/1]
+*** Future Work [0/2]
 **** TODO Integrate with the framework API
 Rainer said it would be nice to integrate the SGX with the tensorflow API (or pytorch, whatever)
+**** TODO Make content of ~dense()~ and network weights independent of launch code
+This would require decrypting the models and dynamically generating the ~dense()~ function.
+However, this would allow signing one single enclave and then moving ML-as-a-service networks to the user, while still only giving them access to an API.
+Not sure if this is too close to business applications, and maybe we want Google or Amazon to do this themselves.
 
 ** Unforeseen events
-*** TODO Figure out how many bits the enclave uses for floats
+*** DONE Figure out how many bits the enclave uses for floats
+    CLOSED: [2019-10-04 Fri 10:11]
 This could cause some weird results and incompatibilities.
 It's also not perfectly clear if the enclave even supports floats.
+
+[2019-10-04 Fri 10:10]
+The enclave supports floats.
+In all my tests there have been rounding errors (larger than the ~numpy~ default of 10^-8), but the results are identical.
+I think this is good enough.
+
+*** DONE Find out if our processors have the foreshadow mitigation      :sgx:
+    CLOSED: [2019-10-04 Fri 10:10]
+   [2019-10-04 Fri 10:02]
+ I should probably read [[https://foreshadowattack.eu/foreshadow.pdf][the paper]].
+ According to [[https://foreshadowattack.eu/][the attack's website]] (what a world we live in), under the headline "Are there mitigations against Foreshadow?", mitigations require software and microcode updates.
+ I would assume the software updates are for changing keys (which could have been leaked by vulnerable systems) and resealing enclave code.
+
+ The microcode is for patching the vulnerability.
+ Intel released a [[https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00161.html][security advisory]] on foreshadow, as well as a summary of microcode updates.
+ This means that having currenty microcode updates on our benchmark machines would make them resistant against foreshadow.
+ At least as resistant as we can currently get.
