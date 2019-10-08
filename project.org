@@ -343,7 +343,7 @@ This either means we are not as memory constrained as we thought, or the simulat
 
 ***** Model stealing
 
-***** Offline ML-as-a-service
+***** Offline ML-as-a-service <<Offline MLAAS>>
 Making content of ~dense()~ and network weights independent of launch code would allow MLAAS providers to sign an execution environment once, and then give signed and encrypted weights and architectures to their customers.
 This would require decrypting the models and dynamically generating the ~dense()~ function.
 
@@ -355,21 +355,35 @@ The resulting classification could even be signed together with the input, thus 
 
 Maybe we can spin an additional paper from this.
 
+***** Oblivious distributed machine learning
+Along the lines of [[Offline MLAAS][this]] and distributed SGD, we can do the same thing the other way round.
+Companies could send signed and encrypted inputs, together with model updates to people offering their compute power.
+The people then train their local model inside the enclave, so they can't steal the model.
+The code in the enclave then signs and encrypts the weight updates and sends them back to the company.
+
+The local devices would all use the same signature if they are provided with the same enclave code, so they wouldn't be identifiable from their updates alone.
+This can be cited from [[file:related_work/shokri15privacy.pdf][Shokri ML privacy]], the learning in general would be similar to [[file:related_work/dean2012large.pdf][Downpour]].
+
+This would make an *awesome* paper.
+
 ***** Privacy -> Set Membership
 
 ***** Lastverteilung zw. Edge, Cloud
+**** TODO [#A] Read related work                                        :sgx:
+    [2019-10-03 Thu 10:15]
+
+***** Privacy for ML:
+ One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]] and the other is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
+
+****** shokri15privacy
+
+
+***** Security in Enclave:
+ [[file+sys:related_work/kaptchuk2019state.pdf][This paper]] uses ledgers to add state to the enclave, which guarantees that every state is only presented to it ones.
+
 *** Future Work [0/2]
 **** TODO Integrate with the framework API
 Rainer said it would be nice to integrate the SGX with the tensorflow API (or pytorch, whatever)
-*** TODO [#A] Read related work                                         :sgx:
-   [2019-10-03 Thu 10:15]
-
-**** Privacy for ML:
-One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]] and the other is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
-
-**** Security in Enclave:
-[[file+sys:related_work/kaptchuk2019state.pdf][This paper]] uses ledgers to add state to the enclave, which guarantees that every state is only presented to it ones.
-
 ** Unforeseen events
 *** DONE Figure out how many bits the enclave uses for floats
     CLOSED: [2019-10-04 Fri 10:11]
@@ -393,8 +407,8 @@ I think this is good enough.
  This means that having currenty microcode updates on our benchmark machines would make them resistant against foreshadow.
  At least as resistant as we can currently get.
 
-*** TODO Limitation: microcode updates and mitigations will carry performance reductions :sgx:
 *** TODO Test if our processors are vulnerable to foreshadow            :sgx:
-   [2019-10-04 Fri 11:46]
+    [2019-10-04 Fri 11:46]
 
- If they are, don't update, we want to measure performance impact of that update
+If they are, don't update, we want to measure performance impact of that 
+Updating is probably ~irreversible~, so we should find out if they are vulnerable before installing any microcode packages.
