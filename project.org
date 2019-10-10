@@ -156,20 +156,40 @@ So yeah, this one's on me.
 [2019-09-23 Mon 14:40]
 Added some error handling to pymatutil.
 
-*** Improvements for paper [2/8]
-**** TODO Test on actual hardware [1/2]
+*** Improvements for paper [3/9]
+**** TODO Test on actual hardware [2/4]                                 :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
 
 ***** DONE Write an e-mail to Manuel
       CLOSED: [2019-09-25 Wed 13:31]
-***** TODO Set up the machine
+***** DONE Set up the machine
+      CLOSED: [2019-10-08 Tue 15:25]
 I have a [[file:setup_sgx_machine.sh][setup script]] for Ubuntu 19.04, which I tested on VMs.
 
 [2019-10-04 Fri 12:00]
 The hardware is set up, it only needs a setup of Ubuntu, and network access.
+***** TODO Plan evaluation
+****** DONE Coordinate with RBO how exactly we evaluate                 :sgx:
+       CLOSED: [2019-10-08 Tue 17:29]
+I work out the exact benchmarking details with him.
+He said he wanted to test different cutting points, so I should also add Convolutional layers to the enclave.
 
+Convolutional layers in the front.
+Ideally more than two dense layers in the end.
+We can look at ImageNet structures, which should have more dense layers.
+
+****** TODO Performance
+enclave vs. GPU for multiple cutoff points
+Test with enclave and with native C code
+
+MNIST, one more type of data
+
+****** TODO Privacy
+more on this later
+
+***** TODO Perform actual evaluation
 **** DONE Find out how model architectures are stored
      CLOSED: [2019-09-25 Wed 10:49]
 We want to be able to specify a cut similar to current SOTA architecture visualization tools.
@@ -214,7 +234,8 @@ Alternatively Keras offers a ~model.summary()~ function which prints a summary o
 
 For these reasons, *Keras* seems to be the best choice, offering the versatility and customizability we need along with nice tooling for training, storing and loading, as well as visualization.
 
-**** TODO Design a splitting functionality for Keras [2/3]
+**** DONE Design a splitting functionality for Keras [3/3]
+     CLOSED: [2019-10-08 Tue 16:05]
 RBO wants to have a good way of specifying split position and visualization of it before we try and run the code.
 The best way to do this is writing a Keras layer container (similar to Sequential).
 This way we have control over how the underlying layers function.
@@ -235,7 +256,8 @@ Setting this to true gives output like in [[file:python/mnist_cnn.png][this imag
       CLOSED: [2019-09-25 Wed 16:25]
 In order to evaluate I need fully working code for MNIST
 
-***** TODO Write extension to Keras Sequential [5/5]
+***** DONE Write extension to Keras Sequential [5/5]
+      CLOSED: [2019-10-08 Tue 16:05]
 We want to have a container similar to Keras's ~Sequential~ model that can also generate C code for the contained layers.
 It should be possible to iterate over all contained layers and store the ~output_shape~ along the way.
 Then I also need to store the ~input_shape~ of the first layer and the weights and biases of all layers.
@@ -317,12 +339,14 @@ That new layer would then either call the Enclave or native C code.
 [2019-10-01 Tue 09:59]
 This is done by creating a custom Layer that builds a ~tf.py_function~, which calls the python function calling my C interop code.
 
-**** TODO Test the splitting with several popular architectures
+**** TODO Add capability for convolutional layers :sgx:
+     
+**** TODO Test the splitting with several popular architectures :sgx:
 We should test the splitting with several common architectures.
 RBO also said something about splitting according to some metrics (e.g. GPU memory/utilization), which I'm not too sure about how he meant it.
 We could try and split before the first dense layer, I should try and see if there are other layer types used for actual classification.
 
-**** TODO Automate memory layout inside SGX
+**** TODO Automate memory layout inside SGX :sgx:
 We might have to do some memory magic because otherwise we might run out of memory inside the SGX.
 The first prototype can do this explicitly for the chosen network, but for publishing we should do this automatically.
 
@@ -338,10 +362,15 @@ I'm currently specifying intermediate matrices after every ~fc~ layer of the net
 
 This either means we are not as memory constrained as we thought, or the simulation simply has a larger amount of memory than the actual enclave would have.
 
+[2019-10-08 Tue 16:09]
+The enclave has 100MB of memory.
+This might require some trickery for full models.
+I could try and use only two temporary buffers, to reduce memory requirements.
+
 **** TODO Anwendungsfälle auflisten                                     :sgx:
     [2019-10-04 Fri 11:36]
-
 ***** Model stealing
+****** TODO Find some papers on model stealing :sgx:
 
 ***** Offline ML-as-a-service <<Offline MLAAS>>
 Making content of ~dense()~ and network weights independent of launch code would allow MLAAS providers to sign an execution environment once, and then give signed and encrypted weights and architectures to their customers.
@@ -367,22 +396,37 @@ This can be cited from [[file:related_work/shokri15privacy.pdf][Shokri ML privac
 This would make an *awesome* paper.
 
 ***** Privacy -> Set Membership
+I should do the math where the total attack accuracy for only returning the label comes from in the set membership paper.
+Other than that we still have the advantage of making an offline model as robust as an online oracle.
+
+****** TODO Leakage confinement
+Find out if the leakage information is constrained to the dense layers.
+Figure -> dense weights before and after retraining
+
+****** TODO Run on Cecilias face classifier
+Retraining, then try and see where the differences are during retraining.
+Evaluate set membership.
+
+***** TODO consider possible new attacks on partial black boxes
+An attacker might use the early convolutional layers to reduce the search space for adversarial examples.
+This needs to be in the final paper.
 
 ***** Lastverteilung zw. Edge, Cloud
-**** TODO [#A] Read related work                                        :sgx:
+****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
+Or talk to DPS groups
+
+**** TODO [#A] Read related work [1/2]                                  :sgx:
     [2019-10-03 Thu 10:15]
 
-***** Privacy for ML:
- One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]] and the other is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
+***** DONE Privacy for ML:
+      CLOSED: [2019-10-08 Tue 16:05]
+One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]] and the other is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
 
-****** shokri15privacy
+***** TODO Security in Enclave: :sgx:
+[[file+sys:related_work/kaptchuk2019state.pdf][This paper]] uses ledgers to add state to the enclave, which guarantees that every state is only presented to it ones.
 
-
-***** Security in Enclave:
- [[file+sys:related_work/kaptchuk2019state.pdf][This paper]] uses ledgers to add state to the enclave, which guarantees that every state is only presented to it ones.
-
-*** Future Work [0/2]
-**** TODO Integrate with the framework API
+*** Future Work [0/1]
+**** TODO Integrate with the framework API :sgx:
 Rainer said it would be nice to integrate the SGX with the tensorflow API (or pytorch, whatever)
 ** Unforeseen events
 *** DONE Figure out how many bits the enclave uses for floats
