@@ -157,7 +157,7 @@ So yeah, this one's on me.
 Added some error handling to pymatutil.
 
 *** Improvements for paper [3/9]
-**** TODO Test on actual hardware [2/4]                                 :sgx:
+**** TODO Test on actual hardware [3/4]                                 :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
@@ -170,7 +170,8 @@ I have a [[file:setup_sgx_machine.sh][setup script]] for Ubuntu 19.04, which I t
 
 [2019-10-04 Fri 12:00]
 The hardware is set up, it only needs a setup of Ubuntu, and network access.
-***** TODO Plan evaluation
+***** DONE Plan evaluation
+      CLOSED: [2019-10-11 Fri 11:32]
 ****** DONE Coordinate with RBO how exactly we evaluate                 :sgx:
        CLOSED: [2019-10-08 Tue 17:29]
 I work out the exact benchmarking details with him.
@@ -180,16 +181,18 @@ Convolutional layers in the front.
 Ideally more than two dense layers in the end.
 We can look at ImageNet structures, which should have more dense layers.
 
+***** TODO Perform actual evaluation
 ****** TODO Performance
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code
 
 MNIST, one more type of data
-
+******* TODO get VGG16 model
+There is one included within ~keras.applications~.
+I think we should use it, but for that we 
 ****** TODO Privacy
 more on this later
 
-***** TODO Perform actual evaluation
 **** DONE Find out how model architectures are stored
      CLOSED: [2019-09-25 Wed 10:49]
 We want to be able to specify a cut similar to current SOTA architecture visualization tools.
