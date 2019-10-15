@@ -192,6 +192,9 @@ TF has a built in, pretrained version of VGG16.
 It also has multiple built-in datasets which can be used for retraining the dense layers.
 This can be used as a preparation for the evaluation.
 
+[2019-10-15 Tue 11:41]
+The tensorflow_datasets library is a bit weird to use, so for now I'm sticking to a dataset that's downloaded from the tensorflow servers.
+
 ****** TODO Performance
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code

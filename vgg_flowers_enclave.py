@@ -1,9 +1,11 @@
 import pathlib
 import random
 import tensorflow as tf
+from tensorflow.keras.models import load_model
 from enclave_model import Enclave
+import os
 
-# tf.enable_eager_execution()
+tf.compat.v1.enable_eager_execution()
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
@@ -65,30 +67,39 @@ train_ds = _input_fn(x_train, y_train)
 validation_ds = _input_fn(x_test, y_test)
 
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
-VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
-                                          include_top=False,
-                                          weights='imagenet')
-VGG16_MODEL.trainable = False
 
-enclave = Enclave()
-enclave.add(tf.keras.layers.Dense(4096, name='fc1', activation='relu'))
-enclave.add(tf.keras.layers.Dense(4096, name='fc2', activation='relu'))
-enclave.add(tf.keras.layers.Dense(len(label_key),
-                                  name='output', activation='softmax'))
+model_file = 'models/vgg_flowers_enclave.h5'
 
-model = tf.keras.Sequential([
-    VGG16_MODEL,
-    tf.keras.layers.Flatten(),
-    enclave
-])
-model.compile(optimizer='adam',
-              loss=tf.keras.losses.sparse_categorical_crossentropy,
-              metrics=["accuracy"])
-history = model.fit(train_ds,
-                    epochs=100,
-                    steps_per_epoch=2,
-                    validation_steps=2,
-                    validation_data=validation_ds)
+if os.path.exists(model_file):
+    print('Model found, loading from %s' % model_file)
+    model = load_model(model_file)
+    model.compile(optimizer='adam',
+                  loss=tf.keras.losses.sparse_categorical_crossentropy,
+                  metrics=["accuracy"])
+else:
+    VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
+                                              include_top=False,
+                                              weights='imagenet')
+    VGG16_MODEL.trainable = False
+    enclave = Enclave()
+    enclave.add(tf.keras.layers.Dense(4096, name='fc1', activation='relu'))
+    enclave.add(tf.keras.layers.Dense(4096, name='fc2', activation='relu'))
+    enclave.add(tf.keras.layers.Dense(len(label_key),
+                                      name='output', activation='softmax'))
+    model = tf.keras.Sequential([
+        VGG16_MODEL,
+        tf.keras.layers.Flatten(),
+        enclave
+    ])
+    model.compile(optimizer='adam',
+                  loss=tf.keras.losses.sparse_categorical_crossentropy,
+                  metrics=["accuracy"])
+    history = model.fit(train_ds,
+                        epochs=100,
+                        steps_per_epoch=2,
+                        validation_steps=2,
+                        validation_data=validation_ds)
+    model.save(model_file)
 
 validation_steps = 20
 
@@ -96,4 +107,3 @@ loss0, accuracy0 = model.evaluate(validation_ds, steps=validation_steps)
 
 print("loss: {:.2f}".format(loss0))
 print("accuracy: {:.2f}".format(accuracy0))
-model.save('models/vgg_flowers_enclave.h5')
