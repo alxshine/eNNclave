@@ -91,4 +91,4 @@ loss0, accuracy0 = model.evaluate(validation_ds, steps=validation_steps)
 
 print("loss: {:.2f}".format(loss0))
 print("accuracy: {:.2f}".format(accuracy0))
-model.save('vgg_flowers.h5')
+model.save('models/vgg_flowers_orig.h5')
