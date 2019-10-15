@@ -208,7 +208,7 @@ We should measure:
 - time for a batch predict, so we have a better understanding of how the enclave performs over larger datasets
 - check if the entire model fits in the 128MB that we have
 
-****** TODO Performance
+****** TODO Finish performance evaluation
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code
 
@@ -222,7 +222,7 @@ I think we should use it, with standard TF datasets.
 We are probably using that network, with the pre-trained weights.
 However the end goal will be to evaluate it on the VGG face datset, when that is available to us.
 
-****** TODO Privacy
+****** TODO Plan privacy evaluation
 more on this later
 
 **** DONE Find out how model architectures are stored
