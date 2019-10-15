@@ -186,14 +186,27 @@ We can look at ImageNet structures, which should have more dense layers.
 ****** WATING Get VGG Face Dataset up and running
 This is large enough to merit its own project, and it's currently underway
 
-****** TODO Prepare evaluation using TF built-in datasets
-       SCHEDULED: <2019-10-15 Tue 12:00>
+****** DONE Prepare evaluation using TF built-in datasets
+       CLOSED: [2019-10-15 Tue 11:54] SCHEDULED: <2019-10-15 Tue 12:00>
 TF has a built in, pretrained version of VGG16.
 It also has multiple built-in datasets which can be used for retraining the dense layers.
 This can be used as a preparation for the evaluation.
 
 [2019-10-15 Tue 11:41]
 The tensorflow_datasets library is a bit weird to use, so for now I'm sticking to a dataset that's downloaded from the tensorflow servers.
+
+[2019-10-15 Tue 11:48]
+Added evaluation scripts for both versions of vgg_flowers.
+Now only the timing needs to be set up.
+
+****** TODO Think about good ways to measure inference time
+We have one-time setups that take place, which need to be measured.
+There is also additional communication between the GPU and CPU that needs to take place.
+
+We should measure:
+- single inference time, which should include enclave setup
+- time for a batch predict, so we have a better understanding of how the enclave performs over larger datasets
+- check if the entire model fits in the 128MB that we have
 
 ****** TODO Performance
 enclave vs. GPU for multiple cutoff points
