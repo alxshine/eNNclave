@@ -10,3 +10,6 @@ models
 **.gdb_history
 logs
 sbatch_launch.sh
+**/state.cpp
+**/state.hpp
+**/dense.cpp

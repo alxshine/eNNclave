@@ -81,14 +81,22 @@ if os.path.exists(model_file):
     model.compile(optimizer='adam',
                   loss=tf.keras.losses.sparse_categorical_crossentropy,
                   metrics=["accuracy"])
+
+    response = input("Would you like to generate C code? [y/N]")
+    if response == 'y':
+        enclave = model.get_layer('Enclave')
+        print('generating state files')
+        enclave.generate_state()
+        print('generating dense function')
+        enclave.generate_dense()
 else:
     VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
                                               include_top=False,
                                               weights='imagenet')
     VGG16_MODEL.trainable = False
     enclave = Enclave()
-    enclave.add(tf.keras.layers.Dense(4096, name='fc1', activation='relu'))
-    enclave.add(tf.keras.layers.Dense(4096, name='fc2', activation='relu'))
+    enclave.add(tf.keras.layers.Dense(2048, name='fc1', activation='relu'))
+    enclave.add(tf.keras.layers.Dense(2048, name='fc2', activation='relu'))
     enclave.add(tf.keras.layers.Dense(len(label_key),
                                       name='output', activation='softmax'))
     model = tf.keras.Sequential([
@@ -106,7 +114,6 @@ else:
                         validation_data=validation_ds)
     model.save(model_file)
 
-
 validation_steps = 1
 time_before = time.process_time()
 model.predict_generator(validation_ds, steps=validation_steps)
@@ -114,7 +121,3 @@ time_after = time.process_time()
 
 print("Prediction on %d samples took %s seconds" %
       (validation_steps*BATCH_SIZE, time_after - time_before))
-# loss0, accuracy0 = model.evaluate(validation_ds, steps=validation_steps)
-
-# print("loss: {:.2f}".format(loss0))
-# print("accuracy: {:.2f}".format(accuracy0))
