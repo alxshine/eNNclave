@@ -157,7 +157,7 @@ So yeah, this one's on me.
 Added some error handling to pymatutil.
 
 *** Improvements for paper [3/9]
-**** TODO Test on actual hardware [3/4]                                 :sgx:
+**** TODO Test on actual hardware [3/5]                                 :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
@@ -182,14 +182,30 @@ Ideally more than two dense layers in the end.
 We can look at ImageNet structures, which should have more dense layers.
 
 ***** TODO Perform actual evaluation
+
+****** WATING Get VGG Face Dataset up and running
+This is large enough to merit its own project, and it's currently underway
+
+****** TODO Prepare evaluation using TF built-in datasets
+       SCHEDULED: <2019-10-15 Tue 12:00>
+TF has a built in, pretrained version of VGG16.
+It also has multiple built-in datasets which can be used for retraining the dense layers.
+This can be used as a preparation for the evaluation.
+
 ****** TODO Performance
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code
 
 MNIST, one more type of data
-******* TODO get VGG16 model
+******* DONE get VGG16 model
+	CLOSED: [2019-10-15 Tue 08:53]
 There is one included within ~keras.applications~.
-I think we should use it, but for that we 
+I think we should use it, with standard TF datasets.
+
+[2019-10-15 Tue 08:53]
+We are probably using that network, with the pre-trained weights.
+However the end goal will be to evaluate it on the VGG face datset, when that is available to us.
+
 ****** TODO Privacy
 more on this later
 
@@ -418,7 +434,7 @@ This needs to be in the final paper.
 ****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
 Or talk to DPS groups
 
-**** TODO [#A] Read related work [1/2]                                  :sgx:
+**** TODO [#A] Read related work [2/3]                                  :sgx:
     [2019-10-03 Thu 10:15]
 
 ***** DONE Privacy for ML:
@@ -427,6 +443,15 @@ One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy pre
 
 ***** TODO Security in Enclave: :sgx:
 [[file+sys:related_work/kaptchuk2019state.pdf][This paper]] uses ledgers to add state to the enclave, which guarantees that every state is only presented to it ones.
+
+***** DONE NNs in TEEs
+      CLOSED: [2019-10-15 Tue 09:51] SCHEDULED: <2019-10-15 Tue 12:00>
+Dan Boneh released [[file:related_work/Tramer2019_TEE_DeepNetworkOutsourcing_ICLR.pdf][this paper]], talking about something very similar to what we're doing.
+[2019-10-15 Tue 10:50]
+They do talk about something similar to what we're doing, but they're doing it very differently.
+Also they are trying to protect inputs from the model owner, not the model itself.
+
+The notion of verifying outputs that come from the GPU is very cool, and we should look into something similar for our project.
 
 *** Future Work [0/1]
 **** TODO Integrate with the framework API :sgx:
