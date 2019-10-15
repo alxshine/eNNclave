@@ -3,6 +3,7 @@ import random
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from enclave_model import Enclave
+import time
 import os
 
 tf.compat.v1.enable_eager_execution()
@@ -40,13 +41,17 @@ BATCH_SIZE = 32
 
 
 def _parse_data(x, y):
+    return convert_image(x), y
+
+
+def convert_image(x):
     image = tf.compat.v1.read_file(x)
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.cast(image, tf.float32)
     image = (image/127.5) - 1
     image = tf.image.resize(image, (IMG_SIZE, IMG_SIZE))
 
-    return image, y
+    return image
 
 
 def _input_fn(x, y):
@@ -72,7 +77,7 @@ model_file = 'models/vgg_flowers_enclave.h5'
 
 if os.path.exists(model_file):
     print('Model found, loading from %s' % model_file)
-    model = load_model(model_file)
+    model = load_model(model_file, custom_objects={'Enclave': Enclave})
     model.compile(optimizer='adam',
                   loss=tf.keras.losses.sparse_categorical_crossentropy,
                   metrics=["accuracy"])
@@ -101,9 +106,15 @@ else:
                         validation_data=validation_ds)
     model.save(model_file)
 
-validation_steps = 20
 
-loss0, accuracy0 = model.evaluate(validation_ds, steps=validation_steps)
+validation_steps = 1
+time_before = time.process_time()
+model.predict_generator(validation_ds, steps=validation_steps)
+time_after = time.process_time()
 
-print("loss: {:.2f}".format(loss0))
-print("accuracy: {:.2f}".format(accuracy0))
+print("Prediction on %d samples took %s seconds" %
+      (validation_steps*BATCH_SIZE, time_after - time_before))
+# loss0, accuracy0 = model.evaluate(validation_ds, steps=validation_steps)
+
+# print("loss: {:.2f}".format(loss0))
+# print("accuracy: {:.2f}".format(accuracy0))
