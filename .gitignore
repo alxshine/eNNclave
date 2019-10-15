@@ -8,3 +8,4 @@ models
 *venv*
 **__pycache__
 **.gdb_history
+logs
