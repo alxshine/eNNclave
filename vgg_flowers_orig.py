@@ -1,9 +1,8 @@
 import pathlib
 import random
 import tensorflow as tf
-from enclave_model import Enclave
 
-# tf.enable_eager_execution()
+tf.enable_eager_execution()
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
@@ -32,13 +31,13 @@ x_test = all_images[:train_test_split]
 y_train = all_labels[train_test_split:]
 y_test = all_labels[:train_test_split]
 
-IMG_SIZE = 224
+IMG_SIZE = 160
 
 BATCH_SIZE = 32
 
 
 def _parse_data(x, y):
-    image = tf.compat.v1.read_file(x)
+    image = tf.read_file(x)
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.cast(image, tf.float32)
     image = (image/127.5) - 1
@@ -69,23 +68,19 @@ VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
                                           include_top=False,
                                           weights='imagenet')
 VGG16_MODEL.trainable = False
-
-enclave = Enclave()
-enclave.add(tf.keras.layers.Dense(4096, name='fc1', activation='relu'))
-enclave.add(tf.keras.layers.Dense(4096, name='fc2', activation='relu'))
-enclave.add(tf.keras.layers.Dense(len(label_key),
-                                  name='output', activation='softmax'))
-
+global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
+prediction_layer = tf.keras.layers.Dense(
+    len(label_names), activation='softmax')
 model = tf.keras.Sequential([
     VGG16_MODEL,
-    tf.keras.layers.Flatten(),
-    enclave
+    global_average_layer,
+    prediction_layer
 ])
-model.compile(optimizer='adam',
+model.compile(optimizer=tf.train.AdamOptimizer(),
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
 history = model.fit(train_ds,
-                    epochs=1,
+                    epochs=100,
                     steps_per_epoch=2,
                     validation_steps=2,
                     validation_data=validation_ds)
