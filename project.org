@@ -238,6 +238,82 @@ The network as it is doesn't fit in the enclave.
 I should first look at the ~GlobalAveragingLayer~ (or similar) in TF.
 This might give us the much needed size reduction.
 
+[2019-10-16 Wed 15:50]
+I just checked the included VGG16 model, whose structure looks like the following:
+#+BEGIN_SRC python :results output
+  from tensorflow.keras.applications import VGG16
+  VGG16().summary()
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Model: "vgg16"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_1 (InputLayer)         [(None, 224, 224, 3)]     0         
+_________________________________________________________________
+block1_conv1 (Conv2D)        (None, 224, 224, 64)      1792      
+_________________________________________________________________
+block1_conv2 (Conv2D)        (None, 224, 224, 64)      36928     
+_________________________________________________________________
+block1_pool (MaxPooling2D)   (None, 112, 112, 64)      0         
+_________________________________________________________________
+block2_conv1 (Conv2D)        (None, 112, 112, 128)     73856     
+_________________________________________________________________
+block2_conv2 (Conv2D)        (None, 112, 112, 128)     147584    
+_________________________________________________________________
+block2_pool (MaxPooling2D)   (None, 56, 56, 128)       0         
+_________________________________________________________________
+block3_conv1 (Conv2D)        (None, 56, 56, 256)       295168    
+_________________________________________________________________
+block3_conv2 (Conv2D)        (None, 56, 56, 256)       590080    
+_________________________________________________________________
+block3_conv3 (Conv2D)        (None, 56, 56, 256)       590080    
+_________________________________________________________________
+block3_pool (MaxPooling2D)   (None, 28, 28, 256)       0         
+_________________________________________________________________
+block4_conv1 (Conv2D)        (None, 28, 28, 512)       1180160   
+_________________________________________________________________
+block4_conv2 (Conv2D)        (None, 28, 28, 512)       2359808   
+_________________________________________________________________
+block4_conv3 (Conv2D)        (None, 28, 28, 512)       2359808   
+_________________________________________________________________
+block4_pool (MaxPooling2D)   (None, 14, 14, 512)       0         
+_________________________________________________________________
+block5_conv1 (Conv2D)        (None, 14, 14, 512)       2359808   
+_________________________________________________________________
+block5_conv2 (Conv2D)        (None, 14, 14, 512)       2359808   
+_________________________________________________________________
+block5_conv3 (Conv2D)        (None, 14, 14, 512)       2359808   
+_________________________________________________________________
+block5_pool (MaxPooling2D)   (None, 7, 7, 512)         0         
+_________________________________________________________________
+flatten (Flatten)            (None, 25088)             0         
+_________________________________________________________________
+fc1 (Dense)                  (None, 4096)              102764544 
+_________________________________________________________________
+fc2 (Dense)                  (None, 4096)              16781312  
+_________________________________________________________________
+predictions (Dense)          (None, 1000)              4097000   
+=================================================================
+Total params: 138,357,544
+Trainable params: 138,357,544
+Non-trainable params: 0
+_________________________________________________________________
+#+end_example
+
+As you can see, there are 25088 inputs to the dense part of the network.
+This does require some additional reduction before I can use it.
+
+******* TODO try an additional pooling layer
+As a simple first step I will try adding an additional pooling layer before the dense part of the network.
+
+******* TODO try an ~GlobalAveragePooling2D~ in vgg_flowers code
+As a hopefully better measure I will try to add a global average pooling layer before the flatten.
+This will greatly reduce dimensionality, and seems to be a SOTA technique.
+Hopefully tests from the flower dataset generalize to the face dataset.
+
 ****** TODO Finish performance evaluation
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code

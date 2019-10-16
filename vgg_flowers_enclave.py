@@ -72,8 +72,9 @@ train_ds = _input_fn(x_train, y_train)
 validation_ds = _input_fn(x_test, y_test)
 
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
+HIDDEN_NEURONS = 4096
 
-model_file = 'models/vgg_flowers_enclave_small.h5'
+model_file = 'models/vgg_flowers_enclave_extra_pooling.h5'
 
 if os.path.exists(model_file):
     print('Model found, loading from %s' % model_file)
@@ -95,12 +96,15 @@ else:
                                               weights='imagenet')
     VGG16_MODEL.trainable = False
     enclave = Enclave()
-    enclave.add(tf.keras.layers.Dense(2048, name='fc1', activation='relu'))
-    enclave.add(tf.keras.layers.Dense(2048, name='fc2', activation='relu'))
+    enclave.add(tf.keras.layers.Dense(
+        HIDDEN_NEURONS, name='fc1', activation='relu'))
+    enclave.add(tf.keras.layers.Dense(
+        HIDDEN_NEURONS, name='fc2', activation='relu'))
     enclave.add(tf.keras.layers.Dense(len(label_key),
                                       name='output', activation='softmax'))
     model = tf.keras.Sequential([
         VGG16_MODEL,
+        tf.keras.layers.MaxPooling2D(7),
         tf.keras.layers.Flatten(),
         enclave
     ])
@@ -114,12 +118,12 @@ else:
                         validation_data=validation_ds)
     model.save(model_file)
 
-response = input("Would you like to measure prediction time? [y/N]")
-if response == 'y':
-    validation_steps = 1
-    time_before = time.process_time()
-    model.predict_generator(validation_ds, steps=validation_steps)
-    time_after = time.process_time()
+# response = input("Would you like to measure prediction time? [y/N]")
+# if response == 'y':
+#     validation_steps = 1
+#     time_before = time.process_time()
+#     model.predict_generator(validation_ds, steps=validation_steps)
+#     time_after = time.process_time()
 
-    print("Prediction on %d samples took %s seconds" %
-          (validation_steps*BATCH_SIZE, time_after - time_before))
+#     print("Prediction on %d samples took %s seconds" %
+#           (validation_steps*BATCH_SIZE, time_after - time_before))
