@@ -208,6 +208,36 @@ We should measure:
 - time for a batch predict, so we have a better understanding of how the enclave performs over larger datasets
 - check if the entire model fits in the 128MB that we have
 
+****** DONE Convert trained VGG flowers model to enclave                :sgx:
+       CLOSED: [2019-10-16 Wed 15:30] SCHEDULED: <2019-10-16 Wed>
+[2019-10-15 Tue 15:35]
+The original model with two layers of 4096 neurons is too large to reasonably convert using my current toolchain.
+They are also too large to fit in the enclave without paging.
+I reduced the number of neurons in these layers to 2048 and requeued the training, it's currently enqueued.
+
+[2019-10-15 Tue 17:14]
+I'm currently running into the problem that the weight matrices are just too large.
+I split the first weight matrix into its own file, and tried to compile only that, but the compilation took up all 16GB of RAM available on my machine.
+The next step would be to look into building ELF files by hand, or simply switching to a more powerful machine.
+
+[2019-10-16 Wed 09:31]
+I'm currently looking into what the problem with the state is.
+My intuition says that it's even before the actual compilation.
+To verify this, I'm using clang with the ~-emit-ast~ option.
+
+If this goes through, then it could be the constant table that's being built during compilation.
+I might be able to turn this off during compilation, but I'm not sure.
+
+[2019-10-16 Wed 15:28]
+I changed the output so it generates binary files containing the weight matrices.
+The code now compiles without issues.
+However, it's still too large for the enclave
+
+****** TODO Resolve the problem of too large networks
+The network as it is doesn't fit in the enclave.
+I should first look at the ~GlobalAveragingLayer~ (or similar) in TF.
+This might give us the much needed size reduction.
+
 ****** TODO Finish performance evaluation
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code

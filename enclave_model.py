@@ -2,6 +2,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Layer
 import tensorflow as tf
 from format_strings import *
+import numpy as np
+
 
 class Enclave(Sequential):
     def __init__(self, layers=None, name='Enclave'):
@@ -22,21 +24,33 @@ class Enclave(Sequential):
             if len(parameters) > 0:
                 w = parameters[0]
 
-                lhs_string = "float w%d[]" % (i)
+                lhs_string = "float *w%d" % (i)
                 header_file.write("extern " + lhs_string + ";\n")
                 header_file.write("extern int w%d_r;\n" % i)
                 header_file.write("extern int w%d_c;\n\n" % i)
 
-                cpp_file.write(Enclave.dump_matrix(w, lhs_string))
+                with open('w%d.bin' % i, 'wb+') as f:
+                    f.write(w.astype(np.float32).tobytes())
+
+                cpp_file.write(
+                    "extern const char _binary_w%d_bin_start;\n" % i)
+                cpp_file.write(
+                    "const float *w%d = (const float*) &_binary_w%d_bin_start;\n" % (i, i))
                 cpp_file.write("int w%d_r = %d;\n" % (i, w.shape[0]))
                 cpp_file.write("int w%d_c = %d;\n\n" % (i, w.shape[1]))
             if len(parameters) > 1:
                 b = parameters[1]
-                lhs_string = "float b%d[]" % (i)
+                lhs_string = "float *b%d" % (i)
                 header_file.write("extern " + lhs_string + ";\n")
                 header_file.write("extern int b%d_c;\n\n" % i)
 
-                cpp_file.write(Enclave.dump_matrix(b, lhs_string))
+                with open('b%d.bin' % i, 'wb+') as bf:
+                    bf.write(b.astype(np.float32).tobytes())
+
+                cpp_file.write(
+                    "extern const char _binary_b%d_bin_start;\n" % i)
+                cpp_file.write(
+                    "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                 cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
 
         header_file.write("#endif\n")

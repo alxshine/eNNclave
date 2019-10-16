@@ -73,7 +73,7 @@ validation_ds = _input_fn(x_test, y_test)
 
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 
-model_file = 'models/vgg_flowers_enclave.h5'
+model_file = 'models/vgg_flowers_enclave_small.h5'
 
 if os.path.exists(model_file):
     print('Model found, loading from %s' % model_file)
