@@ -114,10 +114,12 @@ else:
                         validation_data=validation_ds)
     model.save(model_file)
 
-validation_steps = 1
-time_before = time.process_time()
-model.predict_generator(validation_ds, steps=validation_steps)
-time_after = time.process_time()
+response = input("Would you like to measure prediction time? [y/N]")
+if response == 'y':
+    validation_steps = 1
+    time_before = time.process_time()
+    model.predict_generator(validation_ds, steps=validation_steps)
+    time_after = time.process_time()
 
-print("Prediction on %d samples took %s seconds" %
-      (validation_steps*BATCH_SIZE, time_after - time_before))
+    print("Prediction on %d samples took %s seconds" %
+          (validation_steps*BATCH_SIZE, time_after - time_before))
