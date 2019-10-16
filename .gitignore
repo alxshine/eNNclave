@@ -14,4 +14,3 @@ sbatch_launch.sh
 **/state.hpp
 **/dense.cpp
 **/*.bin
-**/state.hpp
