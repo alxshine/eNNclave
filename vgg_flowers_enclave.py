@@ -1,80 +1,28 @@
-import pathlib
-import random
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from enclave_model import Enclave
-import time
+import numpy as np
 import os
 
 tf.compat.v1.enable_eager_execution()
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-data_dir = tf.keras.utils.get_file(
-    'flower_photos', 'https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz', untar=True)
-data_dir = pathlib.Path(data_dir)
-
-label_names = {'daisy': 0, 'dandelion': 1,
-               'roses': 2, 'sunflowers': 3, 'tulips': 4}
-label_key = ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
-
-all_images = list(data_dir.glob('*/*'))
-all_images = [str(path) for path in all_images]
-random.shuffle(all_images)
-
-all_labels = [label_names[pathlib.Path(path).parent.name]
-              for path in all_images]
-
-data_size = len(all_images)
-
-train_test_split = (int)(data_size*0.2)
-
-x_train = all_images[train_test_split:]
-x_test = all_images[:train_test_split]
-
-y_train = all_labels[train_test_split:]
-y_test = all_labels[:train_test_split]
+data_dir = 'data/flowers/processed'
+x_train = np.load(os.path.join(data_dir, 'x_train.npy'))
+y_train = np.load(os.path.join(data_dir, 'y_train.npy'))
+x_test = np.load(os.path.join(data_dir, 'x_test.npy'))
+y_test = np.load(os.path.join(data_dir, 'y_test.npy'))
 
 IMG_SIZE = 224
 
 BATCH_SIZE = 32
 
 
-def _parse_data(x, y):
-    return convert_image(x), y
-
-
-def convert_image(x):
-    image = tf.compat.v1.read_file(x)
-    image = tf.image.decode_jpeg(image, channels=3)
-    image = tf.cast(image, tf.float32)
-    image = (image/127.5) - 1
-    image = tf.image.resize(image, (IMG_SIZE, IMG_SIZE))
-
-    return image
-
-
-def _input_fn(x, y):
-    ds = tf.data.Dataset.from_tensor_slices((x, y))
-    ds = ds.map(_parse_data)
-    ds = ds.shuffle(buffer_size=data_size)
-
-    ds = ds.repeat()
-
-    ds = ds.batch(BATCH_SIZE)
-
-    ds = ds.prefetch(buffer_size=AUTOTUNE)
-
-    return ds
-
-
-train_ds = _input_fn(x_train, y_train)
-validation_ds = _input_fn(x_test, y_test)
-
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 HIDDEN_NEURONS = 4096
 
-model_file = 'models/vgg_flowers_enclave_extra_pooling.h5'
+model_file = 'models/vgg_flowers_new.h5'
 
 if os.path.exists(model_file):
     print('Model found, loading from %s' % model_file)
@@ -100,7 +48,7 @@ else:
         HIDDEN_NEURONS, name='fc1', activation='relu'))
     enclave.add(tf.keras.layers.Dense(
         HIDDEN_NEURONS, name='fc2', activation='relu'))
-    enclave.add(tf.keras.layers.Dense(len(label_key),
+    enclave.add(tf.keras.layers.Dense(y_train.max(),
                                       name='output', activation='softmax'))
     model = tf.keras.Sequential([
         VGG16_MODEL,
@@ -111,11 +59,12 @@ else:
     model.compile(optimizer='adam',
                   loss=tf.keras.losses.sparse_categorical_crossentropy,
                   metrics=["accuracy"])
-    history = model.fit(train_ds,
+    history = model.fit(x=x_train,
+                        y=y_train,
                         epochs=100,
                         steps_per_epoch=2,
                         validation_steps=2,
-                        validation_data=validation_ds)
+                        validation_data=(x_test, y_test))
     model.save(model_file)
 
 # response = input("Would you like to measure prediction time? [y/N]")
