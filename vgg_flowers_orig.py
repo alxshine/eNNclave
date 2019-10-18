@@ -6,9 +6,10 @@ tf.compat.v1.enable_eager_execution()
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-data_dir = tf.keras.utils.get_file(
-    'flower_photos', 'https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz', untar=True)
-data_dir = pathlib.Path(data_dir)
+# data_dir = tf.keras.utils.get_file(
+    # 'flower_photos', 'https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz', untar=True)
+# data_dir = pathlib.Path(data_dir)
+data_dir = 'data/flowers/raw'
 
 label_names = {'daisy': 0, 'dandelion': 1,
                'roses': 2, 'sunflowers': 3, 'tulips': 4}
