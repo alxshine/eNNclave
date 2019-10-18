@@ -47,13 +47,13 @@ else:
                                               include_top=False,
                                               weights='imagenet')
     VGG16_MODEL.trainable = False
-    enclave = Enclave()
-    enclave.add(tf.keras.layers.Dense(
-        HIDDEN_NEURONS, name='fc1', activation='relu'))
-    enclave.add(tf.keras.layers.Dense(
-        HIDDEN_NEURONS, name='fc2', activation='relu'))
-    enclave.add(tf.keras.layers.Dense(y_train.max(),
-                                      name='output', activation='softmax'))
+    enclave = Enclave(layers=[
+        tf.keras.layers.Dense(
+            HIDDEN_NEURONS, name='fc1', activation='relu'),
+        tf.keras.layers.Dense(
+            HIDDEN_NEURONS, name='fc2', activation='relu'),
+        tf.keras.layers.Dense(y_train.shape[1],
+                              name='output', activation='softmax')])
     model = tf.keras.Sequential([
         VGG16_MODEL,
         tf.keras.layers.MaxPooling2D(7),
@@ -65,8 +65,8 @@ else:
                   metrics=["accuracy"])
     history = model.fit(train_dataset,
                         epochs=100,
-                        steps_per_epoch=2,
-                        validation_steps=2,
+                        steps_per_epoch=20,
+                        validation_steps=20,
                         validation_data=test_dataset)
     model.save(model_file)
 

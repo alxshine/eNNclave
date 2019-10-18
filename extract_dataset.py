@@ -55,7 +55,7 @@ if response == 'y':
     total_samples = sum(label_counts)
     input_shape = numpy_arrs[0].shape[1:]
     all_samples = np.empty((total_samples,) + input_shape)
-    all_labels = np.zeros((total_samples, len(all_files)))
+    all_labels = np.zeros((total_samples, len(numpy_files)))
 
     start = 0
     end = 0
@@ -76,7 +76,7 @@ if response == 'y':
         all_samples /= 255
 
     # shuffle samples and labels
-    print('Performing training/test split')
+    print('Shuffling and performing training/test split')
     shuffled_indices = np.random.permutation(total_samples)
     split_index = int(total_samples*TRAINING_RATIO)
 
