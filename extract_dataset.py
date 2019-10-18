@@ -55,7 +55,7 @@ if response == 'y':
     total_samples = sum(label_counts)
     input_shape = numpy_arrs[0].shape[1:]
     all_samples = np.empty((total_samples,) + input_shape)
-    all_labels = np.zeros((total_samples, len(numpy_files)))
+    all_labels = np.empty((total_samples))
 
     start = 0
     end = 0
@@ -66,7 +66,7 @@ if response == 'y':
     for a in numpy_arrs:
         end += a.shape[0]
         all_samples[start:end] = a
-        all_labels[start:end, label] = 1
+        all_labels[start:end] = label
         start += a.shape[0]
         label += 1
 

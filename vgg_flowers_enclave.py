@@ -1,6 +1,4 @@
 import tensorflow as tf
-from tensorflow.keras.models import load_model
-from enclave_model import Enclave
 import numpy as np
 import os
 
@@ -19,8 +17,13 @@ train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
 BATCH_SIZE = 32
-train_dataset = train_dataset.repeat().shuffle(100).batch(BATCH_SIZE)
-test_dataset = test_dataset.repeat().shuffle(100).batch(BATCH_SIZE)
+DATA_SIZE = x_train.shape[0] + x_test.shape[0]
+train_dataset = train_dataset.shuffle(buffer_size=DATA_SIZE)
+train_dataset = train_dataset.repeat().batch(
+    BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
+test_dataset = test_dataset.shuffle(buffer_size=DATA_SIZE)
+test_dataset = test_dataset.repeat().batch(
+    BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
 
 IMG_SIZE = 224
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
@@ -34,7 +37,7 @@ VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
 VGG16_MODEL.trainable = False
 global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
 prediction_layer = tf.keras.layers.Dense(
-    y_test.shape[1], activation='softmax')
+    5, activation='softmax')
 model = tf.keras.Sequential([
     VGG16_MODEL,
     global_average_layer,
@@ -42,7 +45,7 @@ model = tf.keras.Sequential([
 ])
 
 model.compile(optimizer='adam',
-              loss=tf.keras.losses.categorical_crossentropy,
+              loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
 history = model.fit(train_dataset,
                     epochs=100,
