@@ -64,8 +64,6 @@ def _input_fn(x, y):
 train_ds = _input_fn(x_train, y_train)
 validation_ds = _input_fn(x_test, y_test)
 
-breakpoint()
-
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 
 model_file = 'models/vgg_flowers_orig.h5'
