@@ -28,47 +28,28 @@ HIDDEN_NEURONS = 4096
 
 model_file = 'models/vgg_flowers_new.h5'
 
-if os.path.exists(model_file):
-    print('Model found, loading from %s' % model_file)
-    model = load_model(model_file, custom_objects={'Enclave': Enclave})
-    model.compile(optimizer='adam',
-                  loss=tf.keras.losses.sparse_categorical_crossentropy,
-                  metrics=["accuracy"])
+VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
+                                          include_top=False,
+                                          weights='imagenet')
+VGG16_MODEL.trainable = False
+global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
+prediction_layer = tf.keras.layers.Dense(
+    y_test.shape[1], activation='softmax')
+model = tf.keras.Sequential([
+    VGG16_MODEL,
+    global_average_layer,
+    prediction_layer
+])
 
-    response = input("Would you like to generate C code? [y/N]")
-    if response == 'y':
-        enclave = model.get_layer('Enclave')
-        print('generating state files')
-        enclave.generate_state()
-        print('generating dense function')
-        enclave.generate_dense()
-else:
-    VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
-                                              include_top=False,
-                                              weights='imagenet')
-    VGG16_MODEL.trainable = False
-    enclave = Enclave(layers=[
-        tf.keras.layers.Dense(
-            HIDDEN_NEURONS, name='fc1', activation='relu'),
-        tf.keras.layers.Dense(
-            HIDDEN_NEURONS, name='fc2', activation='relu'),
-        tf.keras.layers.Dense(y_train.shape[1],
-                              name='output', activation='softmax')])
-    model = tf.keras.Sequential([
-        VGG16_MODEL,
-        # tf.keras.layers.MaxPooling2D(7),
-        tf.keras.layers.Flatten(),
-        enclave
-    ])
-    model.compile(optimizer='adam',
-                  loss=tf.keras.losses.categorical_crossentropy,
-                  metrics=["accuracy"])
-    history = model.fit(train_dataset,
-                        epochs=100,
-                        steps_per_epoch=2,
-                        validation_steps=2,
-                        validation_data=test_dataset)
-    model.save(model_file)
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.categorical_crossentropy,
+              metrics=["accuracy"])
+history = model.fit(train_dataset,
+                    epochs=100,
+                    steps_per_epoch=2,
+                    validation_steps=2,
+                    validation_data=test_dataset)
+model.save(model_file)
 
 # response = input("Would you like to measure prediction time? [y/N]")
 # if response == 'y':
