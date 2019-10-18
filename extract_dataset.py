@@ -15,8 +15,8 @@ def extract_from_dir(dir_path):
         resized = img.resize(input_shape[:2])
         samples[i] = np.array(resized)
 
-        target_path = os.path.join(PROCESSED_DIR, entry.name)
-        np.save(target_path, samples)
+    target_path = os.path.join(PROCESSED_DIR, entry.name)
+    np.save(target_path, samples)
 
 
 def filter_func(x):
@@ -55,7 +55,7 @@ if response == 'y':
     total_samples = sum(label_counts)
     input_shape = numpy_arrs[0].shape[1:]
     all_samples = np.empty((total_samples,) + input_shape)
-    all_labels = np.empty((total_samples, 1))
+    all_labels = np.empty((total_samples, len(all_files)))
 
     start = 0
     end = 0
@@ -66,7 +66,7 @@ if response == 'y':
     for a in numpy_arrs:
         end += a.shape[0]
         all_samples[start:end] = a
-        all_labels[start:end] = label
+        all_labels[start:end, label] = 1
         start += a.shape[0]
         label += 1
 

@@ -11,14 +11,18 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 data_dir = 'data/flowers/processed'
 x_train = np.load(os.path.join(data_dir, 'x_train.npy'))
 y_train = np.load(os.path.join(data_dir, 'y_train.npy'))
+
 x_test = np.load(os.path.join(data_dir, 'x_test.npy'))
 y_test = np.load(os.path.join(data_dir, 'y_test.npy'))
 
-IMG_SIZE = 224
+train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
 BATCH_SIZE = 32
+train_dataset = train_dataset.batch(BATCH_SIZE)
+test_dataset = test_dataset.batch(BATCH_SIZE)
 
-
+IMG_SIZE = 224
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 HIDDEN_NEURONS = 4096
 
@@ -59,12 +63,11 @@ else:
     model.compile(optimizer='adam',
                   loss=tf.keras.losses.sparse_categorical_crossentropy,
                   metrics=["accuracy"])
-    history = model.fit(x=x_train,
-                        y=y_train,
+    history = model.fit(train_dataset,
                         epochs=100,
                         steps_per_epoch=2,
                         validation_steps=2,
-                        validation_data=(x_test, y_test))
+                        validation_data=test_dataset)
     model.save(model_file)
 
 # response = input("Would you like to measure prediction time? [y/N]")
