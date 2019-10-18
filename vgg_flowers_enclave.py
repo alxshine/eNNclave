@@ -56,7 +56,7 @@ else:
                               name='output', activation='softmax')])
     model = tf.keras.Sequential([
         VGG16_MODEL,
-        tf.keras.layers.MaxPooling2D(7),
+        # tf.keras.layers.MaxPooling2D(7),
         tf.keras.layers.Flatten(),
         enclave
     ])
