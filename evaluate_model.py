@@ -39,7 +39,7 @@ y_test = np.load(label_file)
 num_samples = args.num_samples
 start = np.random.randint(x_test.shape[0]-num_samples)
 test_samples = x_test[start:(start+num_samples)]
-test_labels = y_test[start:(start+num_samples)].flatten()
+test_labels = y_test[start:(start+num_samples)]
 
 print('Predicting on %d samples, starting from index %d' %
       (num_samples, start))
