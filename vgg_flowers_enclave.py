@@ -19,8 +19,8 @@ train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
 BATCH_SIZE = 32
-train_dataset = train_dataset.batch(BATCH_SIZE)
-test_dataset = test_dataset.batch(BATCH_SIZE)
+train_dataset = train_dataset.shuffle().batch(BATCH_SIZE)
+test_dataset = test_dataset.shuffle().batch(BATCH_SIZE)
 
 IMG_SIZE = 224
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
@@ -61,7 +61,7 @@ else:
         enclave
     ])
     model.compile(optimizer='adam',
-                  loss=tf.keras.losses.sparse_categorical_crossentropy,
+                  loss=tf.keras.losses.categorical_crossentropy,
                   metrics=["accuracy"])
     history = model.fit(train_dataset,
                         epochs=100,
