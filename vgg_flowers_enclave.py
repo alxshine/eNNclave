@@ -19,8 +19,8 @@ train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 
 BATCH_SIZE = 32
-train_dataset = train_dataset.shuffle().batch(BATCH_SIZE)
-test_dataset = test_dataset.shuffle().batch(BATCH_SIZE)
+train_dataset = train_dataset.shuffle(100).batch(BATCH_SIZE)
+test_dataset = test_dataset.shuffle(100).batch(BATCH_SIZE)
 
 IMG_SIZE = 224
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
@@ -66,7 +66,7 @@ else:
     history = model.fit(train_dataset,
                         epochs=100,
                         steps_per_epoch=20,
-                        validation_steps=20,
+                        validation_steps=2,
                         validation_data=test_dataset)
     model.save(model_file)
 
