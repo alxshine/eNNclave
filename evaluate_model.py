@@ -48,5 +48,8 @@ predictions = model.predict(test_samples)
 if len(predictions.shape) > 0:
     predictions = predictions.argmax(axis=1)
 
+if test_labels.shape[1] > 1:
+    test_labels = test_labels.argmax(axis=1)
+
 accuracy = np.equal(predictions, test_labels).sum()/num_samples
 print('Accuracy: %f' % accuracy)
