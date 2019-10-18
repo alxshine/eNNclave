@@ -1,7 +1,7 @@
 import pathlib
 import random
 import tensorflow as tf
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, Flatten
 
 tf.compat.v1.enable_eager_execution()
 
@@ -75,6 +75,7 @@ HIDDEN_NEURONS = 4096
 
 model = tf.keras.Sequential([
     VGG16_MODEL,
+    Flatten(),
     Dense(HIDDEN_NEURONS, activation='relu'),
     Dense(HIDDEN_NEURONS, activation='relu'),
     Dense(len(label_names), activation='softmax')
