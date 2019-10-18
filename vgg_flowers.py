@@ -1,20 +1,18 @@
 import pathlib
 import random
 import tensorflow as tf
+from tensorflow.keras.layers import Dense
 
 tf.compat.v1.enable_eager_execution()
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-# data_dir = tf.keras.utils.get_file(
-    # 'flower_photos', 'https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz', untar=True)
 data_dir = 'data/flowers/raw'
 data_dir = pathlib.Path(data_dir)
 
 label_names = {'daisy': 0, 'dandelion': 1,
                'roses': 2, 'sunflowers': 3, 'tulips': 4}
 label_key = ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
-
 all_images = list(data_dir.glob('*/*'))
 all_images = [str(path) for path in all_images]
 random.shuffle(all_images)
@@ -37,7 +35,7 @@ IMG_SIZE = 160
 BATCH_SIZE = 32
 
 
-def _parse_data(x, y):
+def preprocess_image(x, y):
     image = tf.compat.v1.read_file(x)
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.cast(image, tf.float32)
@@ -47,9 +45,9 @@ def _parse_data(x, y):
     return image, y
 
 
-def _input_fn(x, y):
+def generate_dataset(x, y):
     ds = tf.data.Dataset.from_tensor_slices((x, y))
-    ds = ds.map(_parse_data)
+    ds = ds.map(preprocess_image)
     ds = ds.shuffle(buffer_size=data_size)
 
     ds = ds.repeat()
@@ -61,8 +59,8 @@ def _input_fn(x, y):
     return ds
 
 
-train_ds = _input_fn(x_train, y_train)
-validation_ds = _input_fn(x_test, y_test)
+train_ds = generate_dataset(x_train, y_train)
+validation_ds = generate_dataset(x_test, y_test)
 
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 
@@ -72,20 +70,21 @@ VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
                                           include_top=False,
                                           weights='imagenet')
 VGG16_MODEL.trainable = False
-global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
-prediction_layer = tf.keras.layers.Dense(
-    len(label_names), activation='softmax')
+
+HIDDEN_NEURONS = 4096
+
 model = tf.keras.Sequential([
     VGG16_MODEL,
-    global_average_layer,
-    prediction_layer
+    Dense(HIDDEN_NEURONS, activation='relu'),
+    Dense(HIDDEN_NEURONS, activation='relu'),
+    Dense(len(label_names), activation='softmax')
 ])
 model.compile(optimizer='adam',
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
 history = model.fit(train_ds,
                     epochs=100,
-                    steps_per_epoch=2,
+                    steps_per_epoch=10,
                     validation_steps=2,
                     validation_data=validation_ds)
 model.save(model_file)
