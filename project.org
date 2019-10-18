@@ -208,6 +208,11 @@ We should measure:
 - time for a batch predict, so we have a better understanding of how the enclave performs over larger datasets
 - check if the entire model fits in the 128MB that we have
 
+[2019-10-18 Fri 23:10]
+This new approach to using TF dataset genartors requires some switchup to the method.
+I will change the evaluation script so it provides a method you can call, providing it the model and the generators.
+It will give me a fixed timing framework for the benchmarking project.
+
 ****** DONE Convert trained VGG flowers model to enclave                :sgx:
        CLOSED: [2019-10-16 Wed 15:30] SCHEDULED: <2019-10-16 Wed>
 [2019-10-15 Tue 15:35]
@@ -232,6 +237,12 @@ I might be able to turn this off during compilation, but I'm not sure.
 I changed the output so it generates binary files containing the weight matrices.
 The code now compiles without issues.
 However, it's still too large for the enclave
+
+****** TODO Train VGG flowers model
+This is a necessary first step before training the VGG face model
+
+****** TODO Train a smaller VGG face model with 10 classes
+This should make it reasonably close to the VGG flowers model, but still relevant enough for security so we can use it.
 
 ****** TODO Resolve the problem of too large networks
 The network as it is doesn't fit in the enclave.
