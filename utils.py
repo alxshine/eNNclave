@@ -11,13 +11,15 @@ def preprocess_image(x, y, img_size=224):
     return image, y
 
 
-def generate_dataset(x, y, batch_size=32, repeat=True):
+def generate_dataset(x, y, batch_size=32, repeat=True, shuffle=True):
     ds = tf.data.Dataset.from_tensor_slices((x, y))
     ds = ds.map(preprocess_image)
 
-    ds = ds.shuffle(buffer_size=len(x))
+    if shuffle:
+        ds = ds.shuffle(buffer_size=len(x))
     if repeat:
         ds = ds.repeat()
+
     ds = ds.batch(batch_size)
     ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
 

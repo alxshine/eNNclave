@@ -45,15 +45,14 @@ test_images = random.sample(all_images, num_samples)
 test_labels = [label_names[pathlib.Path(path).parent.name]
                for path in test_images]
 ds = utils.generate_dataset(
-    test_images, test_labels, repeat=False, batch_size=1)
+    test_images, test_labels, repeat=False, shuffle=False, batch_size=1)
 
 print('Predicting')
 predictions = model.predict_generator(ds, steps=num_samples)
 if len(predictions.shape) > 0:
     predictions = predictions.argmax(axis=1)
 
-# if y.shape[1] > 1:
-    # test_labels = test_labels.argmax(axis=1)
+correct_labels = [y.numpy()[0] for _,y in ds]
 
-accuracy = np.equal(predictions, test_labels).sum()/num_samples
+accuracy = np.equal(predictions, correct_labels).sum()/num_samples
 print('Accuracy: %f' % accuracy)
