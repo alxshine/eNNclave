@@ -1,7 +1,7 @@
 import pathlib
 import random
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Dense, Flatten, GlobalAveragePooling2D
 
 tf.compat.v1.enable_eager_execution()
 
@@ -75,7 +75,7 @@ HIDDEN_NEURONS = 4096
 
 model = tf.keras.Sequential([
     VGG16_MODEL,
-    Flatten(),
+    GlobalAveragePooling2D(),
     Dense(HIDDEN_NEURONS, activation='relu'),
     Dense(HIDDEN_NEURONS, activation='relu'),
     Dense(len(label_names), activation='softmax')
@@ -85,7 +85,7 @@ model.compile(optimizer='adam',
               metrics=["accuracy"])
 history = model.fit(train_ds,
                     epochs=100,
-                    steps_per_epoch=10,
+                    steps_per_epoch=2,
                     validation_steps=2,
                     validation_data=validation_ds)
 model.save(model_file)
