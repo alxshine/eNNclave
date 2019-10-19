@@ -32,7 +32,7 @@ x_test = all_images[:train_test_split]
 y_train = all_labels[train_test_split:]
 y_test = all_labels[:train_test_split]
 
-IMG_SIZE = 160
+IMG_SIZE = 224
 
 BATCH_SIZE = 32
 
