@@ -1,7 +1,9 @@
 import pathlib
 import random
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Flatten, GlobalAveragePooling2D
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+
+import utils
 
 tf.compat.v1.enable_eager_execution()
 
@@ -34,37 +36,12 @@ IMG_SIZE = 160
 
 BATCH_SIZE = 32
 
-
-def preprocess_image(x, y):
-    image = tf.compat.v1.read_file(x)
-    image = tf.image.decode_jpeg(image, channels=3)
-    image = tf.cast(image, tf.float32)
-    image = (image/127.5) - 1
-    image = tf.image.resize(image, (IMG_SIZE, IMG_SIZE))
-
-    return image, y
-
-
-def generate_dataset(x, y):
-    ds = tf.data.Dataset.from_tensor_slices((x, y))
-    ds = ds.map(preprocess_image)
-    ds = ds.shuffle(buffer_size=data_size)
-
-    ds = ds.repeat()
-
-    ds = ds.batch(BATCH_SIZE)
-
-    ds = ds.prefetch(buffer_size=AUTOTUNE)
-
-    return ds
-
-
-train_ds = generate_dataset(x_train, y_train)
-validation_ds = generate_dataset(x_test, y_test)
+train_ds = utils.generate_dataset(x_train, y_train)
+validation_ds = utils.generate_dataset(x_test, y_test)
 
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 
-model_file = 'models/vgg_flowers_orig.h5'
+model_file = 'models/vgg_flowers.h5'
 
 VGG16_MODEL = tf.keras.applications.VGG16(input_shape=IMG_SHAPE,
                                           include_top=False,
