@@ -4,7 +4,10 @@ from tensorflow.keras.models import load_model
 import numpy as np
 
 import argparse
-import os
+import pathlib
+import random
+
+import utils
 
 parser = argparse.ArgumentParser(
     description='Evaluate TF model on test data')
@@ -29,27 +32,28 @@ print('Loading model from %s' % model_file)
 model = load_model(model_file, custom_objects={
                    'Enclave': Enclave, 'EnclaveLayer': EnclaveLayer})
 
-sample_file = os.path.join(data_dir, 'x_test.npy')
-print('Loading samples from %s' % sample_file)
-x_test = np.load(sample_file)
-label_file = os.path.join(data_dir, 'y_test.npy')
-print('Loading labels from %s' % label_file)
-y_test = np.load(label_file)
-
+print('Loading samples from %s' % data_dir)
 num_samples = args.num_samples
-start = np.random.randint(x_test.shape[0]-num_samples)
-test_samples = x_test[start:(start+num_samples)]
-test_labels = y_test[start:(start+num_samples)]
 
-print('Predicting on %d samples, starting from index %d' %
-      (num_samples, start))
+label_names = {'daisy': 0, 'dandelion': 1,
+               'roses': 2, 'sunflowers': 3, 'tulips': 4}
+data_dir = pathlib.Path(data_dir)
+all_images = [str(path) for path in data_dir.glob('*/*')]
 
-predictions = model.predict(test_samples)
+print('Generating dataset of %d samples' % num_samples)
+test_images = random.sample(all_images, num_samples)
+test_labels = [label_names[pathlib.Path(path).parent.name]
+               for path in test_images]
+ds = utils.generate_dataset(
+    test_images, test_labels, repeat=False, batch_size=1)
+
+print('Predicting')
+predictions = model.predict_generator(ds, steps=num_samples)
 if len(predictions.shape) > 0:
     predictions = predictions.argmax(axis=1)
 
-if test_labels.shape[1] > 1:
-    test_labels = test_labels.argmax(axis=1)
+# if y.shape[1] > 1:
+    # test_labels = test_labels.argmax(axis=1)
 
 accuracy = np.equal(predictions, test_labels).sum()/num_samples
 print('Accuracy: %f' % accuracy)
