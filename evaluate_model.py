@@ -15,7 +15,7 @@ parser.add_argument(
     'model_file', help='the .h5 file where the TF model is stored')
 parser.add_argument(
     'data_dir',
-    help='the directory where the x_test.npy and y_test.npy are stored')
+    help='the directory where data is stored')
 parser.add_argument(
     '-n',
     dest='num_samples',
@@ -40,19 +40,20 @@ label_names = {'daisy': 0, 'dandelion': 1,
 data_dir = pathlib.Path(data_dir)
 all_images = [str(path) for path in data_dir.glob('*/*')]
 
-print('Generating dataset of %d samples' % num_samples)
+print('Generating evaluation dataset of %d samples' % num_samples)
 test_images = random.sample(all_images, num_samples)
 test_labels = [label_names[pathlib.Path(path).parent.name]
                for path in test_images]
 ds = utils.generate_dataset(
     test_images, test_labels, repeat=False, shuffle=False, batch_size=1)
 
+instances = [(x, y) for x, y in ds]
+xs, ys = zip(*instances)
+ys = np.array([y.numpy()[0] for y in ys])
+xs = np.array([x.numpy()[0] for x in xs])
+
 print('Predicting')
-predictions = model.predict_generator(ds, steps=num_samples)
-if len(predictions.shape) > 0:
-    predictions = predictions.argmax(axis=1)
-
-correct_labels = [y.numpy()[0] for _,y in ds]
-
-accuracy = np.equal(predictions, correct_labels).sum()/num_samples
-print('Accuracy: %f' % accuracy)
+predictions = model.predict(xs).argmax(axis=1)
+corrects = np.equal(predictions, ys).sum()
+print('Correct: %d/%d, accuracy: %f' %
+      (corrects, num_samples, corrects/num_samples))
