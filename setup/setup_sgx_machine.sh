@@ -35,7 +35,7 @@ cd $sdk_dir
 make sdk_install_pkg
 
 #install SGXSDK
-$sdk_dir/linux/installer/bin/sgx_linux_x64_sdk_2.6.100.51363.bin -prefix ${sgx_dir}
+$sdk_dir/linux/installer/bin/sgx_linux_x64_sdk_*.bin -prefix ${sgx_dir}
 echo "source ${sgx_dir}/sgxsdk/environment" >> ${HOME}/.bashrc
 source ${sgx_dir}/sgxsdk/environment
 
@@ -43,7 +43,7 @@ source ${sgx_dir}/sgxsdk/environment
 cd $sdk_dir
 make deb_pkg
 cd ${sdk_dir}/linux/installer/deb
-sudo dpkg -i ./libsgx-urts_2.6.100.51363-disco1_amd64.deb ./libsgx-enclave-common_2.6.100.51363-disco1_amd64.deb ./libsgx-enclave-common-dev_2.6.100.51363-disco1_amd64.deb
+sudo dpkg -i ./libsgx-urts_*.deb ./libsgx-enclave-common_*.deb ./libsgx-enclave-common-dev_*.deb
 
 echo ""
 echo ""
