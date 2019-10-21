@@ -9,7 +9,7 @@ tf.compat.v1.enable_eager_execution()
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-data_dir = 'data/flowers/raw'
+data_dir = 'data/flowers'
 data_dir = pathlib.Path(data_dir)
 
 label_names = {'daisy': 0, 'dandelion': 1,
