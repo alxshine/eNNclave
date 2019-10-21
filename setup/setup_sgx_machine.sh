@@ -33,7 +33,6 @@ git clone $sdk_git $sdk_dir
 cd $sdk_dir
 ./download_prebuilt.sh
 make sdk_install_pkg
-make deb_pkg
 
 #install SGXSDK
 $sdk_dir/linux/installer/bin/sgx_linux_x64_sdk_2.6.100.51363.bin -prefix ${sgx_dir}
@@ -41,6 +40,8 @@ echo "source ${sgx_dir}/sgxsdk/environment" >> ${HOME}/.bashrc
 source ${sgx_dir}/sgxsdk/environment
 
 #install PSW
+cd $sdk_dir
+make deb_pkg
 cd ${sdk_dir}/linux/installer/deb
 sudo dpkg -i ./libsgx-urts_2.6.100.51363-disco1_amd64.deb ./libsgx-enclave-common_2.6.100.51363-disco1_amd64.deb ./libsgx-enclave-common-dev_2.6.100.51363-disco1_amd64.deb
 
