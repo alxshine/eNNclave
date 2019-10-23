@@ -306,7 +306,7 @@ That new layer would then either call the Enclave or native C code.
 [2019-10-01 Tue 09:59]
 This is done by creating a custom Layer that builds a ~tf.py_function~, which calls the python function calling my C interop code.
 
-**** TODO Test on actual hardware [7/14]                                :sgx:
+**** TODO Test on actual hardware [9/14]                                :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
@@ -346,8 +346,8 @@ The tensorflow_datasets library is a bit weird to use, so for now I'm sticking t
 Added evaluation scripts for both versions of vgg_flowers.
 Now only the timing needs to be set up.
 
-***** TODO Think about good ways to measure inference time
-      SCHEDULED: <2019-10-28 Mon>
+***** DONE Think about good ways to measure inference time
+      CLOSED: [2019-10-23 Wed 17:11] SCHEDULED: <2019-10-28 Mon>
 We have one-time setups that take place, which need to be measured.
 There is also additional communication between the GPU and CPU that needs to take place.
 
@@ -364,7 +364,11 @@ It will give me a fixed timing framework for the benchmarking project.
 [2019-10-21 Mon 15:43]
 Dataset generators are done.
 
-Now it only needs me adding the timing code.
+***** TODO Add timing code to evaluation script
+      SCHEDULED: <2019-10-28 Mon>
+Probably just a simple timestamp before and after.
+It's probably best to use system time, as using only active CPU time would miss GPU time.
+
 ***** DONE Convert trained VGG flowers model to enclave
        CLOSED: [2019-10-16 Wed 15:30] SCHEDULED: <2019-10-16 Wed>
 [2019-10-15 Tue 15:35]
@@ -499,10 +503,15 @@ Hopefully tests from the flower dataset generalize to the face dataset.
 This does work well on the flowers dataset.
 More tests with the face dataset coming.
 
-***** TODO Get MS face dataset
+***** DONE Get MS face dataset
+      CLOSED: [2019-10-23 Wed 17:09]
 There is an academic torrent for the [[http://academictorrents.com/details/9e67eb7cc23c9417f39778a8e06cca5e26196a97][MS-Celeb-1M]] dataset.
 While this isn't VGG face it is a face recognition database by Microsoft, so benchmarking on it seems fine.
 We can use this in case the VGG face download doesn't work out fast enough.
+
+***** TODO Extract images from MS face dataset
+The images in the MS dataset are contained as base64 blobs (I think).
+Some assembly required...
 
 ******* DONE Get more disk space for the sgx machine
 	CLOSED: [2019-10-21 Mon 12:08] SCHEDULED: <2019-10-21 Mon>
@@ -529,11 +538,12 @@ This would be the best way IMO to use large datasets on the cluster.
 [2019-10-21 Mon 09:58]
 The resized dataset is not very large anymore, so this isn't really necessary at the moment
 
-***** TODO Finish performance evaluation
+***** TODO Measure performances for multiple network types
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code
 
 MNIST, one more type of data
+
 ******* DONE get VGG16 model
 	CLOSED: [2019-10-15 Tue 08:53]
 There is one included within ~keras.applications~.
