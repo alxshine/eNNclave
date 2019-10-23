@@ -306,7 +306,7 @@ That new layer would then either call the Enclave or native C code.
 [2019-10-01 Tue 09:59]
 This is done by creating a custom Layer that builds a ~tf.py_function~, which calls the python function calling my C interop code.
 
-**** TODO Test on actual hardware [6/14]                                :sgx:
+**** TODO Test on actual hardware [7/14]                                :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
@@ -347,7 +347,7 @@ Added evaluation scripts for both versions of vgg_flowers.
 Now only the timing needs to be set up.
 
 ***** TODO Think about good ways to measure inference time
-      SCHEDULED: <2019-10-22 Tue>
+      SCHEDULED: <2019-10-28 Mon>
 We have one-time setups that take place, which need to be measured.
 There is also additional communication between the GPU and CPU that needs to take place.
 
@@ -399,8 +399,8 @@ I have a trained model using a GlobalAveragePooling2D layer instead of flattenin
 This greatly reduces the number of trainable weights, which is good because I don't have enough data for the larger number anyway.
 For the much larger VGG face dataset this might be different.
 
-***** TODO Install CUDA and tf-gpu on SGX machine
-      SCHEDULED: <2019-10-22 Tue>
+***** DONE Install CUDA and tf-gpu on SGX machine
+      CLOSED: [2019-10-23 Wed 15:25] SCHEDULED: <2019-10-22 Tue>
 For a valid benchmark we need to compare it to the GPU version of tensorflow.
 
 ***** TODO Train a smaller VGG face model with 10 classes
