@@ -57,6 +57,7 @@ model = tf.keras.Sequential([
     Dense(HIDDEN_NEURONS, activation='relu'),
     Dense(len(label_names), activation='softmax')
 ])
+breakpoint()
 model.compile(optimizer='adam',
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])

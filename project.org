@@ -634,30 +634,55 @@ This needs to be in the final paper.
 ****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
 Or talk to DPS groups
 
-**** DONE [#A] Read related work [3/5]                                  :sgx:
+**** DONE [#A] Read related work [4/6]                                  :sgx:
      CLOSED: [2019-10-21 Mon 10:08]
     [2019-10-03 Thu 10:15]
 
 ***** DONE Privacy for ML:
       CLOSED: [2019-10-08 Tue 16:05]
-One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]] and the other is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
+One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]], which provides a way to perform SGD distributed over multiple nodes.
+By not sending all state updates to the state server the participating parties retain privacy of their dataset.
+
+The other Shokri paper is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
+However, in my opininion this doesn't have too much to do with our case.
+The case for k=1 label, however is weird.
+Just guessing gives the correct accuracy, but precision and recall are a bit weird.
+I should talk to Rainer about this
+
+****** TODO Talk to Rainer about the k=1 label case for set membership attacks
+       SCHEDULED: <2019-10-28 Mon>
 
 ***** DONE Security in Enclave:                                         :sgx:
       CLOSED: [2019-10-21 Mon 10:07]
-[[file+sys:related_work/kaptchuk2019state.pdf][This paper]] uses ledgers to add state to the enclave, which guarantees that every state is only presented to it ones.
+[[file+sys:related_work/kaptchuk2019state.pdf][This paper]] by Kaptchuk et al. uses ledgers to add state to the enclave, which guarantees that every state is only presented to it once.
+
+We could use this mechanism to implement rate limiting on our models.
+This would mean they aren't truly offline anymore, but I guess that's the security/usability tradeoff we have to face.
 
 ***** DONE NNs in TEEs
       CLOSED: [2019-10-15 Tue 09:51] SCHEDULED: <2019-10-15 Tue 12:00>
-Dan Boneh released [[file:related_work/Tramer2019_TEE_DeepNetworkOutsourcing_ICLR.pdf][this paper]], talking about something very similar to what we're doing.
+Dan Boneh released [[file:related_work/tramer19slalom.pdf][this paper]] with Florian Tramer, talking about something very similar to what we're doing.
+
 [2019-10-15 Tue 10:50]
 They do talk about something similar to what we're doing, but they're doing it very differently.
-Also they are trying to protect inputs from the model owner, not the model itself.
+Instead of running parts of the NN in the enclave, they run it on the GPU and verify its outputs.
+Also they apply some encryption mechanism to the input to keep it private from the model owner.
 
 The notion of verifying outputs that come from the GPU is very cool, and we should look into something similar for our project.
+Encrypting the input might also be a posibility for future work.
 
-***** TODO [#A] Model stealing
-      SCHEDULED: <2019-10-24 Thu>
-A good paper on model stealing seems to be [[file:related_work/tramer16stealing.pdf][this one]], which Daniel recommended to me.
+[2019-10-26 Sat 19:10]
+In 2016 Ohrimenko et al. released a paper on [[file:related_work/ohrimenko16enclave.pdf][training different ML flavors in the enclave]].
+Their focus is defending against power analysis attacks to keep the training data private from some third party datacenter.
+Not entirely related to our method.
+
+Also what they do requires the entire training process to happen in the enclave, which is a lot slower than training on GPUs, which we could do.
+
+***** DONE [#A] Model stealing
+      CLOSED: [2019-10-26 Sat 18:37] SCHEDULED: <2019-10-24 Thu>
+A good paper on model stealing seems to be [[file:related_work/tramer16stealing.pdf][this one]] by Tramer et al., which Daniel recommended to me.
+The query budget they set for their attack is ~100*k~, where ~k~ is the number of parameters.
+The dense part of our model has 18903.045 parameters, so that wouldn't be feasible.
 
 ***** TODO Accountability/Authentication for NNs
 [2019-10-26 Sat 17:58]
@@ -667,9 +692,14 @@ One could think of a use case where a model is trained, tested for differential 
 The legislator could then co-sign the code running in the enclave, like a certificate.
 Whoever runs the model then can provide proof that the model they are running is differentially private, if that model signs it's outputs.
 
-*** Future Work [0/1]
+*** Future Work [0/2]
 **** TODO Integrate with the framework API :sgx:
 Rainer said it would be nice to integrate the SGX with the tensorflow API (or pytorch, whatever)
+
+**** TODO Examine required query counts for transfer and full model stealing attacks
+Transfer attacks require much less precise replications of the target model.
+It would be interesting to see how the query numbers differ for actual model stealing and transfer attacks.
+
 ** Unforeseen events
 *** DONE Figure out how many bits the enclave uses for floats
     CLOSED: [2019-10-04 Fri 10:11]
