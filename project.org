@@ -331,6 +331,7 @@ Ideally more than two dense layers in the end.
 We can look at ImageNet structures, which should have more dense layers.
 
 ***** WATING Get VGG Face Dataset up and running
+      SCHEDULED: <2019-10-28 Mon>
 This is large enough to merit its own project, and it's currently underway
 
 ***** DONE Prepare evaluation using TF built-in datasets
@@ -347,7 +348,7 @@ Added evaluation scripts for both versions of vgg_flowers.
 Now only the timing needs to be set up.
 
 ***** DONE Think about good ways to measure inference time
-      CLOSED: [2019-10-23 Wed 17:11] SCHEDULED: <2019-10-28 Mon>
+      SCHEDULED: <2019-10-23 Wed>
 We have one-time setups that take place, which need to be measured.
 There is also additional communication between the GPU and CPU that needs to take place.
 
@@ -587,7 +588,8 @@ I could try and use only two temporary buffers, to reduce memory requirements.
 **** TODO Anwendungsfälle auflisten                                     :sgx:
     [2019-10-04 Fri 11:36]
 ***** Model stealing
-****** TODO Find some papers on model stealing :sgx:
+****** DONE Find some papers on model stealing                          :sgx:
+       CLOSED: [2019-10-23 Wed 17:20]
 
 ***** Offline ML-as-a-service <<Offline MLAAS>>
 Making content of ~dense()~ and network weights independent of launch code would allow MLAAS providers to sign an execution environment once, and then give signed and encrypted weights and architectures to their customers.
@@ -632,7 +634,7 @@ This needs to be in the final paper.
 ****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
 Or talk to DPS groups
 
-**** DONE [#A] Read related work [3/3]                                  :sgx:
+**** DONE [#A] Read related work [3/5]                                  :sgx:
      CLOSED: [2019-10-21 Mon 10:08]
     [2019-10-03 Thu 10:15]
 
@@ -652,6 +654,18 @@ They do talk about something similar to what we're doing, but they're doing it v
 Also they are trying to protect inputs from the model owner, not the model itself.
 
 The notion of verifying outputs that come from the GPU is very cool, and we should look into something similar for our project.
+
+***** TODO [#A] Model stealing
+      SCHEDULED: <2019-10-24 Thu>
+A good paper on model stealing seems to be [[file:related_work/tramer16stealing.pdf][this one]], which Daniel recommended to me.
+
+***** TODO Accountability/Authentication for NNs
+[2019-10-26 Sat 17:58]
+What I found is more about accountability for [[http://merrill.umd.edu/wp-content/uploads/2016/01/p56-diakopoulos.pdf][automatically generated textual reports]].
+A [[https://officialblogofunio.com/2019/04/29/a-short-introduction-to-accountability-in-machine-learning-algorithms-under-the-gdpr/%0A][blog post]] (that is heavily focused on law) talks about accountability of data processing under GDPR.
+One could think of a use case where a model is trained, tested for differential privacy and after passing that testing it is approved and signed.
+The legislator could then co-sign the code running in the enclave, like a certificate.
+Whoever runs the model then can provide proof that the model they are running is differentially private, if that model signs it's outputs.
 
 *** Future Work [0/1]
 **** TODO Integrate with the framework API :sgx:
