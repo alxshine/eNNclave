@@ -634,14 +634,16 @@ This needs to be in the final paper.
 ****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
 Or talk to DPS groups
 
-**** DONE [#A] Read related work [4/6]                                  :sgx:
+**** DONE [#A] Read related work [4/5]                                  :sgx:
      CLOSED: [2019-10-21 Mon 10:08]
     [2019-10-03 Thu 10:15]
 
-***** DONE Privacy for ML:
+***** DONE Data privacy:
       CLOSED: [2019-10-08 Tue 16:05]
 One is [[file:~/Projects/nn-sgx/related_work/shokri15privacy.pdf][on privacy preserving deep learning (leakage)]], which provides a way to perform SGD distributed over multiple nodes.
 By not sending all state updates to the state server the participating parties retain privacy of their dataset.
+This is cool in the sense that it solves a problem that we could also try and solve with our method (which would give us [[file:related_work/ohrimenko16enclave.pdf][the ohmirenko paper]] exactly).
+Other than that there's not too much in common.
 
 The other Shokri paper is [[file:~/Projects/nn-sgx/related_work/shokri17membership.pdf][on membership attacks]].
 However, in my opininion this doesn't have too much to do with our case.
@@ -652,7 +654,7 @@ I should talk to Rainer about this
 ****** TODO Talk to Rainer about the k=1 label case for set membership attacks
        SCHEDULED: <2019-10-28 Mon>
 
-***** DONE Security in Enclave:                                         :sgx:
+***** DONE Enclave Security                                             :sgx:
       CLOSED: [2019-10-21 Mon 10:07]
 [[file+sys:related_work/kaptchuk2019state.pdf][This paper]] by Kaptchuk et al. uses ledgers to add state to the enclave, which guarantees that every state is only presented to it once.
 
@@ -661,12 +663,12 @@ This would mean they aren't truly offline anymore, but I guess that's the securi
 
 ***** DONE NNs in TEEs
       CLOSED: [2019-10-15 Tue 09:51] SCHEDULED: <2019-10-15 Tue 12:00>
-Dan Boneh released [[file:related_work/tramer19slalom.pdf][this paper]] with Florian Tramer, talking about something very similar to what we're doing.
+Dan Boneh released [[file:related_work/tramer19slalom.pdf][SLALOM]] with Florian Tramer, talking about something very similar to what we're doing.
 
 [2019-10-15 Tue 10:50]
 They do talk about something similar to what we're doing, but they're doing it very differently.
-Instead of running parts of the NN in the enclave, they run it on the GPU and verify its outputs.
-Also they apply some encryption mechanism to the input to keep it private from the model owner.
+Instead of running parts of the NN in the enclave, they run it on the GPU and verify its outputs in the enclave.
+Also they apply some encryption mechanism to the input data to keep it private from the model owner.
 
 The notion of verifying outputs that come from the GPU is very cool, and we should look into something similar for our project.
 Encrypting the input might also be a posibility for future work.
