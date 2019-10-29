@@ -6,6 +6,7 @@ import numpy as np
 import argparse
 import pathlib
 import random
+from datetime import datetime
 
 import utils
 
@@ -53,7 +54,10 @@ ys = np.array([y.numpy()[0] for y in ys])
 xs = np.array([x.numpy()[0] for x in xs])
 
 print('Predicting')
+time_before = datetime.now()
 predictions = model.predict(xs).argmax(axis=1)
+time_after = datetime.now()
 corrects = np.equal(predictions, ys).sum()
-print('Correct: %d/%d, accuracy: %f' %
-      (corrects, num_samples, corrects/num_samples))
+delta = time_after - time_before
+print('Correct: %d/%d, accuracy: %f, prediction took %.3f seconds' %
+      (corrects, num_samples, corrects/num_samples, delta.total_seconds()))

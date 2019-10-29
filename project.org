@@ -306,7 +306,7 @@ That new layer would then either call the Enclave or native C code.
 [2019-10-01 Tue 09:59]
 This is done by creating a custom Layer that builds a ~tf.py_function~, which calls the python function calling my C interop code.
 
-**** TODO Test on actual hardware [9/14]                                :sgx:
+**** TODO Test on actual hardware [10/16]                               :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
@@ -331,8 +331,12 @@ Ideally more than two dense layers in the end.
 We can look at ImageNet structures, which should have more dense layers.
 
 ***** WATING Get VGG Face Dataset up and running
-      SCHEDULED: <2019-10-28 Mon>
+      SCHEDULED: <2019-11-04 Mon>
 This is large enough to merit its own project, and it's currently underway
+
+[2019-10-29 Tue 11:55]
+We are currently at 229 ... images out of over 2 6.. ..., so slightly under 10%.
+We're getting there.
 
 ***** DONE Prepare evaluation using TF built-in datasets
        CLOSED: [2019-10-15 Tue 11:54] SCHEDULED: <2019-10-15 Tue 12:00>
@@ -365,8 +369,8 @@ It will give me a fixed timing framework for the benchmarking project.
 [2019-10-21 Mon 15:43]
 Dataset generators are done.
 
-***** TODO Add timing code to evaluation script
-      SCHEDULED: <2019-10-28 Mon>
+***** DONE Add timing code to evaluation script
+      CLOSED: [2019-10-29 Tue 12:06] SCHEDULED: <2019-10-28 Mon>
 Probably just a simple timestamp before and after.
 It's probably best to use system time, as using only active CPU time would miss GPU time.
 
@@ -545,7 +549,7 @@ Test with enclave and with native C code
 
 MNIST, one more type of data
 
-******* DONE get VGG16 model
+****** DONE get VGG16 model
 	CLOSED: [2019-10-15 Tue 08:53]
 There is one included within ~keras.applications~.
 I think we should use it, with standard TF datasets.
@@ -554,6 +558,12 @@ I think we should use it, with standard TF datasets.
 We are probably using that network, with the pre-trained weights.
 However the end goal will be to evaluate it on the VGG face datset, when that is available to us.
 
+****** TODO Talk to Rainer about the reduced class subset of VGG face   :sgx:
+       SCHEDULED: <2019-10-29 Tue>
+      [2019-10-29 Tue 08:56]
+
+    We currently have 222 classes (221 of which should downloaded as much as possible)
+    This seems like a good starting point for a classifier
 ***** TODO Plan privacy evaluation
 more on this later
 
@@ -651,8 +661,8 @@ The case for k=1 label, however is weird.
 Just guessing gives the correct accuracy, but precision and recall are a bit weird.
 I should talk to Rainer about this
 
-****** TODO Talk to Rainer about the k=1 label case for set membership attacks
-       SCHEDULED: <2019-10-28 Mon>
+****** DONE Talk to Rainer about the k=1 label case for set membership attacks
+       CLOSED: [2019-10-29 Tue 08:55] SCHEDULED: <2019-10-28 Mon>
 
 ***** DONE Enclave Security                                             :sgx:
       CLOSED: [2019-10-21 Mon 10:07]
