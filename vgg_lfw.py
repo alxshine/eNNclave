@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
-import tensorflow_datasets as tfds
 import tensorflow as tf
 from tensorflow.keras.applications import VGG16
 
