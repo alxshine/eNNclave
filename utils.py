@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-def preprocess_image(x, y, img_size=224):
+def preprocess_flowers(x, y, img_size=224):
     image = tf.compat.v1.read_file(x)
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.cast(image, tf.float32)
@@ -11,9 +11,20 @@ def preprocess_image(x, y, img_size=224):
     return image, y
 
 
-def generate_dataset(x, y, batch_size=32, repeat=True, shuffle=True):
+def preprocess_lfw(x, y):
+    image = tf.io.read_file(x)
+    image = tf.image.decode_jpeg(image, channels=3)
+    image = tf.cast(image, tf.float32)
+    image = (image/127.5) - 1
+    image = tf.image.resize(image, (250, 250))
+
+    return image, y
+
+
+def generate_dataset(x, y, preprocess_function=preprocess_flowers,
+                     batch_size=32, repeat=True, shuffle=True):
     ds = tf.data.Dataset.from_tensor_slices((x, y))
-    ds = ds.map(preprocess_image)
+    ds = ds.map(preprocess_flowers)
 
     if shuffle:
         ds = ds.shuffle(buffer_size=len(x))
