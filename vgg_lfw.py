@@ -27,7 +27,7 @@ data_size = len(all_images)
 train_test_split = data_size - (int)(data_size*0.2)
 
 x_train = all_images[:train_test_split]
-x_test = all_images[train_test_split]
+x_test = all_images[train_test_split:]
 y_train = all_labels[:train_test_split]
 y_test = all_labels[train_test_split:]
 
@@ -43,7 +43,7 @@ IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 
 model_file = 'models/vgg_lfw.h5'
 
-VGG16_MODEL = VGG16(input_shape=(250, 250, 3),
+VGG16_MODEL = VGG16(input_shape=IMG_SHAPE,
                     include_top=False, weights='imagenet')
 VGG16_MODEL.trainable = False
 
@@ -54,14 +54,15 @@ model = tf.keras.Sequential([
     GlobalAveragePooling2D(),
     Dense(hidden_neurons, activation='relu'),
     Dense(hidden_neurons, activation='relu'),
-    Dense(10, activation='softmax')
+    Dense(len(labels), activation='softmax')
 ])
 model.compile(optimizer='adam',
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=['accuracy'])
+
 history = model.fit(train_ds,
                     epochs=100,
-                    steps_per_epoch=2,
+                    steps_per_epoch=40,
                     validation_steps=2,
                     validation_data=validation_ds)
 model.save(model_file)
