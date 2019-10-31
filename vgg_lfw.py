@@ -40,6 +40,12 @@ included_images = list(
 included_labels = list(
     filter(lambda l: l in included_classes,
            all_labels))
+# reformat labels to [0,NUM_CLASSES)
+new_class_mapping = {}
+for i, c in enumerate(included_classes):
+    new_class_mapping[c] = i
+included_labels = list(map(lambda l: new_class_mapping[l], included_labels))
+
 
 data_size = len(included_images)
 train_test_split = data_size - (int)(data_size*0.2)
