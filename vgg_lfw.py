@@ -3,6 +3,7 @@
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 import tensorflow as tf
 from tensorflow.keras.applications import VGG16
+import numpy as np
 
 import utils
 
@@ -21,15 +22,32 @@ with open(label_file_name, 'r') as label_file:
 all_paths = list(data_dir.glob('*/*'))
 random.shuffle(all_paths)
 all_images = [str(path) for path in all_paths]
-all_labels = [labels[path.parent.name] for path in all_paths]
+all_labels = np.array([labels[path.parent.name] for path in all_paths])
 
-data_size = len(all_images)
+# sort labels by their count
+uniques, counts = np.unique(all_labels, return_counts=True)
+# zip returns a generator, so it's only good for one use
+zipped = zip(uniques, counts)
+sorted_tuples = sorted(zipped, key=lambda x: x[1], reverse=True)
+
+# select subset of classes, ordered by number of samples
+NUM_CLASSES = 100
+included_classes, _ = set(zip(*sorted_tuples[:NUM_CLASSES]))
+included_images = list(
+    map(lambda t: t[1],
+        filter(lambda t: all_labels[t[0]] in included_classes,
+               enumerate(all_images))))
+included_labels = list(
+    filter(lambda l: l in included_classes,
+           all_labels))
+
+data_size = len(included_images)
 train_test_split = data_size - (int)(data_size*0.2)
 
-x_train = all_images[:train_test_split]
-x_test = all_images[train_test_split:]
-y_train = all_labels[:train_test_split]
-y_test = all_labels[train_test_split:]
+x_train = included_images[:train_test_split]
+x_test = included_images[train_test_split:]
+y_train = included_labels[:train_test_split]
+y_test = included_labels[train_test_split:]
 
 IMG_SIZE = 250
 BATCH_SIZE = 32
@@ -54,7 +72,7 @@ model = tf.keras.Sequential([
     GlobalAveragePooling2D(),
     Dense(hidden_neurons, activation='relu'),
     Dense(hidden_neurons, activation='relu'),
-    Dense(len(labels), activation='softmax')
+    Dense(NUM_CLASSES, activation='softmax')
 ])
 model.compile(optimizer='adam',
               loss=tf.keras.losses.sparse_categorical_crossentropy,
