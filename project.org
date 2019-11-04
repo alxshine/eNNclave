@@ -156,7 +156,7 @@ So yeah, this one's on me.
 [2019-09-23 Mon 14:40]
 Added some error handling to pymatutil.
 
-*** Improvements for paper [4/9]
+*** Improvements for paper [3/9]
 **** DONE Find out how model architectures are stored
      CLOSED: [2019-09-25 Wed 10:49]
 We want to be able to specify a cut similar to current SOTA architecture visualization tools.
@@ -582,11 +582,12 @@ We also need a second dataset, maybe something on malware
 ****** TODO Test different vgg_lfw variants                             :sgx:
       [2019-11-04 Mon 08:35]
 
-    The baseline model reaches 61% validation accuracy after 100 epochs.
-    See if this can be improved via:
-    - increasing training epochs
-    - dense on flattened
-    - globalmean with more dense neurons
+The baseline model reaches 61% validation accuracy after 100 epochs.
+See if this can be improved via:
+- increasing training epochs: 62%
+- dense on flattened: 63%
+- globalmean with more dense neurons: 62%
+- more dense neurons on flattened: 
 ***** TODO Measure performances for multiple network types
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code
@@ -690,8 +691,7 @@ This needs to be in the final paper.
 ****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
 Or talk to DPS groups
 
-**** DONE [#A] Read related work [4/7]                                  :sgx:
-     CLOSED: [2019-10-21 Mon 10:08]
+**** TODO [#A] Read related work [4/7]                                  :sgx:
     [2019-10-03 Thu 10:15]
 
 ***** DONE Data privacy:
@@ -751,10 +751,13 @@ The legislator could then co-sign the code running in the enclave, like a certif
 Whoever runs the model then can provide proof that the model they are running is differentially private, if that model signs it's outputs.
 
 ***** TODO Layer freezing in transfer learning
-      SCHEDULED: <2019-10-31 Thu>
+      SCHEDULED: <2019-11-04 Mon 18:00>
 Cecilia pointed me towards transfer learning.
 There should be some papers on this especially in the context of layer freezing.
 I should talk to her next week
+
+[2019-11-04 Mon 09:24]
+Cecialia sent me an email with resources, I should check them out.
 
 ****** TODO Talk to Cecilia about Layer Freezing
 After me reading some literature we might be able to have a good discussion.
