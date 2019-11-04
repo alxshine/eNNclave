@@ -2,7 +2,7 @@
 
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 import tensorflow as tf
-from tensorflow.keras.applications import VGG16
+from tensorflow.keras.applications import ResNet50
 import numpy as np
 from enclave_model import Enclave
 
@@ -66,11 +66,11 @@ validation_ds = utils.generate_dataset(
 
 IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
 
-model_file = 'models/vgg_lfw.h5'
+model_file = 'models/resnet_lfw.h5'
 
-VGG16_MODEL = VGG16(input_shape=IMG_SHAPE,
-                    include_top=False, weights='imagenet')
-VGG16_MODEL.trainable = False
+resnet = ResNet50(input_shape=IMG_SHAPE,
+                  include_top=False)
+resnet.trainable = False
 
 hidden_neurons = 4096
 steps_per_epoch = 40
@@ -151,7 +151,7 @@ dense = tf.keras.Sequential([
 
 # ----------- COMMON AGAIN -----------
 model = tf.keras.Sequential([
-    VGG16_MODEL,
+    resnet,
     dense
 ])
 model.compile(optimizer='adam',
