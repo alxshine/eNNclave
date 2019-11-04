@@ -89,7 +89,7 @@ num_epochs = 100
 #     enclave
 # ])
 
-# "longer" variant, with double the training epochs
+# "longer" variant, with double the training epochs, reaches 62%
 # num_epochs = 200
 # enclave = Enclave([
 #     Dense(hidden_neurons, activation='relu'),
@@ -101,7 +101,7 @@ num_epochs = 100
 #     enclave
 # ])
 
-# "flattened" variant, with less input reduction
+# "flattened" variant, with less input reduction, reaches 63%
 # enclave = Enclave([
 #     Dense(hidden_neurons, activation='relu'),
 #     Dense(hidden_neurons, activation='relu'),
@@ -112,7 +112,19 @@ num_epochs = 100
 #     enclave
 # ])
 
-# "larger" variant, with more dense neurons
+# "larger" variant, with more dense neurons, reaches 62%
+# hidden_neurons = 8192
+# enclave = Enclave([
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(NUM_CLASSES, activation='softmax')
+# ])
+# dense = tf.keras.Sequential([
+#     GlobalAveragePooling2D(),
+#     enclave
+# ])
+
+# large variant on flattened conv output
 hidden_neurons = 8192
 enclave = Enclave([
     Dense(hidden_neurons, activation='relu'),
@@ -120,7 +132,7 @@ enclave = Enclave([
     Dense(NUM_CLASSES, activation='softmax')
 ])
 dense = tf.keras.Sequential([
-    GlobalAveragePooling2D(),
+    tf.keras.layers.Flatten(),
     enclave
 ])
 
