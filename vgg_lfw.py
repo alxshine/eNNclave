@@ -4,6 +4,7 @@ from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 import tensorflow as tf
 from tensorflow.keras.applications import VGG16
 import numpy as np
+from enclave_model import Enclave
 
 import utils
 
@@ -72,21 +73,69 @@ VGG16_MODEL = VGG16(input_shape=IMG_SHAPE,
 VGG16_MODEL.trainable = False
 
 hidden_neurons = 4096
+steps_per_epoch = 40
+num_epochs = 100
 
-model = tf.keras.Sequential([
-    VGG16_MODEL,
-    GlobalAveragePooling2D(),
+# ----------- MODEL DEFINITIONS -----------
+
+# "baseline" variant, reaches 61%
+# enclave = Enclave([
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(NUM_CLASSES, activation='softmax')
+# ])
+# dense = tf.keras.Sequential([
+#     GlobalAveragePooling2D(),
+#     enclave
+# ])
+
+# "longer" variant, with double the training epochs
+# num_epochs = 200
+# enclave = Enclave([
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(NUM_CLASSES, activation='softmax')
+# ])
+# dense = tf.keras.Sequential([
+#     GlobalAveragePooling2D(),
+#     enclave
+# ])
+
+# "flattened" variant, with less input reduction
+# enclave = Enclave([
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(hidden_neurons, activation='relu'),
+#     Dense(NUM_CLASSES, activation='softmax')
+# ])
+# dense = tf.keras.Sequential([
+#     tf.keras.layers.Flatten(),
+#     enclave
+# ])
+
+# "larger" variant, with more dense neurons
+hidden_neurons = 8192
+enclave = Enclave([
     Dense(hidden_neurons, activation='relu'),
     Dense(hidden_neurons, activation='relu'),
     Dense(NUM_CLASSES, activation='softmax')
+])
+dense = tf.keras.Sequential([
+    GlobalAveragePooling2D(),
+    enclave
+])
+
+# ----------- COMMON AGAIN -----------
+model = tf.keras.Sequential([
+    VGG16_MODEL,
+    dense
 ])
 model.compile(optimizer='adam',
               loss=tf.keras.losses.sparse_categorical_crossentropy,
               metrics=['accuracy'])
 
 history = model.fit(train_ds,
-                    epochs=100,
-                    steps_per_epoch=40,
+                    epochs=num_epochs,
+                    steps_per_epoch=steps_per_epoch,
                     validation_steps=2,
                     validation_data=validation_ds)
 model.save(model_file)
