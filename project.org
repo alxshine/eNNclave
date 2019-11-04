@@ -306,7 +306,7 @@ That new layer would then either call the Enclave or native C code.
 [2019-10-01 Tue 09:59]
 This is done by creating a custom Layer that builds a ~tf.py_function~, which calls the python function calling my C interop code.
 
-**** TODO Test on actual hardware [12/19]                               :sgx:
+**** TODO Test on actual hardware [16/20]                               :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
@@ -415,10 +415,14 @@ For the much larger VGG face dataset this might be different.
       CLOSED: [2019-10-23 Wed 15:25] SCHEDULED: <2019-10-22 Tue>
 For a valid benchmark we need to compare it to the GPU version of tensorflow.
 
-***** TODO Train a smaller VGG face model with 10 classes
+***** CANCELED Train a smaller VGG face model with 10 classes
+      CLOSED: [2019-10-31 Thu 15:23]
 This should make it reasonably close to the VGG flowers model, but still relevant enough for security so we can use it.
 
-***** TODO Resolve the problem of too large networks
+[2019-10-31 Thu 15:23]
+The dataset has changed, see [[LFW][here]]
+***** DONE Resolve the problem of too large networks
+      CLOSED: [2019-10-31 Thu 15:25]
 The network as it is doesn't fit in the enclave.
 I should first look at the ~GlobalAveragingLayer~ (or similar) in TF.
 This might give us the much needed size reduction.
@@ -497,10 +501,6 @@ This might work, but it also reduces the number of neurons hidden from the netwo
 We can probably argue that the shape of the enclave network is irrelevant, only the number of hidden neurons is important.
 Then we can treat the shape of the additional dense layer as a "security parameter" (which it technically isn't but that's ok)
 
-******* CANCELED try an additional pooling layer
-	CLOSED: [2019-10-21 Mon 09:27]
-As a simple first step I will try adding an additional pooling layer before the dense part of the network.
-
 ******* DONE try an ~GlobalAveragePooling2D~ in vgg_flowers code
 	CLOSED: [2019-10-21 Mon 09:28]
 As a hopefully better measure I will try to add a global average pooling layer before the flatten.
@@ -517,7 +517,8 @@ There is an academic torrent for the [[http://academictorrents.com/details/9e67e
 While this isn't VGG face it is a face recognition database by Microsoft, so benchmarking on it seems fine.
 We can use this in case the VGG face download doesn't work out fast enough.
 
-***** TODO Extract images from MS face dataset
+***** CANCELED Extract images from MS face dataset
+      CLOSED: [2019-11-04 Mon 09:18]
 The images in the MS dataset are contained as base64 blobs (I think).
 Some assembly required...
 
@@ -546,6 +547,46 @@ This would be the best way IMO to use large datasets on the cluster.
 [2019-10-21 Mon 09:58]
 The resized dataset is not very large anymore, so this isn't really necessary at the moment
 
+***** DONE Talk to Rainer about the reduced class subset of VGG face    :sgx:
+       CLOSED: [2019-10-29 Tue 16:30] SCHEDULED: <2019-10-29 Tue>
+      [2019-10-29 Tue 08:56]
+
+    We currently have 222 classes (221 of which should downloaded as much as possible)
+    This seems like a good starting point for a classifier
+
+***** DONE [#A] Get ANY dataset working
+      CLOSED: [2019-10-30 Wed 17:08] SCHEDULED: <2019-10-30 Wed>
+[2019-10-29 Tue 17:32]
+[[https://megapixels.cc/datasets/msceleb/][This]] is a pretty damning report about the MS Face dataset.
+We could still use it, but we should be aware of the things happening around it.
+It also links to [[https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/][this workshop]], where ther is a download link for a reduced and cleaned up dataset extracted from it.
+
+[2019-10-29 Tue 17:52]
+The labeled faces in the wild dataset is contained in ~tensorflow_datasets~ and seems to work.
+There is a git repo [[https://github.com/davidsandberg/facenet][here]] which implements the model from [[https://arxiv.org/pdf/1503.03832.pdf][this paper]].
+However, the author of the repo doesn't seem to be affiliated with the authors of the paper.
+LFW in general at least seems like a promising direction.
+
+<<LFW>>
+[2019-10-30 Wed 17:08]
+I started training a classifier on LFW
+
+***** TODO Get a second media type (e.g. Malware dataset)
+We now have a working image dataset for benchmarking.
+Ideally we get a working second media type that also uses CNNs working, for better results.
+
+***** TODO Train classifier on Benchmark Data
+Currently one of the benchmark sets is the 100 most common classes in labelled faces in the wild (LFW).
+We also need a second dataset, maybe something on malware
+      
+****** TODO Test different vgg_lfw variants                             :sgx:
+      [2019-11-04 Mon 08:35]
+
+    The baseline model reaches 61% validation accuracy after 100 epochs.
+    See if this can be improved via:
+    - increasing training epochs
+    - dense on flattened
+    - globalmean with more dense neurons
 ***** TODO Measure performances for multiple network types
 enclave vs. GPU for multiple cutoff points
 Test with enclave and with native C code
@@ -560,28 +601,6 @@ I think we should use it, with standard TF datasets.
 [2019-10-15 Tue 08:53]
 We are probably using that network, with the pre-trained weights.
 However the end goal will be to evaluate it on the VGG face datset, when that is available to us.
-
-***** DONE Talk to Rainer about the reduced class subset of VGG face    :sgx:
-       CLOSED: [2019-10-29 Tue 16:30] SCHEDULED: <2019-10-29 Tue>
-      [2019-10-29 Tue 08:56]
-
-    We currently have 222 classes (221 of which should downloaded as much as possible)
-    This seems like a good starting point for a classifier
-
-***** TODO [#A] Get ANY dataset working
-      SCHEDULED: <2019-10-30 Wed>
-[2019-10-29 Tue 17:32]
-[[https://megapixels.cc/datasets/msceleb/][This]] is a pretty damning report about the MS Face dataset.
-We could still use it, but we should be aware of the things happening around it.
-It also links to [[https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/][this workshop]], where ther is a download link for a reduced and cleaned up dataset extracted from it.
-
-[2019-10-29 Tue 17:52]
-The labeled faces in the wild dataset is contained in ~tensorflow_datasets~ and seems to work.
-There is a git repo [[https://github.com/davidsandberg/facenet][here]] which implements the model from [[https://arxiv.org/pdf/1503.03832.pdf][this paper]].
-However, the author of the repo doesn't seem to be affiliated with the authors of the paper.
-LFW in general at least seems like a promising direction.
-
-***** TODO Train classifier on Benchmark Data
 
 ***** TODO Plan privacy evaluation
 more on this later
@@ -651,6 +670,14 @@ Other than that we still have the advantage of making an offline model as robust
 Find out if the leakage information is constrained to the dense layers.
 Figure -> dense weights before and after retraining
 
+[2019-10-31 Thu 15:29]
+I mean it's contained in the dense layers if you keep it there.
+What would be interesting is how much the convolutional layers change if you don't fix them.
+Here a delta per individual weight would be interesting.
+
+A comparison of accuracies on the same dataset with and without freezing the convolutional layers would also be beneficial.
+This relates to [[Layer freezing in transfer learning][transfer learning]].
+
 ****** TODO Run on Cecilias face classifier
 Retraining, then try and see where the differences are during retraining.
 Evaluate set membership.
@@ -663,7 +690,7 @@ This needs to be in the final paper.
 ****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
 Or talk to DPS groups
 
-**** DONE [#A] Read related work [4/5]                                  :sgx:
+**** DONE [#A] Read related work [4/7]                                  :sgx:
      CLOSED: [2019-10-21 Mon 10:08]
     [2019-10-03 Thu 10:15]
 
@@ -722,6 +749,15 @@ A [[https://officialblogofunio.com/2019/04/29/a-short-introduction-to-accountabi
 One could think of a use case where a model is trained, tested for differential privacy and after passing that testing it is approved and signed.
 The legislator could then co-sign the code running in the enclave, like a certificate.
 Whoever runs the model then can provide proof that the model they are running is differentially private, if that model signs it's outputs.
+
+***** TODO Layer freezing in transfer learning
+      SCHEDULED: <2019-10-31 Thu>
+Cecilia pointed me towards transfer learning.
+There should be some papers on this especially in the context of layer freezing.
+I should talk to her next week
+
+****** TODO Talk to Cecilia about Layer Freezing
+After me reading some literature we might be able to have a good discussion.
 
 *** Future Work [0/2]
 **** TODO Integrate with the framework API :sgx:
