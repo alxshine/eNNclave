@@ -306,7 +306,7 @@ That new layer would then either call the Enclave or native C code.
 [2019-10-01 Tue 09:59]
 This is done by creating a custom Layer that builds a ~tf.py_function~, which calls the python function calling my C interop code.
 
-**** TODO Test on actual hardware [16/20]                               :sgx:
+**** TODO Test on actual hardware [16/21]                               :sgx:
 We want to test this on some actual hardware.
 For a representative evaluation we should use one consumer grade, and one server grade CPU.
 According to [[https://software.intel.com/en-us/forums/intel-software-guard-extensions-intel-sgx/topic/606636][this forum answer]] Intel SGX was introduced with Skylake generation CPUs, so any 6xxx processor will be fine.
@@ -571,9 +571,23 @@ LFW in general at least seems like a promising direction.
 [2019-10-30 Wed 17:08]
 I started training a classifier on LFW
 
-***** TODO Get a second media type (e.g. Malware dataset)
+***** TODO Get NN above 80% on a 100 class image recognition task
+The images should be 224x224 (or larger), and the convolutional part should be based on VGG (or ResNet).
+I'm currently working the 15 to 115 most common classes in the LFW dataset, the model is still running.
+My best result to date is 65%.
+
+[2019-11-05 Tue 16:15]
+I just fixed a bug in the dataset generation that breaks everything.
+I'll let the currently running instance finish, but will schedule a new VGG and ResNet run.
+Hopefully there will be better results tomorrow.
+
+***** TODO Get Ember dataset working
 We now have a working image dataset for benchmarking.
 Ideally we get a working second media type that also uses CNNs working, for better results.
+
+[2019-11-05 Tue 16:01]
+I started on working with the Ember dataset.
+The features are extracted from the raw data, I just don't know that they mean yet...
 
 ***** TODO Train classifier on Benchmark Data
 Currently one of the benchmark sets is the 100 most common classes in labelled faces in the wild (LFW).
@@ -691,7 +705,7 @@ This needs to be in the final paper.
 ****** TODO Find some papers on load balancing for distributed heterogenous architectures :sgx:
 Or talk to DPS groups
 
-**** TODO [#A] Read related work [4/7]                                  :sgx:
+**** Read related work [5/6]                                  :sgx:
     [2019-10-03 Thu 10:15]
 
 ***** DONE Data privacy:
@@ -742,7 +756,7 @@ A good paper on model stealing seems to be [[file:related_work/tramer16stealing.
 The query budget they set for their attack is ~100*k~, where ~k~ is the number of parameters.
 The dense part of our model has 18903.045 parameters, so that wouldn't be feasible.
 
-***** TODO Accountability/Authentication for NNs
+***** TODO Find something on accountability for NNs
 [2019-10-26 Sat 17:58]
 What I found is more about accountability for [[http://merrill.umd.edu/wp-content/uploads/2016/01/p56-diakopoulos.pdf][automatically generated textual reports]].
 A [[https://officialblogofunio.com/2019/04/29/a-short-introduction-to-accountability-in-machine-learning-algorithms-under-the-gdpr/%0A][blog post]] (that is heavily focused on law) talks about accountability of data processing under GDPR.
@@ -750,8 +764,8 @@ One could think of a use case where a model is trained, tested for differential 
 The legislator could then co-sign the code running in the enclave, like a certificate.
 Whoever runs the model then can provide proof that the model they are running is differentially private, if that model signs it's outputs.
 
-***** TODO Layer freezing in transfer learning
-      SCHEDULED: <2019-11-04 Mon 18:00>
+***** DONE Layer freezing in transfer learning
+      CLOSED: [2019-11-04 Mon 18:01] SCHEDULED: <2019-11-04 Mon 18:00>
 Cecilia pointed me towards transfer learning.
 There should be some papers on this especially in the context of layer freezing.
 I should talk to her next week
