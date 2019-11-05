@@ -23,7 +23,6 @@ def build_lfw(num_classes):
 
     # select subset of classes, ordered by number of samples
     included_classes, _ = set(zip(*sorted_tuples[:num_classes]))
-    breakpoint()
     x = list(
         map(lambda t: t[1],
             filter(lambda t: all_labels[t[0]] in included_classes,
