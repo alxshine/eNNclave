@@ -2,7 +2,7 @@ import pathlib
 import numpy as np
 
 
-def build_lfw(num_classes):
+def build_lfw(num_classes, drop_max=15):
     data_dir = 'data/lfw'
     data_dir = pathlib.Path(data_dir)
 
@@ -22,21 +22,20 @@ def build_lfw(num_classes):
     sorted_tuples = sorted(zipped, key=lambda x: x[1], reverse=True)
 
     # select subset of classes, ordered by number of samples
-    included_classes, _ = set(zip(*sorted_tuples[:num_classes]))
-    x = list(
-        map(lambda t: t[1],
-            filter(lambda t: all_labels[t[0]] in included_classes,
-                   enumerate(all_images))))
-    y = list(
-        filter(lambda l: l in included_classes,
-               all_labels))
+    included_classes, _ = list(
+        zip(*sorted_tuples[drop_max:num_classes+drop_max]))
+    included_classes = set(included_classes)
+    included_instances = list(filter(
+        lambda t: all_labels[t[0]] in included_classes, enumerate(all_images)))
 
     # reformat labels to [0,num_classes)
     new_class_mapping = {}
     for i, c in enumerate(included_classes):
         new_class_mapping[c] = i
-    y = list(
-        map(lambda l: new_class_mapping[l], y))
+
+    x = list(map(lambda t: t[1], included_instances))
+    included_labels = list(map(lambda t: all_labels[t[0]], included_instances))
+    y = list(map(lambda x: new_class_mapping[x], included_labels))
 
     return x, y
 
