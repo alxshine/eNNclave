@@ -1,5 +1,6 @@
 import pathlib
 import numpy as np
+import random
 
 
 def build_lfw(num_classes, drop_max=15):
@@ -12,7 +13,8 @@ def build_lfw(num_classes, drop_max=15):
             labels[x.name] = i
 
     all_paths = list(data_dir.glob('*/*'))
-    all_images = [str(path) for path in all_paths]  # TODO: shuffle
+    random.shuffle(all_paths)
+    all_images = [str(path) for path in all_paths]
     all_labels = np.array([labels[path.parent.name] for path in all_paths])
 
     # sort labels by their count
@@ -49,7 +51,8 @@ def build_faces():
         if x.is_dir():
             labels[x.name] = i
 
-    all_paths = list(data_dir.glob('*/*'))  # TODO: shuffle
+    all_paths = list(data_dir.glob('*/*'))
+    random.shuffle(all_paths)
     x = [str(path) for path in all_paths]
     y = [str(path.parent.name) for path in all_paths]
     y = list(map(lambda s: labels[s], y))
