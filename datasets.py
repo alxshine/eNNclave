@@ -12,7 +12,7 @@ def build_lfw(num_classes):
             labels[x.name] = i
 
     all_paths = list(data_dir.glob('*/*'))
-    all_images = [str(path) for path in all_paths]
+    all_images = [str(path) for path in all_paths]  # TODO: shuffle
     all_labels = np.array([labels[path.parent.name] for path in all_paths])
 
     # sort labels by their count
@@ -37,5 +37,22 @@ def build_lfw(num_classes):
         new_class_mapping[c] = i
     y = list(
         map(lambda l: new_class_mapping[l], y))
+
+    return x, y
+
+
+def build_faces():
+    data_dir = 'data/vgg'
+    data_dir = pathlib.Path(data_dir)
+
+    labels = {}
+    for i, x in enumerate(data_dir.glob('*')):
+        if x.is_dir():
+            labels[x.name] = i
+
+    all_paths = list(data_dir.glob('*/*'))  # TODO: shuffle
+    x = [str(path) for path in all_paths]
+    y = [str(path.parent.name) for path in all_paths]
+    y = list(map(lambda s: labels[s], y))
 
     return x, y
