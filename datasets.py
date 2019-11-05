@@ -1,16 +1,15 @@
 import pathlib
-import os
-import json
 import numpy as np
 
 
 def build_lfw(num_classes):
     data_dir = 'data/lfw'
     data_dir = pathlib.Path(data_dir)
-    label_file_name = os.path.join(data_dir, 'labelings.json')
 
-    with open(label_file_name, 'r') as label_file:
-        labels = json.load(label_file)
+    labels = {}
+    for i, x in enumerate(data_dir.glob('*')):
+        if x.is_dir():
+            labels[x.name] = i
 
     all_paths = list(data_dir.glob('*/*'))
     all_images = [str(path) for path in all_paths]
