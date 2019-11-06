@@ -124,12 +124,13 @@ model.compile(optimizer='adam',
 history = model.fit(train_ds,
                     epochs=num_epochs,
                     steps_per_epoch=steps_per_epoch,
-                    validation_steps=2,
+                    validation_steps=steps_per_epoch,
                     validation_data=validation_ds)
-model.save(model_file)
 
-validation_steps = 20
+validation_steps = steps_per_epoch
 loss0, accuracy0 = model.evaluate(validation_ds, steps=validation_steps)
 
 print("loss: {:.2f}".format(loss0))
 print("accuracy: {:.2f}".format(accuracy0))
+print("\nSaving model at: {}".format(model_file))
+model.save(model_file)
