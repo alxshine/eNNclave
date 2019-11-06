@@ -581,6 +581,41 @@ I just fixed a bug in the dataset generation that breaks everything.
 I'll let the currently running instance finish, but will schedule a new VGG and ResNet run.
 Hopefully there will be better results tomorrow.
 
+****** VGG-LFW
+I pick the 100 most common classes, dropping the most common class.
+The most common class is dropped to somewhat reduce variation in the prior probabilities (the most common class has over 500 samples, the next has 100).
+
+******* "Baseline"
+The current baseline has 4096 hidden neurons, and is trained for 100 epochs.
+It reached 61% once, but I since then changed some dataset stuff, so I'm not sure if that is correct anymore.
+
+******** WATING Retrain baseline model
+	 SCHEDULED: <2019-11-06 Wed 15:00>
+I changed some dataset generation code, I should rerun the baseline to still have an accurate and current baseline.
+
+[2019-11-06 Wed 12:56]
+Just started, it's job 11908.
+
+******* Larger variants
+I tried increasing the number of hidden neurons and increasing the number of training epochs.
+Both variants slightly increased the performance (larger 62%, longer 62%, all combined 65%).
+However, that doesn't seem like the right thing to do, because my results already look like they're overfitting too much.
+
+******* Smaller variants
+I will also try running smaller variants, one with only 50 training epochs, and one with only 512 hidden neurons.
+We'll see how that goes.
+
+******** WATING Train 50 epoch model
+	 SCHEDULED: <2019-11-06 Wed 15:00>
+It's job 11909.
+
+******** TODO Train 510 neuron model
+	 SCHEDULED: <2019-11-06 Wed 15:00>
+It's job 11911.
+
+[2019-11-06 Wed 13:11]
+The third job that I schedule keeps on failing, I'll just have to wait until the 50 epoch or baseline model are done.
+
 ***** TODO Get Ember dataset working
 We now have a working image dataset for benchmarking.
 Ideally we get a working second media type that also uses CNNs working, for better results.
