@@ -605,16 +605,23 @@ However, that doesn't seem like the right thing to do, because my results alread
 I will also try running smaller variants, one with only 50 training epochs, and one with only 512 hidden neurons.
 We'll see how that goes.
 
-******** WATING Train 50 epoch model
-	 SCHEDULED: <2019-11-06 Wed 15:00>
+******** DONE Train 50 epoch model
+	 CLOSED: [2019-11-06 Wed 15:38] SCHEDULED: <2019-11-06 Wed 15:00>
 It's job 11909.
+This is the log output:
+#+INCLUDE: "cluster_outputs/50_epochs.log" 
 
-******** TODO Train 510 neuron model
+It reaches 58% accuracy for the test set, 94% for the training set.
+
+******** TODO Train 512 neuron model
 	 SCHEDULED: <2019-11-06 Wed 15:00>
 It's job 11911.
 
 [2019-11-06 Wed 13:11]
 The third job that I schedule keeps on failing, I'll just have to wait until the 50 epoch or baseline model are done.
+
+[2019-11-06 Wed 15:40]
+Just started it again, job 11917 on the cluster.
 
 ***** TODO Get Ember dataset working
 We now have a working image dataset for benchmarking.
