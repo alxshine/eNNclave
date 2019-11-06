@@ -12,7 +12,8 @@ NUM_CLASSES = 100
 x, y = datasets.build_lfw(num_classes=NUM_CLASSES, drop_max=1)
 
 data_size = len(x)
-train_test_split = data_size - (int)(data_size*0.2)
+training_split = 0.1
+train_test_split = data_size - (int)(data_size*training_split)
 
 x_train = x[:train_test_split]
 x_test = x[train_test_split:]
@@ -126,6 +127,13 @@ dense = tf.keras.Sequential([
 # ])
 
 # ----------- COMMON AGAIN -----------
+print('Hypeparameters:')
+print('num_epochs: {}'.format(num_epochs))
+print('hidden_neurons: {}'.format(hidden_neurons))
+print('training set size: {}'.format(len(y_train)))
+print('test set size: {}'.format(len(y_test)))
+print()
+
 model = tf.keras.Sequential([
     VGG16_MODEL,
     dense
