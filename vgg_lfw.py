@@ -12,7 +12,7 @@ NUM_CLASSES = 100
 x, y = datasets.build_lfw(num_classes=NUM_CLASSES, drop_max=1)
 
 data_size = len(x)
-training_split = 0.1
+training_split = 0.05
 train_test_split = data_size - (int)(data_size*training_split)
 
 x_train = x[:train_test_split]
