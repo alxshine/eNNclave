@@ -54,6 +54,7 @@ num_epochs = 100
 
 # "shorter" variant, with half the training epochs
 num_epochs = 50
+hidden_neurons = 512
 enclave = Enclave([
     layers.Dense(hidden_neurons, activation='relu'),
     layers.Dense(hidden_neurons, activation='relu'),
