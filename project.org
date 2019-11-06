@@ -609,7 +609,7 @@ We'll see how that goes.
 	 CLOSED: [2019-11-06 Wed 15:38] SCHEDULED: <2019-11-06 Wed 15:00>
 It's job 11909.
 This is the log output:
-#+INCLUDE: "cluster_outputs/50_epochs.log" 
+#+include: "cluster_outputs/50_epochs.log" src text
 
 It reaches 58% accuracy for the test set, 94% for the training set.
 

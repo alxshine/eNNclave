@@ -1,19 +1,19 @@
 
 # Table of Contents
 
-1.  [NN SGX](#org5a1ef86)
-    1.  [People](#org223f68c)
-    2.  [Project Outline](#orgc71a84d)
-        1.  [First prototype <code>[14/14]</code>](#org48a1cc5)
-        2.  [Improvements for paper <code>[3/9]</code>](#org1586543)
-        3.  [Future Work <code>[0/2]</code>](#org35b3189)
-    3.  [Unforeseen events](#orgde1aeb4)
-        1.  [Figure out how many bits the enclave uses for floats](#org52a121b)
-        2.  [Find out what is needed for the foreshadow mitigation](#org19d1ae5):sgx:
-        3.  [Test if our processors are vulnerable to foreshadow](#orgdef8a7a):sgx:
+1.  [NN SGX](#orgbb94a2a)
+    1.  [People](#orga4739c5)
+    2.  [Project Outline](#orgd397ea5)
+        1.  [First prototype <code>[14/14]</code>](#org48016d5)
+        2.  [Improvements for paper <code>[3/9]</code>](#org028f7c4)
+        3.  [Future Work <code>[0/2]</code>](#org9606181)
+    3.  [Unforeseen events](#orgb94c082)
+        1.  [Figure out how many bits the enclave uses for floats](#orgce9c5db)
+        2.  [Find out what is needed for the foreshadow mitigation](#org3ac2247):sgx:
+        3.  [Test if our processors are vulnerable to foreshadow](#org1905900):sgx:
 
 
-<a id="org5a1ef86"></a>
+<a id="orgbb94a2a"></a>
 
 # NN SGX
 
@@ -21,19 +21,19 @@ Running the dense part of CNNs inside the trusted enclave to reduce leakage and 
 We hope to make this as robust against model stealing as online oracles.
 
 
-<a id="org223f68c"></a>
+<a id="orga4739c5"></a>
 
 ## People
 
 RBO, CPA, ASC
 
 
-<a id="orgc71a84d"></a>
+<a id="orgd397ea5"></a>
 
 ## Project Outline
 
 
-<a id="org48a1cc5"></a>
+<a id="org48016d5"></a>
 
 ### First prototype <code>[14/14]</code>
 
@@ -146,7 +146,7 @@ RBO, CPA, ASC
     <span class="timestamp-wrapper"><span class="timestamp">[2019-09-18 Wed 17:10]</span></span>
     The numpy and C variants do give slightly different results than the pure pytorch variant (in the e-7 range).
     Jakob thinks this is more than just rounding errors, so I should check that out.
-    See [this TODO](#org72f3242)
+    See [this TODO](#orga6b8650)
 
 9.  DONE Combine C functions into one `dense` function
 
@@ -187,7 +187,7 @@ RBO, CPA, ASC
     Added some error handling to pymatutil.
 
 
-<a id="org1586543"></a>
+<a id="org028f7c4"></a>
 
 ### Improvements for paper <code>[3/9]</code>
 
@@ -203,7 +203,7 @@ RBO, CPA, ASC
         This means it is dependent on the containing folder structure, which might lead to some very weird errors.
         
         PyTorch has no innate visualization tool, it instead is directed more at a programmer's view of things, as it allows for debugging the actual code of the `forward` function.
-        What one can do is export the model to [ONNX](#orge5befee) format, and then visualize it using something like [VisualDL](https://github.com/PaddlePaddle/VisualDL).
+        What one can do is export the model to [ONNX](#org240de07) format, and then visualize it using something like [VisualDL](https://github.com/PaddlePaddle/VisualDL).
         
         For our separation we could create some macro, wrapper, whatever that is then easily plugged into the definition of `forward`.
     
@@ -217,7 +217,7 @@ RBO, CPA, ASC
         A link to this is [here](https://www.tensorflow.org/guide/graph_viz).
         I'm not sure how easy we can use Tensorboard for input, as Tensorflow in general is hard to edit.
     
-    3.  Open Neural Network Exchange - <a id="orge5befee"></a>
+    3.  Open Neural Network Exchange - <a id="org240de07"></a>
     
         [ONNX](https://github.com/onnx/onnx) is meant to be a framework independent way of specifying models, complete with data types and operators.
         There are ways to **export** to ONNX format from most common tools, but not many have a way of **importing**.
@@ -318,7 +318,7 @@ RBO, CPA, ASC
         
         3.  DONE Test calling C Code from a custom Keras layer
         
-            Does not make sense, see [this point](#org0ee6630), lazyness is super annoying.
+            Does not make sense, see [this point](#org1bca657), lazyness is super annoying.
             
             <span class="timestamp-wrapper"><span class="timestamp">[2019-09-27 Fri 09:56]</span></span>
             Actually, with TF as backend this still works (see [this code](python/tf_poc.py)).
@@ -462,7 +462,7 @@ RBO, CPA, ASC
         This should make it reasonably close to the VGG flowers model, but still relevant enough for security so we can use it.
         
         <span class="timestamp-wrapper"><span class="timestamp">[2019-10-31 Thu 15:23]</span></span>
-        The dataset has changed, see [here](#org6564f4a)
+        The dataset has changed, see [here](#org61d3572)
     
     12. DONE Resolve the problem of too large networks
     
@@ -551,7 +551,7 @@ RBO, CPA, ASC
         However, the author of the repo doesn't seem to be affiliated with the authors of the paper.
         LFW in general at least seems like a promising direction.
         
-        <a id="org6564f4a"></a>
+        <a id="org61d3572"></a>
         <span class="timestamp-wrapper"><span class="timestamp">[2019-10-30 Wed 17:08]</span></span>
         I started training a classifier on LFW
     
@@ -598,115 +598,116 @@ RBO, CPA, ASC
                 
                     It's job 11909.
                     This is the log output:
-                    Hypeparameters:
-                    num<sub>epochs</sub>: 50
-                    hidden<sub>neurons</sub>: 4096
-                    training set size: 2822
-                    test set size: 313
                     
-                    Epoch 1/50
-                    40/40 [==============================] - 144s 4s/step - loss: 4.5281 - acc: 0.0570 - val<sub>loss</sub>: 4.3582 - val<sub>acc</sub>: 0.0641
-                    Epoch 2/50
-                    40/40 [==============================] - 148s 4s/step - loss: 4.2580 - acc: 0.0859 - val<sub>loss</sub>: 4.1780 - val<sub>acc</sub>: 0.1070
-                    Epoch 3/50
-                    40/40 [==============================] - 149s 4s/step - loss: 4.0062 - acc: 0.1203 - val<sub>loss</sub>: 3.8714 - val<sub>acc</sub>: 0.0992
-                    Epoch 4/50
-                    40/40 [==============================] - 149s 4s/step - loss: 3.6143 - acc: 0.1773 - val<sub>loss</sub>: 3.4942 - val<sub>acc</sub>: 0.1609
-                    Epoch 5/50
-                    40/40 [==============================] - 150s 4s/step - loss: 3.2635 - acc: 0.2164 - val<sub>loss</sub>: 3.2345 - val<sub>acc</sub>: 0.2250
-                    Epoch 6/50
-                    40/40 [==============================] - 150s 4s/step - loss: 2.9261 - acc: 0.2773 - val<sub>loss</sub>: 2.8594 - val<sub>acc</sub>: 0.2711
-                    Epoch 7/50
-                    40/40 [==============================] - 150s 4s/step - loss: 2.6633 - acc: 0.3094 - val<sub>loss</sub>: 2.6242 - val<sub>acc</sub>: 0.3313
-                    Epoch 8/50
-                    40/40 [==============================] - 150s 4s/step - loss: 2.4841 - acc: 0.3539 - val<sub>loss</sub>: 2.6124 - val<sub>acc</sub>: 0.3320
-                    Epoch 9/50
-                    40/40 [==============================] - 151s 4s/step - loss: 2.3263 - acc: 0.3844 - val<sub>loss</sub>: 2.4848 - val<sub>acc</sub>: 0.3469
-                    Epoch 10/50
-                    40/40 [==============================] - 151s 4s/step - loss: 2.1146 - acc: 0.4156 - val<sub>loss</sub>: 2.3971 - val<sub>acc</sub>: 0.3602
-                    Epoch 11/50
-                    40/40 [==============================] - 150s 4s/step - loss: 2.0584 - acc: 0.4453 - val<sub>loss</sub>: 2.3637 - val<sub>acc</sub>: 0.3633
-                    Epoch 12/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.8657 - acc: 0.4766 - val<sub>loss</sub>: 2.2422 - val<sub>acc</sub>: 0.3562
-                    Epoch 13/50
-                    40/40 [==============================] - 151s 4s/step - loss: 1.8343 - acc: 0.4961 - val<sub>loss</sub>: 2.2244 - val<sub>acc</sub>: 0.4187
-                    Epoch 14/50
-                    40/40 [==============================] - 151s 4s/step - loss: 1.7056 - acc: 0.5188 - val<sub>loss</sub>: 2.0923 - val<sub>acc</sub>: 0.4570
-                    Epoch 15/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.6859 - acc: 0.5211 - val<sub>loss</sub>: 2.0829 - val<sub>acc</sub>: 0.4398
-                    Epoch 16/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.5415 - acc: 0.5594 - val<sub>loss</sub>: 2.1350 - val<sub>acc</sub>: 0.4437
-                    Epoch 17/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.4506 - acc: 0.5813 - val<sub>loss</sub>: 2.1626 - val<sub>acc</sub>: 0.4258
-                    Epoch 18/50
-                    40/40 [==============================] - 151s 4s/step - loss: 1.4247 - acc: 0.5961 - val<sub>loss</sub>: 2.1133 - val<sub>acc</sub>: 0.4453
-                    Epoch 19/50
-                    40/40 [==============================] - 151s 4s/step - loss: 1.3201 - acc: 0.6086 - val<sub>loss</sub>: 1.9491 - val<sub>acc</sub>: 0.4547
-                    Epoch 20/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.2787 - acc: 0.6336 - val<sub>loss</sub>: 1.8885 - val<sub>acc</sub>: 0.4844
-                    Epoch 21/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.1745 - acc: 0.6562 - val<sub>loss</sub>: 1.8885 - val<sub>acc</sub>: 0.4906
-                    Epoch 22/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.1080 - acc: 0.6695 - val<sub>loss</sub>: 2.1113 - val<sub>acc</sub>: 0.4289
-                    Epoch 23/50
-                    40/40 [==============================] - 150s 4s/step - loss: 1.0706 - acc: 0.6922 - val<sub>loss</sub>: 2.1356 - val<sub>acc</sub>: 0.4555
-                    Epoch 24/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.9893 - acc: 0.7039 - val<sub>loss</sub>: 1.8050 - val<sub>acc</sub>: 0.5078
-                    Epoch 25/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.9377 - acc: 0.7312 - val<sub>loss</sub>: 1.8422 - val<sub>acc</sub>: 0.5281
-                    Epoch 26/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.8181 - acc: 0.7578 - val<sub>loss</sub>: 1.8654 - val<sub>acc</sub>: 0.4914
-                    Epoch 27/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.8668 - acc: 0.7352 - val<sub>loss</sub>: 1.8883 - val<sub>acc</sub>: 0.4805
-                    Epoch 28/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.7349 - acc: 0.7820 - val<sub>loss</sub>: 1.8898 - val<sub>acc</sub>: 0.5492
-                    Epoch 29/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.7134 - acc: 0.7922 - val<sub>loss</sub>: 1.7778 - val<sub>acc</sub>: 0.5297
-                    Epoch 30/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.6433 - acc: 0.8062 - val<sub>loss</sub>: 1.8707 - val<sub>acc</sub>: 0.5250
-                    Epoch 31/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.6419 - acc: 0.8180 - val<sub>loss</sub>: 1.8195 - val<sub>acc</sub>: 0.5273
-                    Epoch 32/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.5811 - acc: 0.8273 - val<sub>loss</sub>: 1.7483 - val<sub>acc</sub>: 0.5508
-                    Epoch 33/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.6008 - acc: 0.8180 - val<sub>loss</sub>: 1.8984 - val<sub>acc</sub>: 0.5188
-                    Epoch 34/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.5169 - acc: 0.8484 - val<sub>loss</sub>: 2.0376 - val<sub>acc</sub>: 0.5078
-                    Epoch 35/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.5090 - acc: 0.8469 - val<sub>loss</sub>: 2.0583 - val<sub>acc</sub>: 0.5086
-                    Epoch 36/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.4752 - acc: 0.8578 - val<sub>loss</sub>: 2.1739 - val<sub>acc</sub>: 0.5148
-                    Epoch 37/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.4264 - acc: 0.8805 - val<sub>loss</sub>: 1.9400 - val<sub>acc</sub>: 0.5469
-                    Epoch 38/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.4108 - acc: 0.8836 - val<sub>loss</sub>: 1.8909 - val<sub>acc</sub>: 0.5414
-                    Epoch 39/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.3942 - acc: 0.8797 - val<sub>loss</sub>: 2.1462 - val<sub>acc</sub>: 0.5172
-                    Epoch 40/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.3634 - acc: 0.9000 - val<sub>loss</sub>: 1.8605 - val<sub>acc</sub>: 0.5367
-                    Epoch 41/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.3340 - acc: 0.9148 - val<sub>loss</sub>: 2.0350 - val<sub>acc</sub>: 0.5461
-                    Epoch 42/50
-                    40/40 [==============================] - 151s 4s/step - loss: 0.3156 - acc: 0.9187 - val<sub>loss</sub>: 2.1340 - val<sub>acc</sub>: 0.5320
-                    Epoch 43/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.3115 - acc: 0.9109 - val<sub>loss</sub>: 2.2825 - val<sub>acc</sub>: 0.5016
-                    Epoch 44/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.2939 - acc: 0.9219 - val<sub>loss</sub>: 1.8770 - val<sub>acc</sub>: 0.5539
-                    Epoch 45/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.2446 - acc: 0.9383 - val<sub>loss</sub>: 2.4037 - val<sub>acc</sub>: 0.5242
-                    Epoch 46/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.2757 - acc: 0.9211 - val<sub>loss</sub>: 2.1594 - val<sub>acc</sub>: 0.5500
-                    Epoch 47/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.2746 - acc: 0.9289 - val<sub>loss</sub>: 2.2189 - val<sub>acc</sub>: 0.5375
-                    Epoch 48/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.2381 - acc: 0.9266 - val<sub>loss</sub>: 2.0340 - val<sub>acc</sub>: 0.5664
-                    Epoch 49/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.2680 - acc: 0.9195 - val<sub>loss</sub>: 1.8832 - val<sub>acc</sub>: 0.5969
-                    Epoch 50/50
-                    40/40 [==============================] - 150s 4s/step - loss: 0.2057 - acc: 0.9469 - val<sub>loss</sub>: 2.0120 - val<sub>acc</sub>: 0.5773
-                    40/40 [==============================] - 74s 2s/step - loss: 1.9711 - acc: 0.5797
-                    loss: 1.97
-                    accuracy: 0.58
+                        Hypeparameters:
+                        num_epochs: 50
+                        hidden_neurons: 4096
+                        training set size: 2822
+                        test set size: 313
+                        
+                        Epoch 1/50
+                        40/40 [==============================] - 144s 4s/step - loss: 4.5281 - acc: 0.0570 - val_loss: 4.3582 - val_acc: 0.0641
+                        Epoch 2/50
+                        40/40 [==============================] - 148s 4s/step - loss: 4.2580 - acc: 0.0859 - val_loss: 4.1780 - val_acc: 0.1070
+                        Epoch 3/50
+                        40/40 [==============================] - 149s 4s/step - loss: 4.0062 - acc: 0.1203 - val_loss: 3.8714 - val_acc: 0.0992
+                        Epoch 4/50
+                        40/40 [==============================] - 149s 4s/step - loss: 3.6143 - acc: 0.1773 - val_loss: 3.4942 - val_acc: 0.1609
+                        Epoch 5/50
+                        40/40 [==============================] - 150s 4s/step - loss: 3.2635 - acc: 0.2164 - val_loss: 3.2345 - val_acc: 0.2250
+                        Epoch 6/50
+                        40/40 [==============================] - 150s 4s/step - loss: 2.9261 - acc: 0.2773 - val_loss: 2.8594 - val_acc: 0.2711
+                        Epoch 7/50
+                        40/40 [==============================] - 150s 4s/step - loss: 2.6633 - acc: 0.3094 - val_loss: 2.6242 - val_acc: 0.3313
+                        Epoch 8/50
+                        40/40 [==============================] - 150s 4s/step - loss: 2.4841 - acc: 0.3539 - val_loss: 2.6124 - val_acc: 0.3320
+                        Epoch 9/50
+                        40/40 [==============================] - 151s 4s/step - loss: 2.3263 - acc: 0.3844 - val_loss: 2.4848 - val_acc: 0.3469
+                        Epoch 10/50
+                        40/40 [==============================] - 151s 4s/step - loss: 2.1146 - acc: 0.4156 - val_loss: 2.3971 - val_acc: 0.3602
+                        Epoch 11/50
+                        40/40 [==============================] - 150s 4s/step - loss: 2.0584 - acc: 0.4453 - val_loss: 2.3637 - val_acc: 0.3633
+                        Epoch 12/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.8657 - acc: 0.4766 - val_loss: 2.2422 - val_acc: 0.3562
+                        Epoch 13/50
+                        40/40 [==============================] - 151s 4s/step - loss: 1.8343 - acc: 0.4961 - val_loss: 2.2244 - val_acc: 0.4187
+                        Epoch 14/50
+                        40/40 [==============================] - 151s 4s/step - loss: 1.7056 - acc: 0.5188 - val_loss: 2.0923 - val_acc: 0.4570
+                        Epoch 15/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.6859 - acc: 0.5211 - val_loss: 2.0829 - val_acc: 0.4398
+                        Epoch 16/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.5415 - acc: 0.5594 - val_loss: 2.1350 - val_acc: 0.4437
+                        Epoch 17/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.4506 - acc: 0.5813 - val_loss: 2.1626 - val_acc: 0.4258
+                        Epoch 18/50
+                        40/40 [==============================] - 151s 4s/step - loss: 1.4247 - acc: 0.5961 - val_loss: 2.1133 - val_acc: 0.4453
+                        Epoch 19/50
+                        40/40 [==============================] - 151s 4s/step - loss: 1.3201 - acc: 0.6086 - val_loss: 1.9491 - val_acc: 0.4547
+                        Epoch 20/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.2787 - acc: 0.6336 - val_loss: 1.8885 - val_acc: 0.4844
+                        Epoch 21/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.1745 - acc: 0.6562 - val_loss: 1.8885 - val_acc: 0.4906
+                        Epoch 22/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.1080 - acc: 0.6695 - val_loss: 2.1113 - val_acc: 0.4289
+                        Epoch 23/50
+                        40/40 [==============================] - 150s 4s/step - loss: 1.0706 - acc: 0.6922 - val_loss: 2.1356 - val_acc: 0.4555
+                        Epoch 24/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.9893 - acc: 0.7039 - val_loss: 1.8050 - val_acc: 0.5078
+                        Epoch 25/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.9377 - acc: 0.7312 - val_loss: 1.8422 - val_acc: 0.5281
+                        Epoch 26/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.8181 - acc: 0.7578 - val_loss: 1.8654 - val_acc: 0.4914
+                        Epoch 27/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.8668 - acc: 0.7352 - val_loss: 1.8883 - val_acc: 0.4805
+                        Epoch 28/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.7349 - acc: 0.7820 - val_loss: 1.8898 - val_acc: 0.5492
+                        Epoch 29/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.7134 - acc: 0.7922 - val_loss: 1.7778 - val_acc: 0.5297
+                        Epoch 30/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.6433 - acc: 0.8062 - val_loss: 1.8707 - val_acc: 0.5250
+                        Epoch 31/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.6419 - acc: 0.8180 - val_loss: 1.8195 - val_acc: 0.5273
+                        Epoch 32/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.5811 - acc: 0.8273 - val_loss: 1.7483 - val_acc: 0.5508
+                        Epoch 33/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.6008 - acc: 0.8180 - val_loss: 1.8984 - val_acc: 0.5188
+                        Epoch 34/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.5169 - acc: 0.8484 - val_loss: 2.0376 - val_acc: 0.5078
+                        Epoch 35/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.5090 - acc: 0.8469 - val_loss: 2.0583 - val_acc: 0.5086
+                        Epoch 36/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.4752 - acc: 0.8578 - val_loss: 2.1739 - val_acc: 0.5148
+                        Epoch 37/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.4264 - acc: 0.8805 - val_loss: 1.9400 - val_acc: 0.5469
+                        Epoch 38/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.4108 - acc: 0.8836 - val_loss: 1.8909 - val_acc: 0.5414
+                        Epoch 39/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.3942 - acc: 0.8797 - val_loss: 2.1462 - val_acc: 0.5172
+                        Epoch 40/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.3634 - acc: 0.9000 - val_loss: 1.8605 - val_acc: 0.5367
+                        Epoch 41/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.3340 - acc: 0.9148 - val_loss: 2.0350 - val_acc: 0.5461
+                        Epoch 42/50
+                        40/40 [==============================] - 151s 4s/step - loss: 0.3156 - acc: 0.9187 - val_loss: 2.1340 - val_acc: 0.5320
+                        Epoch 43/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.3115 - acc: 0.9109 - val_loss: 2.2825 - val_acc: 0.5016
+                        Epoch 44/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.2939 - acc: 0.9219 - val_loss: 1.8770 - val_acc: 0.5539
+                        Epoch 45/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.2446 - acc: 0.9383 - val_loss: 2.4037 - val_acc: 0.5242
+                        Epoch 46/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.2757 - acc: 0.9211 - val_loss: 2.1594 - val_acc: 0.5500
+                        Epoch 47/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.2746 - acc: 0.9289 - val_loss: 2.2189 - val_acc: 0.5375
+                        Epoch 48/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.2381 - acc: 0.9266 - val_loss: 2.0340 - val_acc: 0.5664
+                        Epoch 49/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.2680 - acc: 0.9195 - val_loss: 1.8832 - val_acc: 0.5969
+                        Epoch 50/50
+                        40/40 [==============================] - 150s 4s/step - loss: 0.2057 - acc: 0.9469 - val_loss: 2.0120 - val_acc: 0.5773
+                        40/40 [==============================] - 74s 2s/step - loss: 1.9711 - acc: 0.5797
+                        loss: 1.97
+                        accuracy: 0.58
                     
                     It reaches 58% accuracy for the test set, 94% for the training set.
                 
@@ -804,7 +805,7 @@ RBO, CPA, ASC
     
         1.  DONE Find some papers on model stealing     :sgx:
     
-    2.  Offline ML-as-a-service <a id="org7443fd6"></a>
+    2.  Offline ML-as-a-service <a id="orgc255e46"></a>
     
         Making content of `dense()` and network weights independent of launch code would allow MLAAS providers to sign an execution environment once, and then give signed and encrypted weights and architectures to their customers.
         This would require decrypting the models and dynamically generating the `dense()` function.
@@ -819,7 +820,7 @@ RBO, CPA, ASC
     
     3.  Oblivious distributed machine learning
     
-        Along the lines of [this](#org7443fd6) and distributed SGD, we can do the same thing the other way round.
+        Along the lines of [this](#orgc255e46) and distributed SGD, we can do the same thing the other way round.
         Companies could send signed and encrypted inputs, together with model updates to people offering their compute power.
         The people then train their local model inside the enclave, so they can't steal the model.
         The code in the enclave then signs and encrypts the weight updates and sends them back to the company.
@@ -845,7 +846,7 @@ RBO, CPA, ASC
             Here a delta per individual weight would be interesting.
             
             A comparison of accuracies on the same dataset with and without freezing the convolutional layers would also be beneficial.
-            This relates to [transfer learning](#org890825a).
+            This relates to [transfer learning](#org479f675).
         
         2.  TODO Run on Cecilias face classifier
         
@@ -938,7 +939,7 @@ RBO, CPA, ASC
             After me reading some literature we might be able to have a good discussion.
 
 
-<a id="org35b3189"></a>
+<a id="org9606181"></a>
 
 ### Future Work <code>[0/2]</code>
 
@@ -952,12 +953,12 @@ RBO, CPA, ASC
     It would be interesting to see how the query numbers differ for actual model stealing and transfer attacks.
 
 
-<a id="orgde1aeb4"></a>
+<a id="orgb94c082"></a>
 
 ## Unforeseen events
 
 
-<a id="org52a121b"></a>
+<a id="orgce9c5db"></a>
 
 ### DONE Figure out how many bits the enclave uses for floats
 
@@ -970,7 +971,7 @@ In all my tests there have been rounding errors (larger than the `numpy` default
 I think this is good enough.
 
 
-<a id="org19d1ae5"></a>
+<a id="org3ac2247"></a>
 
 ### DONE Find out what is needed for the foreshadow mitigation     :sgx:
 
@@ -985,7 +986,7 @@ This means that having currenty microcode updates on our benchmark machines woul
 At least as resistant as we can currently get.
 
 
-<a id="orgdef8a7a"></a>
+<a id="org1905900"></a>
 
 ### TODO Test if our processors are vulnerable to foreshadow     :sgx:
 
