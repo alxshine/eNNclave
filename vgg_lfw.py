@@ -42,6 +42,18 @@ num_epochs = 100
 # ----------- MODEL DEFINITIONS -----------
 
 # "baseline" variant, reaches 61%
+# enclave = Enclave([
+#     layers.Dense(hidden_neurons, activation='relu'),
+#     layers.Dense(hidden_neurons, activation='relu'),
+#     layers.Dense(NUM_CLASSES, activation='softmax')
+# ])
+# dense = tf.keras.Sequential([
+#     layers.GlobalAveragePooling2D(),
+#     enclave
+# ])
+
+# "shorter" variant, with half the training epochs
+num_epochs = 50
 enclave = Enclave([
     layers.Dense(hidden_neurons, activation='relu'),
     layers.Dense(hidden_neurons, activation='relu'),
