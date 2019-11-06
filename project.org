@@ -596,10 +596,19 @@ I changed some dataset generation code, I should rerun the baseline to still hav
 [2019-11-06 Wed 12:56]
 Just started, it's job 11908.
 
+[2019-11-06 Wed 18:32]
+The new baseline gets 55% accuracy, log output:
+#+include: "cluster_outputs/baseline.log" src text
+
 ******* Larger variants
 I tried increasing the number of hidden neurons and increasing the number of training epochs.
 Both variants slightly increased the performance (larger 62%, longer 62%, all combined 65%).
 However, that doesn't seem like the right thing to do, because my results already look like they're overfitting too much.
+
+******** TODO Train flattened model for 50 epochs
+	 SCHEDULED: <2019-11-07 Thu>
+I will try the model which takes the flattened features as output instead of the GlobalAveragePooling2D.
+This time I will train it for 50 epochs, and on the GPU, it might be quite fast.
 
 ******* Smaller variants
 I will also try running smaller variants, one with only 50 training epochs, and one with only 512 hidden neurons.
@@ -608,20 +617,21 @@ We'll see how that goes.
 ******** DONE Train 50 epoch model
 	 CLOSED: [2019-11-06 Wed 15:38] SCHEDULED: <2019-11-06 Wed 15:00>
 It's job 11909.
-This is the log output:
+This is the log output, it gets 58% accuracy:
 #+include: "cluster_outputs/50_epochs.log" src text
 
 It reaches 58% accuracy for the test set, 94% for the training set.
 
-******** TODO Train 512 neuron model
-	 SCHEDULED: <2019-11-06 Wed 15:00>
-It's job 11911.
+******** WATING Train 512 neuron model
+	 SCHEDULED: <2019-11-07 Thu 15:00>
+Just started it, job 11917 on the cluster.
+This one will only train for 50 epochs.
+Log output is here, it gets 54% accuracy:
+#+include: "cluster_outputs/512_neurons_50_epochs.log" src text
 
-[2019-11-06 Wed 13:11]
-The third job that I schedule keeps on failing, I'll just have to wait until the 50 epoch or baseline model are done.
+I will train the same model on the SGX machine overnight, this time for 100 epochs.
+This will let me know if training works on that machine, also it gives me some more results.
 
-[2019-11-06 Wed 15:40]
-Just started it again, job 11917 on the cluster.
 
 ***** TODO Get Ember dataset working
 We now have a working image dataset for benchmarking.

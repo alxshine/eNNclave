@@ -54,17 +54,17 @@ num_epochs = 100
 # ])
 
 # "shorter" variant, with half the training epochs
-num_epochs = 50
-hidden_neurons = 512
-enclave = Enclave([
-    layers.Dense(hidden_neurons, activation='relu'),
-    layers.Dense(hidden_neurons, activation='relu'),
-    layers.Dense(NUM_CLASSES, activation='softmax')
-])
-dense = tf.keras.Sequential([
-    layers.GlobalAveragePooling2D(),
-    enclave
-])
+# num_epochs = 50
+# hidden_neurons = 512
+# enclave = Enclave([
+#     layers.Dense(hidden_neurons, activation='relu'),
+#     layers.Dense(hidden_neurons, activation='relu'),
+#     layers.Dense(NUM_CLASSES, activation='softmax')
+# ])
+# dense = tf.keras.Sequential([
+#     layers.GlobalAveragePooling2D(),
+#     enclave
+# ])
 
 # "longer" variant, with double the training epochs, reaches 62%
 # num_epochs = 200
@@ -79,15 +79,16 @@ dense = tf.keras.Sequential([
 # ])
 
 # "flattened" variant, with less input reduction, reaches 63%
-# enclave = Enclave([
-#     layers.Dense(hidden_neurons, activation='relu'),
-#     layers.Dense(hidden_neurons, activation='relu'),
-#     layers.Dense(NUM_CLASSES, activation='softmax')
-# ])
-# dense = tf.keras.Sequential([
-#     layers.Flatten(),
-#     enclave
-# ])
+num_epochs = 50
+enclave = Enclave([
+    layers.Dense(hidden_neurons, activation='relu'),
+    layers.Dense(hidden_neurons, activation='relu'),
+    layers.Dense(NUM_CLASSES, activation='softmax')
+])
+dense = tf.keras.Sequential([
+    layers.Flatten(),
+    enclave
+])
 
 # "larger" variant, with more dense neurons, reaches 62%
 # hidden_neurons = 8192
