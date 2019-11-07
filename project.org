@@ -631,7 +631,13 @@ Log output is here, it gets 54% accuracy:
 
 I will train the same model on the SGX machine overnight, this time for 100 epochs.
 This will let me know if training works on that machine, also it gives me some more results.
+It reaches 66% (for some reason).
+This is the output
+#+include: "cluster_outputs/512_neurons_100_epochs.log"  src text
 
+******* Fewer steps
+I think the large number of training steps might limit our search of the weight space.
+I will try to train a model with only 4 steps per epoch, but 1000 epochs.
 
 ***** TODO Get Ember dataset working
 We now have a working image dataset for benchmarking.
