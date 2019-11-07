@@ -309,9 +309,22 @@ This is done by creating a custom Layer that builds a ~tf.py_function~, which ca
 **** TODO Test on actual hardware                                       :sgx:
 We want to get a performance benchmark on actual hardware running my enclave code on the actual enclave.
 
-***** TODO Replicate a transfer learning paper
+***** TODO Replicate [[file:related_work/razavian14cnn-transferability.pdf][CNN Features off-the-shelf]]
 One paper that Cecilia sent me uses ResNet + an SVM.
 Instead we could try and solve the same task using ResNet and some Dense Layers.
+
+****** Dataset
+They use the [[http://web.mit.edu/torralba/www/indoor.html][MIT67]], consisting of 67 classes of indoor scenes.
+The dataset can be downloaded from [[http://groups.csail.mit.edu/vision/LabelMe/NewImages/indoorCVPR_09.tar][here]], and there are files detailing the [[http://web.mit.edu/torralba/www/TrainImages.txt][training set]] and [[http://web.mit.edu/torralba/www/TestImages.txt][test set]].
+
+Some images need to be converted with command line magic:
+#+begin_src bash
+find -name "*.jpg" -exec file \-i {} \; | grep -v jpeg | awk -F ':' '{system("convert "$1" "$1)}'
+#+end_src
+It can be validated that all files are now actually jpegs using the first two commands only:
+#+begin_src bash
+find -name "*.jpg" -exec file \-i {} \; | grep -v jpeg
+#+end_src
 
 ***** TODO Find a purely dense model for some task with an existing dataset
 Jakob told me to try RNNs.
