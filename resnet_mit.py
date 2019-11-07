@@ -41,7 +41,7 @@ test_ds = utils.generate_dataset(
 MODEL_FILE = 'models/resnet_mit.h5'
 HIDDEN_NEURONS = 128
 NUM_EPOCHS = 100
-STEPS_PER_EPOCH = len(train_labels)/32//2  # half the number of batches
+STEPS_PER_EPOCH = 40
 
 resnet = ResNet50(include_top=False, weights='imagenet',
                   input_shape=((224, 224, 3)))
