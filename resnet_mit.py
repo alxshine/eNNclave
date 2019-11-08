@@ -3,6 +3,8 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 
+import pandas as pd
+
 from os.path import join
 import os
 
@@ -39,6 +41,7 @@ test_ds = utils.generate_dataset(
 
 # build model
 MODEL_FILE = 'models/resnet_mit.h5'
+HIST_FILE = 'hist_resnet_mit.csv'
 HIDDEN_NEURONS = 2048
 NUM_EPOCHS = 300
 STEPS_PER_EPOCH = 80
@@ -83,3 +86,8 @@ print("loss: {:.2f}".format(loss0))
 print("accuracy: {:.2f}".format(accuracy0))
 print("\nSaving model at: {}".format(MODEL_FILE))
 model.save(MODEL_FILE)
+
+print("Saving history at: {}".format(HIST_FILE))
+hist_df = pd.DataFrame(history.history)
+with open(HIST_FILE, 'w+') as f:
+    hist_df.to_csv(f)
