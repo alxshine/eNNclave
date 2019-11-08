@@ -15,3 +15,4 @@ sbatch_launch.sh
 **/dense.cpp
 **/*.bin
 **/*.npy
+/hists/

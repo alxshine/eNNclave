@@ -12,9 +12,6 @@ x_test = x_test.reshape((x_test.shape[0], -1))
 y_train = np.load('y_train.npy')
 y_test = np.load('y_test.npy')
 
-x_train = x_train[:10]
-y_train = y_train[:10]
-
 print('Training classifier')
 svm = SGDClassifier()
 svm.fit(x_train, y_train)
