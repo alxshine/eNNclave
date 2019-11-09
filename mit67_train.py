@@ -1,5 +1,5 @@
 import tensorflow.keras.layers as layers
-from tensorflow.keras.applications import ResNet50
+import tensorflow.keras.applications as apps
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 
@@ -41,26 +41,27 @@ test_ds = utils.generate_dataset(
 
 # build model
 MODEL_FILE = 'models/resnet_mit.h5'
-HIST_FILE = 'hist_resnet_mit.csv'
+HIST_FILE = 'hist.csv'
 HIDDEN_NEURONS = 2048
-NUM_EPOCHS = 300
-STEPS_PER_EPOCH = 80
+DROPOUT_RATIO=0.4
+NUM_EPOCHS = 1000
+STEPS_PER_EPOCH = 2
 
-resnet = ResNet50(include_top=False, weights='imagenet',
+extractor = apps.VGG16(include_top=False, weights='imagenet',
                   input_shape=((224, 224, 3)))
-resnet.trainable = False
+extractor.trainable = False
 
 dense = Sequential([
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
-    layers.Dropout(0.2),
+    layers.Dropout(DROPOUT_RATIO),
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
-    layers.Dropout(0.2),
+    layers.Dropout(DROPOUT_RATIO),
     layers.Dense(len(labels), activation='softmax')
 ])
 
 model = Sequential([
-    resnet,
-    layers.Flatten(),
+    extractor,
+    layers.GlobalAveragePooling2D(),
     dense])
 
 print('Hypeparameters:')
@@ -77,9 +78,9 @@ model.compile(optimizer='adam',
 history = model.fit(train_ds,
                     epochs=NUM_EPOCHS,
                     steps_per_epoch=STEPS_PER_EPOCH,
-                    validation_data=test_ds)
+                    validation_data=test_ds,
+                    validation_steps=STEPS_PER_EPOCH)
 
-validation_steps = STEPS_PER_EPOCH*10
 loss0, accuracy0 = model.evaluate(test_ds)
 
 print("loss: {:.2f}".format(loss0))
