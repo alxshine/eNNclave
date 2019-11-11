@@ -15,10 +15,6 @@ class EnclaveLayer(Layer):
             ret[i, label] = 1
         return ret
 
-    def __init__(self, num_outputs):
-        super().__init__()
-        self.num_outputs = num_outputs
-
     def call(self, inputs):
         return tf.py_function(func=self.wrap_matutil,
                               inp=[inputs], Tout=tf.float32)
