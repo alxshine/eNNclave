@@ -258,10 +258,10 @@ void matutil_relu(float *m, int r, int c) {
 }
 
 
-int matutil_dense(float *m, int r, int c, int *label){
+int matutil_forward(float *m, int r, int c, int *label){
   int sts;
   // *label=-1; //so invalid results are visible
-  sgx_status_t sgx_status = dense(global_eid, &sts, m, r*c, r, c, label);
+  sgx_status_t sgx_status = forward(global_eid, &sts, m, r*c, r, c, label);
   if(sgx_status != SGX_SUCCESS)
     print_error_message(sgx_status);
   return sts;

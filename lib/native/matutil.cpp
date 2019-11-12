@@ -4,7 +4,7 @@
 
 #include "matutil.hpp"
 #include "state.hpp"
-#include "dense.hpp"
+#include "forward.hpp"
 
 int matutil_initialize(void) { return 0; }
 
@@ -73,8 +73,8 @@ void matutil_dump_matrix(float *m, int r, int c) {
   }
 }
 
-int matutil_dense(float *m, int r, int c, int *label){
-  return dense(m, r*c, r, c, label);
+int matutil_forward(float *m, int r, int c, int *label){
+  return forward(m, r*c, r, c, label);
 }
 
 int print_error(const char* fmt, ...){

@@ -10,7 +10,7 @@ class EnclaveLayer(Layer):
         xs = xs.numpy()
         ret = np.zeros_like(xs)
         for i, x in enumerate(xs):
-            label = pymatutil.dense(x.astype(np.float32).tobytes(),
+            label = pymatutil.forward(x.astype(np.float32).tobytes(),
                                     1, x.shape[0])
             ret[i, label] = 1
         return ret

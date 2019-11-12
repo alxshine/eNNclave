@@ -50,8 +50,8 @@ int main(void) {
   }
 
   int label = -1;
-  printf("dense\n");
-  matutil_dense(input, 1, c, &label);
+  printf("forward\n");
+  matutil_forward(input, 1, c, &label);
   printf("Output label: %d\n", label);
   
   matutil_teardown();

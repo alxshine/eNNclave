@@ -104,7 +104,7 @@ static PyObject *pymatutil_relu(PyObject *self, PyObject *args) {
   return PyBytes_FromStringAndSize((char *)mret, w * h * sizeof(float));
 }
 
-static PyObject *pymatutil_dense(PyObject *self, PyObject *args) {
+static PyObject *pymatutil_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
   int r, c;
 
@@ -113,7 +113,7 @@ static PyObject *pymatutil_dense(PyObject *self, PyObject *args) {
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   int label;
-  int sts = matutil_dense(m, r, c, &label);
+  int sts = matutil_forward(m, r, c, &label);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error in enclave");
     return NULL; // TODO: do some error handling
@@ -140,7 +140,7 @@ static PyMethodDef PymatutilMethods[] = {
     {"multiply", pymatutil_multiply, METH_VARARGS, "Multiply matrices"},
     {"add", pymatutil_add, METH_VARARGS, "Add matrices"},
     {"relu", pymatutil_relu, METH_VARARGS, "Execute ReLU on matrix"},
-    {"dense", pymatutil_dense, METH_VARARGS, "Execute full all operations of dense part of NN"},
+    {"forward", pymatutil_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
 

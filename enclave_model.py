@@ -74,13 +74,13 @@ class Enclave(Sequential):
         s += "};\n"
         return s
 
-    def generate_dense(self, to_file='dense.cpp'):
-        dense_file = open(to_file, 'w+')
+    def generate_forward(self, to_file='forward.cpp'):
+        forward_file = open(to_file, 'w+')
 
         expected_c = self.layers[0].get_weights()[0].shape[0]
         preamble = preamble_template % (expected_c, expected_c)
 
-        dense_file.write(preamble)
+        forward_file.write(preamble)
         increase_tmp_index = -1
         for i, l in enumerate(self.layers):
             if i == 0:
@@ -90,11 +90,11 @@ class Enclave(Sequential):
 
             call_string, increment_tmp_index = Enclave.get_call_string(
                 inputs, i, l)
-            dense_file.write(call_string)
+            forward_file.write(call_string)
             if increment_tmp_index:
                 increase_tmp_index = i
-        dense_file.write(postamble)
-        dense_file.close()
+        forward_file.write(postamble)
+        forward_file.close()
 
     @staticmethod
     def get_call_string(inputs, tmp_index, layer):

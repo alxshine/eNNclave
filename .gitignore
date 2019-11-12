@@ -12,7 +12,7 @@ logs
 sbatch_launch.sh
 **/state.cpp
 **/state.hpp
-**/dense.cpp
+**/forward.cpp
 **/*.bin
 **/*.npy
 /hists/

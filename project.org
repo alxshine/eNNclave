@@ -1,5 +1,5 @@
 * NN SGX
-Running the dense part of CNNs inside the trusted enclave to reduce leakage and protect against model stealing.
+Running some parts or all of a CNN inside the trusted enclave to reduce leakage and protect against model stealing.
 We hope to make this as robust against model stealing as online oracles.
 
 ** People
@@ -26,9 +26,9 @@ It takes two parameters: the original model file, and the number of layers to ex
 The extracted layers will be replaced by an ~EnclaveLayer~, which wraps the generated enclave in a manner compatible with the TensorFlow API.
 From the original layers that were not extracted and the new ~EnclaveLayer~ it builds a new model, and saves it.
 
-The script creates a ~dense.cpp~ and multiple ~.bin~ files.
+The script creates a ~forward.cpp~ and multiple ~.bin~ files.
 Inside the ~.bin~ files are the layer weights which will be compiled into the enclave.
-The ~dense.cpp~ file contains the dense function of the enclave.
+The ~forward.cpp~ file contains the forward function of the enclave.
 
 ** Compiling the enclave
 Building the enclave (or native) code happens in the ~lib~ directory, so move the generated files there.

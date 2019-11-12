@@ -46,7 +46,7 @@ enclave.build(input_shape=enclave_input_shape)
 
 # build cpp and bin files for enclave
 enclave.generate_state()
-enclave.generate_dense()
+enclave.generate_forward()
 
 # build replacement layer for original model
 enclave_model = Sequential(all_layers[:-n])

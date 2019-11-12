@@ -1,9 +1,9 @@
 preamble_template = """
 #include "state.hpp"
 #include "matutil.hpp"
-#include "dense.hpp"
+#include "forward.hpp"
 
-int dense(float *m, int, int r, int c, int *label) {
+int forward(float *m, int, int r, int c, int *label) {
   if (r != 1 || c != %d) {
     print_error("ERROR: Input should be 1x%d, got %%dx%%d\\n", r, c);
     return -1;
