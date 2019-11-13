@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Layer
+import tensorflow.keras.layers as layers
 import tensorflow as tf
 from format_strings import *
 import numpy as np
@@ -18,40 +18,47 @@ class Enclave(Sequential):
         header_file.write("#define STATE_H\n\n")
 
         for i, l in enumerate(self.layers):
-            # TODO: test if layer is dense here, like in get_call_string
-            parameters = l.get_weights()
+            if type(l) in [layers.Dense]:
+                # TODO: test if layer is dense here, like in get_call_string
+                parameters = l.get_weights()
 
-            if len(parameters) > 0:
-                w = parameters[0]
+                if len(parameters) > 0:
+                    w = parameters[0]
 
-                lhs_string = "float *w%d" % (i)
-                header_file.write("extern " + lhs_string + ";\n")
-                header_file.write("extern int w%d_r;\n" % i)
-                header_file.write("extern int w%d_c;\n\n" % i)
+                    lhs_string = "float *w%d" % (i)
+                    header_file.write("extern " + lhs_string + ";\n")
+                    header_file.write("extern int w%d_r;\n" % i)
+                    header_file.write("extern int w%d_c;\n\n" % i)
 
-                with open('w%d.bin' % i, 'wb+') as f:
-                    f.write(w.astype(np.float32).tobytes())
+                    with open('w%d.bin' % i, 'wb+') as f:
+                        f.write(w.astype(np.float32).tobytes())
 
-                cpp_file.write(
-                    "extern const char _binary_w%d_bin_start;\n" % i)
-                cpp_file.write(
-                    "const float *w%d = (const float*) &_binary_w%d_bin_start;\n" % (i, i))
-                cpp_file.write("int w%d_r = %d;\n" % (i, w.shape[0]))
-                cpp_file.write("int w%d_c = %d;\n\n" % (i, w.shape[1]))
-            if len(parameters) > 1:
-                b = parameters[1]
-                lhs_string = "float *b%d" % (i)
-                header_file.write("extern " + lhs_string + ";\n")
-                header_file.write("extern int b%d_c;\n\n" % i)
+                    cpp_file.write(
+                        "extern const char _binary_w%d_bin_start;\n" % i)
+                    cpp_file.write(
+                        "const float *w%d = (const float*) &_binary_w%d_bin_start;\n" % (i, i))
+                    cpp_file.write("int w%d_r = %d;\n" % (i, w.shape[0]))
+                    cpp_file.write("int w%d_c = %d;\n\n" % (i, w.shape[1]))
+                if len(parameters) > 1:
+                    b = parameters[1]
+                    lhs_string = "float *b%d" % (i)
+                    header_file.write("extern " + lhs_string + ";\n")
+                    header_file.write("extern int b%d_c;\n\n" % i)
 
-                with open('b%d.bin' % i, 'wb+') as bf:
-                    bf.write(b.astype(np.float32).tobytes())
+                    with open('b%d.bin' % i, 'wb+') as bf:
+                        bf.write(b.astype(np.float32).tobytes())
 
-                cpp_file.write(
-                    "extern const char _binary_b%d_bin_start;\n" % i)
-                cpp_file.write(
-                    "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
-                cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
+                    cpp_file.write(
+                        "extern const char _binary_b%d_bin_start;\n" % i)
+                    cpp_file.write(
+                        "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
+                    cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
+            elif type(l) in [layers.Dropout]:
+                # these layers are not used during inference
+                continue
+            else:
+                raise NotImplementedError(
+                    "Unknown layer type {}".format(type(l)))
 
         header_file.write("#endif\n")
         header_file.close()
@@ -77,7 +84,8 @@ class Enclave(Sequential):
     def generate_forward(self, to_file='forward.cpp'):
         forward_file = open(to_file, 'w+')
 
-        expected_c = self.layers[0].get_weights()[0].shape[0]
+        # the first dim of input_shape is num_samples in batch, so skip that
+        expected_c = self.layers[0].input_shape[1]
         preamble = preamble_template % (expected_c, expected_c)
 
         forward_file.write(preamble)
@@ -98,9 +106,20 @@ class Enclave(Sequential):
 
     @staticmethod
     def get_call_string(inputs, tmp_index, layer):
+        """Generates C function calls required for layer.
+
+        Arguments:
+        inputs -- the name of the input buffer
+        tmp_index -- the index of the current tmp buffer
+        layer -- the layer to generate for
+
+        Returns:
+        s -- the generated C code
+        added_ops -- if actual code was generated
+        """
 
         added_ops = True
-        if type(layer) in [tf.keras.layers.Dense]:
+        if type(layer) in [layers.Dense]:
             # the output of the dense layer will be a
             # row vector with ncols(w) elements
             tmp_name = tmp_buffer_template % tmp_index
@@ -124,7 +143,7 @@ class Enclave(Sequential):
                     tmp_name)
                 s += error_handling_template % add
 
-            if layer.activation.__name__ == 'relu':  # TODO: do this cleaner
+            if layer.activation.__name__ == 'relu':
                 relu = relu_template % (
                     tmp_name, 1, w.shape[1])
                 s += relu
@@ -133,12 +152,15 @@ class Enclave(Sequential):
                 softmax = softmax_template % (w.shape[1], tmp_name, tmp_name)
                 s += softmax
             else:
-                s += "ERROR: unknown activation function %s\n" % (
-                    layer.activation.__name__)
+                raise NotImplementedError("Unknown activation function {} in layer {}".format(
+                    layer.activation.__name__, layer.name))
+        elif type(layer) in [layers.Dropout]:
+            # these layers are inactive during inference, so they can be skipped
+            s = "//Layer {} skipped\n"
+            return s, False
         else:
-            s = unknown_layer_template % (
-                layer.name, type(layer))
-            added_ops = False
+            raise NotImplementedError(
+                "Unknown layer type {}".format(type(layer)))
 
         s += "\n"
 
