@@ -42,10 +42,10 @@ int main(void) {
 
   printf("mret2:\n");
   matutil_dump_matrix(mret2, rret, cret);
-  
+
   int c = 9216;
   float input[c];
-  for (int i = 0; i<c; ++i) {
+  for (int i = 0; i < c; ++i) {
     input[i] = i;
   }
 
@@ -53,7 +53,25 @@ int main(void) {
   printf("forward\n");
   matutil_forward(input, 1, c, &label);
   printf("Output label: %d\n", label);
-  
+
+  float conv_input[9];
+  float weights[9];
+  for (int i = 0; i < 9; ++i) {
+    conv_input[i] = i;
+    weights[i] = 1;
+  }
+  float biases[1] = {0};
+
+  float results[9];
+  matutil_conv(conv_input, 3, 3, 1, 1, weights, 3, 3, biases, results);
+
+  printf("Inputs:\n");
+  matutil_dump_matrix(conv_input, 3, 3);
+  printf("Weights:\n");
+  matutil_dump_matrix(weights, 3,3);
+  printf("Outputs:\n");
+  matutil_dump_matrix(results, 3, 3);
+
   matutil_teardown();
   printf("Matutil torn down\n");
   return 0;

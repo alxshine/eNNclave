@@ -1,11 +1,26 @@
 [
     {
         "arguments": [
-            "clang",
+            "cc",
+            "-c",
+            "-g",
+            "-fPIC",
+            "-I/home/alex/Projects/nn-sgx/inc",
+            "-o",
+            "libmatutil.so",
+            "forward.cpp"
+        ],
+        "directory": "/home/alex/Projects/nn-sgx/lib/native",
+        "file": "forward.cpp"
+    },
+    {
+        "arguments": [
+            "cc",
             "-c",
             "-fPIC",
             "-g",
             "-I/home/alex/Projects/nn-sgx/inc",
+            "-DHOST",
             "-o",
             "pymatutil.so",
             "pymatutilmodule.c"
@@ -15,15 +30,43 @@
     },
     {
         "arguments": [
-            "clang",
+            "cc",
             "-c",
             "-g",
             "-I/home/alex/Projects/nn-sgx/inc",
             "-o",
-            "test_native",
+            "test_matutil",
             "test_matutil.c"
         ],
         "directory": "/home/alex/Projects/nn-sgx/lib",
         "file": "test_matutil.c"
+    },
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-g",
+            "-fPIC",
+            "-I/home/alex/Projects/nn-sgx/inc",
+            "-o",
+            "libmatutil.so",
+            "state.cpp"
+        ],
+        "directory": "/home/alex/Projects/nn-sgx/lib/native",
+        "file": "state.cpp"
+    },
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-g",
+            "-fPIC",
+            "-I/home/alex/Projects/nn-sgx/inc",
+            "-o",
+            "libmatutil.so",
+            "matutil.cpp"
+        ],
+        "directory": "/home/alex/Projects/nn-sgx/lib/native",
+        "file": "matutil.cpp"
     }
 ]
