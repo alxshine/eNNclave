@@ -15,16 +15,14 @@ import utils
 
 # global config
 data_dir = 'data/mit67'
+label_file = join(data_dir, 'class_labels.json')
 train_file = 'TrainImages.txt'
 test_file = 'TestImages.txt'
 
-# build label mapping from directories
-labels = {}
-i = 0
-for entry in os.scandir(data_dir):
-    if entry.is_dir():
-        labels[entry.name] = i
-        i += 1
+# load label mapping
+with open(label_file, 'r') as f:
+    labels = json.load(f)
+
 
 # load images
 with open(join(data_dir, train_file), 'r') as f:
@@ -42,7 +40,7 @@ test_ds = utils.generate_dataset(
     test_images, test_labels, shuffle=False, repeat=False)
 
 # build model
-MODEL_FILE = 'models/resnet_mit.h5'
+MODEL_FILE = 'models/mit67.h5'
 HIST_FILE = 'hist.csv'
 HIDDEN_NEURONS = 2048
 DROPOUT_RATIO=0.4
