@@ -8,7 +8,7 @@ from os.path import join
 
 import numpy as np
 
-model_file = 'models/mit67_57_percent.h5'
+model_file = 'models/mit67_56_percent.h5'
 num_images = 100
 
 model_tf = load_model(model_file)
@@ -34,4 +34,4 @@ test_labels = [labels[s.split('/')[-2]] for s in test_images]
 test_ds = utils.generate_dataset(test_images, test_labels, shuffle=False, repeat=False)
 
 # predict dataset
-loss, acc = model_tf.predict(test_ds)
+loss, acc = model_tf.evaluate(test_ds)
