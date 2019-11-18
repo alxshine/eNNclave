@@ -1,4 +1,7 @@
 from tensorflow.keras.models import load_model
+import tensorflow as tf
+import numpy as np
+
 from enclave_model import Enclave
 from enclave_layer import EnclaveLayer
 import utils
@@ -6,7 +9,8 @@ import utils
 import os
 from os.path import join
 
-import numpy as np
+tf.compat.v1.set_random_seed(1337)
+np.random.seed(1337)
 
 model_file = 'models/mit67_56_percent.h5'
 num_images = 100

@@ -2,8 +2,11 @@ import tensorflow.keras.layers as layers
 import tensorflow.keras.applications as apps
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.losses import sparse_categorical_crossentropy
+import tensorflow as tf
 
 import pandas as pd
+
+tf.compat.v1.set_random_seed(1337)
 
 from os.path import join
 import os
@@ -32,7 +35,6 @@ with open(join(data_dir, test_file), 'r') as f:
 # generate labels
 train_labels = [labels[s.split('/')[-2]] for s in train_images]
 test_labels = [labels[s.split('/')[-2]] for s in test_images]
-
 
 # generate datasets
 train_ds = utils.generate_dataset(train_images, train_labels)
