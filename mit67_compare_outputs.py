@@ -14,7 +14,7 @@ import json
 tf.compat.v1.set_random_seed(1337)
 np.random.seed(1337)
 
-model_file = 'models/mit67_56_percent.h5'
+model_file = sys.argv[1]
 num_images = 100
 
 model_tf = load_model(model_file)
