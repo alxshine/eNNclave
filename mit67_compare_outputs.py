@@ -15,10 +15,14 @@ import sys
 tf.compat.v1.set_random_seed(1337)
 np.random.seed(1337)
 
-model_file = sys.argv[1]
+#TODO: use argparse
+
+model_file_1 = sys.argv[1]
+model_file_2 = sys.argv[2]
 num_images = 100
 
-model_tf = load_model(model_file)
+model_1 = load_model(model_file_1, custom_objects={"EnclaveLayer": EnclaveLayer})
+model_2 = load_model(model_file_2, custom_objects={"EnclaveLayer": EnclaveLayer})
 
 data_dir = 'data/mit67'
 test_file = 'TestImages.txt'
@@ -37,4 +41,17 @@ test_labels = [labels[s.split('/')[-2]] for s in test_images]
 test_ds = utils.generate_dataset(test_images, test_labels, shuffle=False, repeat=False)
 
 # predict dataset
-loss, acc = model_tf.evaluate(test_ds)
+predictions_1 = model_1.predict(test_ds)
+# TODO: deal with models returning the label directly
+predictions_1 = np.argmax(predictions_1, axis=1)
+
+accuracy_1 = np.equal(predictions_1, test_labels).sum()/len(test_labels)
+print("Model 1 accuracy: {}".format(accuracy_1))
+
+predictions_2 = model_2.predict(test_ds)
+
+accuracy_2 = np.equal(predictions_2, test_labels).sum()/len(test_labels)
+print("Model 2 accuracy: {}".format(accuracy_2))
+
+same_labels = np.equals(predictions_1, predictions_2)
+print("{} of {} labels are equal".format(same_labels.sum(), len(same_labels)))

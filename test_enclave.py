@@ -15,7 +15,7 @@ from tensorflow.keras import backend as K
 batch_size = 128
 num_classes = 10
 epochs = 1
-model_file = 'models/tf_enclave_mnist_cnn.h5'
+model_file = 'models/mnist.h5'
 
 img_rows, img_cols = 28, 28
 

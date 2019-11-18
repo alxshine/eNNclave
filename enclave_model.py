@@ -19,7 +19,6 @@ class Enclave(Sequential):
 
         for i, l in enumerate(self.layers):
             if type(l) in [layers.Dense]:
-                # TODO: test if layer is dense here, like in get_call_string
                 parameters = l.get_weights()
 
                 if len(parameters) > 0:
@@ -54,7 +53,7 @@ class Enclave(Sequential):
                         "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                     cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
             elif type(l) in [layers.Dropout]:
-                # these layers are not used during inference
+                # TODO: add comment to file about skipping current layer because it's not used during inference
                 continue
             else:
                 raise NotImplementedError(
