@@ -25,6 +25,8 @@ extern "C" {
 
   void matutil_dump_matrix(float *m, int r, int c);
 
+  void matutil_dump_matrix3(float *m, int h, int w, int c);
+
 #if defined(__cplusplus)
 }
 #endif

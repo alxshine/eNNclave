@@ -111,6 +111,18 @@ void matutil_dump_matrix(float *m, int r, int c) {
   }
 }
 
+void matutil_dump_matrix3(float *m, int h, int w, int c){
+  for (int ci = 0; ci < c; ++ci) {
+    printf("Ci=%d:\n", ci);
+    for (int i = 0; i < h; ++i) {
+      for (int j = 0; j < w; ++j) {
+	printf("%f, ", m[i*w*c + j*c + ci]);
+      }
+      printf("\n");
+    }
+  }
+}
+
 int matutil_forward(float *m, int r, int c, int *label) {
   return forward(m, r * c, r, c, label);
 }

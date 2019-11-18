@@ -54,23 +54,27 @@ int main(void) {
   matutil_forward(input, 1, c, &label);
   printf("Output label: %d\n", label);
 
-  float conv_input[9];
-  float weights[9];
-  for (int i = 0; i < 9; ++i) {
+  int input_size = 18;
+  float conv_input[input_size];
+  for (int i = 0; i < input_size; ++i) {
     conv_input[i] = i;
+  }
+  float weights[36];
+  for (int i = 0; i < 36; ++i) {
     weights[i] = 1;
   }
-  float biases[1] = {0};
 
-  float results[9];
-  matutil_conv(conv_input, 3, 3, 1, 1, weights, 3, 3, biases, results);
+  float biases[2] = {0,0};
+
+  float results[18];
+  matutil_conv(conv_input, 3, 3, 2, 2, weights, 3, 3, biases, results);
 
   printf("Inputs:\n");
-  matutil_dump_matrix(conv_input, 3, 3);
+  matutil_dump_matrix3(conv_input, 3, 3, 2);
   printf("Weights:\n");
-  matutil_dump_matrix(weights, 3,3);
+  matutil_dump_matrix3(weights, 3, 3, 4);
   printf("Outputs:\n");
-  matutil_dump_matrix(results, 3, 3);
+  matutil_dump_matrix3(results, 3, 3, 2);
 
   matutil_teardown();
   printf("Matutil torn down\n");
