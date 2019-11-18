@@ -9,6 +9,8 @@ import utils
 import os
 from os.path import join
 
+import json
+
 tf.compat.v1.set_random_seed(1337)
 np.random.seed(1337)
 
@@ -21,12 +23,8 @@ data_dir = 'data/mit67'
 test_file = 'TestImages.txt'
 
 # build label mapping from directories
-labels = {}
-i = 0
-for entry in os.scandir(data_dir):
-    if entry.is_dir():
-        labels[entry.name] = i
-        i += 1
+with open(join(data_dir, "class_labels.json"), 'r') as f:
+    labels = json.load(f)
 
 # generate dataset
 with open(join(data_dir, test_file), 'r') as f:
