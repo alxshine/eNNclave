@@ -2,7 +2,12 @@
 import pandas as pd
 import plotille as plt
 
-hist = pd.read_csv('hist.csv')
+import sys
+
+if len(sys.argv) < 2:
+    print("Usage {} hist_file".format(sys.argv[0]))
+
+hist = pd.read_csv(sys.argv[1])
 indices = range(len(hist))
 fig = plt.Figure()
 fig.set_x_limits(min_=0, max_=len(hist))
