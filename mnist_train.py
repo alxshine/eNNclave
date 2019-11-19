@@ -8,6 +8,8 @@ import tensorflow_datasets as tfds
 
 import pandas as pd
 
+import utils
+
 tf.compat.v1.enable_eager_execution()
 
 # hyperparameters
@@ -29,8 +31,11 @@ tf.compat.v1.set_random_seed(1337)
 train_ds, test_ds = tfds.load('mnist',
                               split=[tfds.Split.TRAIN, tfds.Split.TEST],
                               as_supervised=True)
+train_ds = train_ds.map(utils.preprocess_mnist)
 train_ds = train_ds.shuffle(buffer_size=2*BATCH_SIZE).repeat().batch(
     BATCH_SIZE).prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+
+test_ds = test_ds.map(utils.preprocess_mnist)
 test_ds = test_ds.batch(BATCH_SIZE)
 
 model = Sequential([
