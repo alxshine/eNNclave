@@ -9,6 +9,9 @@ class EnclaveLayer(Layer):
     def __init__(self, num_classes, **kwargs):
         self.num_classes = num_classes
         super().__init__(**kwargs)
+
+    def get_config(self):
+        return {'num_classes': self.num_classes, 'name': super().name}
     
     def wrap_matutil(self, xs):
         xs = xs.numpy()
