@@ -1,65 +1,62 @@
 import tensorflow.keras as keras
 from tensorflow.keras.datasets import mnist
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Dense, Flatten, Dropout
-from tensorflow.keras.layers import Conv2D, MaxPooling2D
-from tensorflow.keras import backend as K
+from tensorflow.keras.models import Sequential
+import tensorflow.keras.layers as layers
 from tensorflow.keras.losses import sparse_categorical_crossentropy
+import tensorflow as tf
+import tensorflow_datasets as tfds
 
 import pandas as pd
 
-img_rows, img_cols = 28, 28
-num_classes = 10
+tf.compat.v1.enable_eager_execution()
 
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-
-if K.image_data_format() == 'channels_first':
-    x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
-    x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
-    input_shape = (1, img_rows, img_cols)
-else:
-    x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)
-    x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
-    input_shape = (img_rows, img_cols, 1)
-
-x_train = x_train.astype('float32')
-x_test = x_test.astype('float32')
-x_train /= 255
-x_test /= 255
-print('x_train shape:', x_train.shape)
-print(x_train.shape[0], 'train samples')
-print(x_test.shape[0], 'test samples')
-
-# build model
+# hyperparameters
 MODEL_FILE = 'models/mnist.h5'
 HIST_FILE = 'hist_mnist.csv'
-HIDDEN_NEURONS = 1024
-DROPOUT_RATIO=0.4
-NUM_EPOCHS = 1
+HIDDEN_NEURONS = 128
+DROPOUT_RATIO = 0.4
+NUM_EPOCHS = 100
 STEPS_PER_EPOCH = 10
+VALIDATION_STEPS = 2
+BATCH_SIZE = 32
+
+# dataset parameters
+NUM_CLASSES = 10
+INPUT_SHAPE = (28, 28, 1)
+
+tf.compat.v1.set_random_seed(1337)
+
+train_ds, test_ds = tfds.load('mnist',
+                              split=[tfds.Split.TRAIN, tfds.Split.TEST],
+                              as_supervised=True)
+train_ds = train_ds.shuffle(buffer_size=2*BATCH_SIZE).repeat().batch(
+    BATCH_SIZE).prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+test_ds = test_ds.batch(BATCH_SIZE)
 
 model = Sequential([
-    Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape),
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D(pool_size=(2, 2)),
-    Flatten(),
-    Dropout(DROPOUT_RATIO),
-    Dense(128, activation='relu'),
-    Dropout(DROPOUT_RATIO),
-    Dense(num_classes, activation='softmax')
-    ])
+    layers.Input(INPUT_SHAPE),
+    layers.Conv2D(32, 3, activation='relu'),
+    layers.Conv2D(64, 3, activation='relu'),
+    layers.MaxPooling2D(2),
+    layers.Flatten(),
+    layers.Dropout(DROPOUT_RATIO),
+    layers.Dense(HIDDEN_NEURONS, activation='relu'),
+    layers.Dropout(DROPOUT_RATIO),
+    layers.Dense(NUM_CLASSES, activation='softmax')
+])
 
 model.compile(optimizer='adam',
               loss=sparse_categorical_crossentropy,
               metrics=['accuracy'])
 
-history = model.fit(x_train, y_train,
-                    batch_size=128,
+history = model.fit(train_ds,
                     epochs=NUM_EPOCHS,
                     steps_per_epoch=STEPS_PER_EPOCH,
-                    validation_data=(x_test, y_test))
+                    validation_data=test_ds,
+                    validation_steps=VALIDATION_STEPS,
+                    )
 
-loss0, accuracy0 = model.evaluate(x_test, y_test)
+loss0, accuracy0 = model.evaluate(test_ds)
 
 print("loss: {:.2f}".format(loss0))
 print("accuracy: {:.2f}".format(accuracy0))
