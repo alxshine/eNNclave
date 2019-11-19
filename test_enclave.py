@@ -100,6 +100,9 @@ print("Testing enclave on %d samples, starting from %d" %
 expected_results = model.predict(test_set)
 enclave_results = enclave_model.predict(test_set)
 
+print("Expected output shape: {}".format(expected_results.shape))
+print("Enclave output shape: {}".format(enclave_results.shape))
+
 expected_results = np.argmax(expected_results, 1)
 enclave_results = np.argmax(enclave_results, 1)
 correct = np.array_equal(expected_results, enclave_results)

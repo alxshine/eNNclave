@@ -6,9 +6,13 @@ from tensorflow.keras.layers import Layer
 
 
 class EnclaveLayer(Layer):
+    def __init__(self, num_classes, **kwargs):
+        self.num_classes = num_classes
+        super().__init__(**kwargs)
+    
     def wrap_matutil(self, xs):
         xs = xs.numpy()
-        ret = np.zeros_like(xs)
+        ret = np.zeros((xs.shape[0],self.num_classes))
         for i, x in enumerate(xs):
             label = pymatutil.forward(x.astype(np.float32).tobytes(),
                                     1, x.shape[0])
