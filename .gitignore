@@ -16,3 +16,4 @@ sbatch_launch.sh
 **/*.bin
 **/*.npy
 /hists/
+*.csv

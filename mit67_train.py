@@ -42,7 +42,7 @@ test_ds = utils.generate_dataset(
 
 # build model
 MODEL_FILE = 'models/mit67.h5'
-HIST_FILE = 'hist.csv'
+HIST_FILE = 'hist_mit67.csv'
 HIDDEN_NEURONS = 2048
 DROPOUT_RATIO=0.4
 NUM_EPOCHS = 1000
