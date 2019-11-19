@@ -88,18 +88,16 @@ class Enclave(Sequential):
         preamble = preamble_template % (expected_c, expected_c)
 
         forward_file.write(preamble)
-        increase_tmp_index = -1
+        inputs = 'm'
         for i, l in enumerate(self.layers):
-            if i == 0:
-                inputs = 'm'
-            else:
-                inputs = tmp_buffer_template % (increase_tmp_index)
-
-            call_string, increment_tmp_index = Enclave.get_call_string(
+            call_string, generated_ops = Enclave.get_call_string(
                 inputs, i, l)
             forward_file.write(call_string)
-            if increment_tmp_index:
-                increase_tmp_index = i
+
+            #if the function generated a call, it declared a new tmp buffer
+            if generated_ops:
+                inputs = tmp_buffer_template % i
+                
         forward_file.write(postamble)
         forward_file.close()
 
@@ -155,7 +153,7 @@ class Enclave(Sequential):
                     layer.activation.__name__, layer.name))
         elif type(layer) in [layers.Dropout]:
             # these layers are inactive during inference, so they can be skipped
-            s = "//Layer {} skipped\n"
+            s = "//Layer {} skipped\n".format(layer.name)
             return s, False
         else:
             raise NotImplementedError(
