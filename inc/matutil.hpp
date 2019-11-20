@@ -21,6 +21,8 @@ extern "C" {
 
   void matutil_relu(float *m, int r, int c);
 
+  void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret);
+
   int matutil_forward(float *m, int r, int c, int *label);
 
   void matutil_dump_matrix(float *m, int r, int c);

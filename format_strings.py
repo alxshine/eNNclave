@@ -37,4 +37,5 @@ softmax_template = """
 
   *label = max_index;
 """
+global_average_pooling_2d_template = "  matutil_global_average_pooling_2d(%s, %d, %d, %d, %s);\n"
 unknown_layer_template = "  //No call method generated for layer %s of type %s\n"

@@ -77,7 +77,7 @@ int matutil_conv(float *input, int h, int w, int c, int f, float *kernels,
             for (int fi = 0; fi < f; ++fi) {
               int input_i = i - min_row_offset + ki;
               int input_j = j - min_col_offset + kj;
-
+	      
               // zero padding // TODO: make this data independent
               if (input_i < 0 || input_i >= h || input_j < 0 || input_j >= w)
                 continue;
@@ -100,6 +100,27 @@ void matutil_relu(float *m, int r, int c) {
   for (int i = 0; i < r * c; i++)
     if (m[i] < 0)
       m[i] = 0;
+}
+
+
+void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret){
+  //calculate the average per channel (averaging over h and w)
+  for (int i=0; i < c; ++i) {
+    ret[i] = 0;
+  }
+
+  for (int i = 0; i<h; ++i) {
+    for (int j = 0; j<w; ++j) {
+      for(int ci=0; ci<c; ++ci) {
+	ret[ci] += m[i*w*c + j*c + ci];
+      }
+    }
+  }
+
+  int div = h*w;
+  for (int ci=0; ci < c; ++ci) {
+    ret[ci] /= div;
+  }
 }
 
 void matutil_dump_matrix(float *m, int r, int c) {

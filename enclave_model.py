@@ -38,6 +38,7 @@ class Enclave(Sequential):
                         "const float *w%d = (const float*) &_binary_w%d_bin_start;\n" % (i, i))
                     cpp_file.write("int w%d_r = %d;\n" % (i, w.shape[0]))
                     cpp_file.write("int w%d_c = %d;\n\n" % (i, w.shape[1]))
+
                 if len(parameters) > 1:
                     b = parameters[1]
                     lhs_string = "float *b%d" % (i)
@@ -52,8 +53,9 @@ class Enclave(Sequential):
                     cpp_file.write(
                         "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                     cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
-            elif type(l) in [layers.Dropout]:
-                # TODO: add comment to file about skipping current layer because it's not used during inference
+                    
+            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling2D]:
+                # these layers are either not used during inference or have no parameters
                 continue
             else:
                 raise NotImplementedError(
@@ -112,7 +114,7 @@ class Enclave(Sequential):
 
         Returns:
         s -- the generated C code
-        added_ops -- if actual code was generated
+        added_ops -- True iff an operation was generated (as opposed to a comment)
         """
 
         added_ops = True
@@ -151,6 +153,13 @@ class Enclave(Sequential):
             else:
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
+
+        elif type(layer) in [layers.GlobalAveragePooling2D]:
+            _, h, w, c = layer.input_shape
+            s = tmp_buffer_declaration_template % (tmp_index, c)
+            s += global_average_pooling_2d_template % (inputs, h, w, c, tmp_buffer_template % tmp_index)
+            
+            return s, True
         elif type(layer) in [layers.Dropout]:
             # these layers are inactive during inference, so they can be skipped
             s = "//Layer {} skipped\n".format(layer.name)

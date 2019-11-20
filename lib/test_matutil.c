@@ -54,9 +54,10 @@ int main(void) {
   matutil_forward(input, 1, c, &label);
   printf("Output label: %d\n", label);
 
-  int input_size = 18;
-  float conv_input[input_size];
-  for (int i = 0; i < input_size; ++i) {
+  printf("\n\nConvolution:\n");
+  int conv_input_size = 18;
+  float conv_input[conv_input_size];
+  for (int i = 0; i < conv_input_size; ++i) {
     conv_input[i] = i;
   }
   float weights[36];
@@ -76,6 +77,21 @@ int main(void) {
   printf("Outputs:\n");
   matutil_dump_matrix3(results, 3, 3, 2);
 
+  printf("\n\nGlobalAveragePooling2D:\n");
+  int gap_input_size = 18;
+  float gap_input[gap_input_size];
+  for (int i = 0; i < gap_input_size; ++i) {
+    gap_input[i] = i;
+  }
+
+  float gap_results[2];
+  matutil_global_average_pooling_2d(gap_input, 3, 3, 2, gap_results);
+
+  printf("Inputs:\n");
+  matutil_dump_matrix3(gap_input, 3, 3, 2);
+  printf("Outputs:\n");
+  matutil_dump_matrix(gap_results, 1, 2);
+  
   matutil_teardown();
   printf("Matutil torn down\n");
   return 0;
