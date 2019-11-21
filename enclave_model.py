@@ -18,7 +18,7 @@ class Enclave(Sequential):
         header_file.write("#define STATE_H\n\n")
 
         for i, l in enumerate(self.layers):
-            if type(l) in [layers.Dense]:
+            if type(l) in [layers.Dense, layers.Conv2D]:
                 parameters = l.get_weights()
 
                 if len(parameters) > 0:
@@ -53,7 +53,7 @@ class Enclave(Sequential):
                     cpp_file.write(
                         "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                     cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
-                    
+
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling2D, layers.MaxPooling2D]:
                 # these layers are either not used during inference or have no parameters
                 continue
@@ -137,6 +137,18 @@ class Enclave(Sequential):
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
 
+        elif type(layer) in [layers.Conv2D]:
+            _, h, w, c = layer.input_shape
+            f = layer.output_shape[-1]
+            new_size = np.prod(layer.output_shape[1:])
+            s = tmp_buffer_declaration_template % (tmp_index, new_size)
+            new_buffer = tmp_buffer_template % tmp_index
+            kh, kw = layer.kernel_size
+            kernels = weight_name_template % tmp_index
+            biases = bias_name_template % tmp_index
+            
+            s += conv_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
+
         elif type(layer) in [layers.GlobalAveragePooling2D]:
             _, h, w, c = layer.input_shape
             s = tmp_buffer_declaration_template % (tmp_index, c)
@@ -148,7 +160,7 @@ class Enclave(Sequential):
             if layer.pool_size[0] != layer.pool_size[1]:
                 raise NotImplementedError("Non-square pooling is not implemented")
 
-            new_size = h/pool_size*w/pool_size*c
+            new_size = np.prod(layer.output_shape[1:])
             s = tmp_buffer_declaration_template % (tmp_index, new_size)
             s += max_pooling_2d_template % (inputs, h, w, c, pool_size, tmp_buffer_template % tmp_index)
 

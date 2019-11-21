@@ -28,6 +28,7 @@ error_handling_template = """  if ((sts = %s))
 """
 add_template = "matutil_add(%s, %d, %d, %s, %d, %d, %s)"
 mult_template = "matutil_multiply(%s, %d, %d, %s, %d, %d, %s)"
+conv_template = "matutil_conv(%s, %d, %d, %d, %d, %s, %d, %d, %s, %s);"
 relu_template = "  matutil_relu(%s, %d, %d);\n"
 softmax_template = """
   // get maximum for label
