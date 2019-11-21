@@ -65,23 +65,6 @@ class Enclave(Sequential):
         header_file.close()
         cpp_file.close()
 
-    @staticmethod
-    def dump_matrix(m, lhs_string):
-        s = "%s = {\n" % lhs_string
-        if len(m.shape) == 1:
-            # 1D array
-            for x in m:
-                s += "%f, " % x
-            s += "\n"
-        else:
-            # 2D array
-            for row in m:
-                for x in row:
-                    s += "%f, " % x
-                s += "\n"
-        s += "};\n"
-        return s
-
     def generate_forward(self, to_file='forward.cpp'):
         forward_file = open(to_file, 'w+')
 
