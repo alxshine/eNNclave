@@ -91,7 +91,22 @@ int main(void) {
   matutil_dump_matrix3(gap_input, 3, 3, 2);
   printf("Outputs:\n");
   matutil_dump_matrix(gap_results, 1, 2);
-  
+
+  printf("\n\nMaxPooling2D:\n");
+  int mp_input_size = 32;
+  float mp_input[mp_input_size];
+  for (int i=0; i<mp_input_size; ++i) {
+    mp_input[i] = i;
+  }
+
+  float mp_results[mp_input_size/4];
+  matutil_max_pooling_2d(mp_input, 4, 4, 2, 2, mp_results);
+
+  printf("Inputs:\n");
+  matutil_dump_matrix3(mp_input, 4,4,2);
+  printf("Outputs:\n");
+  matutil_dump_matrix3(mp_results, 2,2,2);
+
   matutil_teardown();
   printf("Matutil torn down\n");
   return 0;

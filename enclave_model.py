@@ -54,7 +54,7 @@ class Enclave(Sequential):
                         "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                     cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
                     
-            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling2D]:
+            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling2D, layers.MaxPooling2D]:
                 # these layers are either not used during inference or have no parameters
                 continue
             else:
@@ -158,8 +158,17 @@ class Enclave(Sequential):
             _, h, w, c = layer.input_shape
             s = tmp_buffer_declaration_template % (tmp_index, c)
             s += global_average_pooling_2d_template % (inputs, h, w, c, tmp_buffer_template % tmp_index)
-            
-            return s, True
+
+        elif type(layer) in [layers.MaxPooling2D]:
+            _, h, w, c = layer.input_shape
+            pool_size = layer.pool_size[0]
+            if layer.pool_size[0] != layer.pool_size[1]:
+                raise NotImplementedError("Non-square pooling is not implemented")
+
+            new_size = h/pool_size*w/pool_size*c
+            s = tmp_buffer_declaration_template % (tmp_index, new_size)
+            s += max_pooling_2d_template % (inputs, h, w, c, pool_size, tmp_buffer_template % tmp_index)
+
         elif type(layer) in [layers.Dropout]:
             # these layers are inactive during inference, so they can be skipped
             s = "//Layer {} skipped\n".format(layer.name)

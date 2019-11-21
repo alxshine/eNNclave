@@ -123,6 +123,33 @@ void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret
   }
 }
 
+void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float *ret){
+  int ret_h = h/pool_size;
+  int ret_w = w/pool_size;
+  
+  for (int i = 0; i < ret_h; ++i) {
+    int input_i = i*pool_size;
+    for (int j = 0; j < ret_w; ++j) {
+      int input_j = j*pool_size;
+
+      for (int ci = 0; ci < c; ++ci) {
+	float current_max = m[input_i*w*c + input_j*c + ci];
+	
+	for (int di=0; di < pool_size; ++di) {
+	  for (int dj=0; dj < pool_size; ++dj) {
+	    int current_i = input_i + di;
+	    int current_j = input_j + dj;
+	    float to_compare = m[current_i*w*c + current_j*c + ci];
+	    current_max = to_compare > current_max ? to_compare : current_max;
+	  }
+	}
+
+	ret[i*ret_w*c + j*c + ci] = current_max;
+      }
+    }
+  }
+}
+
 void matutil_dump_matrix(float *m, int r, int c) {
   for (int i = 0; i < r; ++i) {
     for (int j = 0; j < c; ++j) {
