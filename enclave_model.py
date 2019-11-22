@@ -148,6 +148,13 @@ class Enclave(Sequential):
             
             s += conv_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
 
+            if layer.activation.__name__ == 'relu':
+                # relu
+                s += relu_template % (new_buffer, 1, new_size)
+            else:
+                raise NotImplementedError("Unknown activation function {} in layer {}".format(
+                    layer.activation.__name__, layer.name))
+
         elif type(layer) in [layers.GlobalAveragePooling2D]:
             _, h, w, c = layer.input_shape
             s = tmp_buffer_declaration_template % (tmp_index, c)
