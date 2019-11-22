@@ -55,6 +55,9 @@ enclave_model.build()
 print("New model:")
 enclave_model.summary()
 
+print("Enclave:")
+enclave.summary()
+
 model_path = pathlib.Path(model_file)
 target_dir = model_path.parent
 target_basename = model_path.stem
