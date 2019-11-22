@@ -137,6 +137,9 @@ class Enclave(Sequential):
                     layer.activation.__name__, layer.name))
 
         elif type(layer) in [layers.Conv2D]:
+            if layer.padding != 'same':
+                raise NotImplementedError("Padding modes other than 'same' are not implemented")
+            
             _, h, w, c = layer.input_shape
             f = layer.output_shape[-1]
             new_size = np.prod(layer.output_shape[1:])

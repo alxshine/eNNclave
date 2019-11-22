@@ -43,7 +43,7 @@ int main(void) {
   printf("mret2:\n");
   matutil_dump_matrix(mret2, rret, cret);
 
-  int c = 9216;
+  int c = 21632;
   float input[c];
   for (int i = 0; i < c; ++i) {
     input[i] = i;
