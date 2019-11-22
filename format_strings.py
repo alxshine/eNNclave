@@ -3,11 +3,7 @@ preamble_template = """
 #include "matutil.hpp"
 #include "forward.hpp"
 
-int forward(float *m, int, int r, int c, int *label) {
-  if (r != 1 || c != %d) {
-    print_error("ERROR: Input should be 1x%d, got %%dx%%d\\n", r, c);
-    return -1;
-  }
+int forward(float *m, int, int *label) {
   int sts;
 
 """

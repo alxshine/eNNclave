@@ -51,7 +51,7 @@ int main(void) {
 
   int label = -1;
   printf("forward\n");
-  matutil_forward(input, 1, c, &label);
+  matutil_forward(input, c, &label);
   printf("Output label: %d\n", label);
 
   printf("\n\nConvolution:\n");

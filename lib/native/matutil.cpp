@@ -171,8 +171,8 @@ void matutil_dump_matrix3(float *m, int h, int w, int c){
   }
 }
 
-int matutil_forward(float *m, int r, int c, int *label) {
-  return forward(m, r * c, r, c, label);
+int matutil_forward(float *m, int size, int *label){
+  return forward(m, size, label);
 }
 
 int print_error(const char *fmt, ...) {

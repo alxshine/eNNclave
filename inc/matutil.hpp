@@ -25,8 +25,8 @@ extern "C" {
 
   void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float *ret);
 
-  int matutil_forward(float *m, int r, int c, int *label);
-
+  int matutil_forward(float *m, int size, int *label);
+  
   void matutil_dump_matrix(float *m, int r, int c);
 
   void matutil_dump_matrix3(float *m, int h, int w, int c);

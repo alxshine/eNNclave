@@ -70,9 +70,8 @@ class Enclave(Sequential):
 
         # the first dim of input_shape is num_samples in batch, so skip that
         expected_c = self.layers[0].input_shape[1]
-        preamble = preamble_template % (expected_c, expected_c)
 
-        forward_file.write(preamble)
+        forward_file.write(preamble_template)
         inputs = 'm'
         for i, l in enumerate(self.layers):
             call_string, generated_ops = Enclave.get_call_string(
