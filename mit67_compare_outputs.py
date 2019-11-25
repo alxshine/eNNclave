@@ -54,7 +54,7 @@ test_images = processed_images
 print("Predicting with TF model")
 tf_before = time.time()
 tf_predictions = tf_model.predict(test_images)
-tf_after = time.after()
+tf_after = time.time()
 tf_labels = np.argmax(tf_predictions, axis=1)
 
 tf_accuracy = np.equal(tf_labels, test_labels).sum()/len(test_labels)
