@@ -41,7 +41,7 @@ for i in range(num_layers-n, num_layers):
     layer = all_layers[i]
     enclave.add(layer)
 
-enclave_input_shape = all_layers[-n-1].output_shape
+enclave_input_shape = all_layers[-n].input_shape
 enclave.build(input_shape=enclave_input_shape)
 
 # build cpp and bin files for enclave
