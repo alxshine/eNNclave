@@ -61,7 +61,6 @@ dense = Sequential([
 ])
 
 model = Sequential([
-    layers.MaxPooling2D(1),
     extractor,
     layers.GlobalAveragePooling2D(),
     dense])
