@@ -11,13 +11,14 @@ from os.path import join
 
 import json
 import sys
+import time
 
 tf.compat.v1.enable_eager_execution()
 
 if len(sys.argv) < 3:
     print("Usage: {} tf_model enclave_model".format(sys.argv[0]))
 
-NUM_IMAGES = 20
+NUM_IMAGES = 5
 
 tf_model_file = sys.argv[1]
 tf_model = load_model(tf_model_file)
@@ -51,15 +52,20 @@ test_images = processed_images
 
 # predict dataset
 print("Predicting with TF model")
+tf_before = time.time()
 tf_predictions = tf_model.predict(test_images)
+tf_after = time.after()
 tf_labels = np.argmax(tf_predictions, axis=1)
 
 tf_accuracy = np.equal(tf_labels, test_labels).sum()/len(test_labels)
-print("TF model accuracy: {}".format(tf_accuracy))
+print("TF model accuracy: {}, prediction took {}".format(tf_accuracy, tf_after-tf_before))
 
 print("Predicting with Enclave model")
+enclave_before = time.time()
 enclave_predictions = enclave_model.predict(test_images)
+enclave_after = time.time()
 enclave_labels = np.argmax(enclave_predictions, axis=1)
+print("Prediction took {}".format(enclave_after-enclave_befor))
 
 same_labels = np.equal(tf_labels, enclave_labels)
 print("{} of {} labels are equal".format(same_labels.sum(), len(same_labels)))
