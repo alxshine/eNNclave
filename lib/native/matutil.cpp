@@ -84,11 +84,14 @@ int matutil_conv(float *input, int h, int w, int c, int f, float *kernels,
 
               ret[i * w * f + j * f + fi] +=
 		input[input_i * w * c + input_j * c + ci] *
-		kernels[ki * kw * c * f + kj * c * f + ci * f + fi] +
-		biases[fi];
+		kernels[ki * kw * c * f + kj * c * f + ci * f + fi];
             }
           }
         }
+      }
+      
+      for (int fi = 0; fi < f; ++fi) {
+	ret[i*w*f + j*f + fi] += biases[fi];
       }
     }
   }

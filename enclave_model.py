@@ -154,6 +154,8 @@ class Enclave(Sequential):
             if layer.activation.__name__ == 'relu':
                 # relu
                 s += relu_template % (new_buffer, 1, new_size)
+            elif layer.activation.__name__ == 'linear':
+                s += "  // no activation function for layer {}".format(layer.name)
             else:
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
