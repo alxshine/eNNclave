@@ -58,14 +58,14 @@ tf_after = time.time()
 tf_labels = np.argmax(tf_predictions, axis=1)
 
 tf_accuracy = np.equal(tf_labels, test_labels).sum()/len(test_labels)
-print("TF model accuracy: {}, prediction took {}".format(tf_accuracy, tf_after-tf_before))
+print("TF model accuracy: {}, prediction took {:05f} seconds".format(tf_accuracy, tf_after-tf_before))
 
 print("Predicting with Enclave model")
 enclave_before = time.time()
 enclave_predictions = enclave_model.predict(test_images)
 enclave_after = time.time()
 enclave_labels = np.argmax(enclave_predictions, axis=1)
-print("Prediction took {}".format(enclave_after-enclave_befor))
+print("Prediction took {:05f} seconds".format(enclave_after-enclave_before))
 
 same_labels = np.equal(tf_labels, enclave_labels)
 print("{} of {} labels are equal".format(same_labels.sum(), len(same_labels)))
