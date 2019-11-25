@@ -17,7 +17,7 @@ MODEL_FILE = 'models/mnist.h5'
 HIST_FILE = 'hist_mnist.csv'
 HIDDEN_NEURONS = 128
 DROPOUT_RATIO = 0.4
-NUM_EPOCHS = 100
+NUM_EPOCHS = 200
 STEPS_PER_EPOCH = 10
 VALIDATION_STEPS = 2
 BATCH_SIZE = 32
@@ -40,10 +40,12 @@ test_ds = test_ds.batch(BATCH_SIZE)
 
 model = Sequential([
     layers.Input(INPUT_SHAPE),
-    layers.Conv2D(32, 3, activation='relu'),
-    layers.Conv2D(64, 3, activation='relu'),
+    layers.MaxPooling2D(1),
+    layers.Conv2D(32, 3, activation='relu', padding='same'),
     layers.MaxPooling2D(2),
-    layers.Flatten(),
+    layers.Conv2D(64, 3, activation='relu', padding='same'),
+    layers.MaxPooling2D(2),
+    layers.GlobalAveragePooling2D(),
     layers.Dropout(DROPOUT_RATIO),
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
