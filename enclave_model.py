@@ -72,21 +72,30 @@ class Enclave(Sequential):
         expected_c = self.layers[0].input_shape[1]
 
         forward_file.write(preamble_template)
+        # declare tmp buffers
+        output_sizes = [np.prod(l.output_shape[1:]) for l in self.layers]
+        output_sizes.sort(reverse = True)
+        # TODO: declare the largest and second largest, instead of largest twice (requires coordination with tmp_index)
+        forward_file.write(tmp_buffer_declaration_template % (0, output_sizes[0]))
+        forward_file.write(tmp_buffer_declaration_template % (1, output_sizes[1]))
+            
+        tmp_index = 0
         inputs = 'm'
         for i, l in enumerate(self.layers):
             call_string, generated_ops = Enclave.get_call_string(
-                inputs, i, l)
+                inputs, i, l, tmp_index)
             forward_file.write(call_string)
 
             #if the function generated a call, it declared a new tmp buffer
             if generated_ops:
-                inputs = tmp_buffer_template % i
+                inputs = tmp_buffer_template % tmp_index
+                tmp_index = 1-tmp_index
                 
         forward_file.write(postamble)
         forward_file.close()
 
     @staticmethod
-    def get_call_string(inputs, tmp_index, layer):
+    def get_call_string(inputs, i, layer, tmp_index):
         """Generates C function calls required for layer.
 
         Arguments:
@@ -107,18 +116,16 @@ class Enclave(Sequential):
             parameters = layer.get_weights()
             w = parameters[0]
 
-            s = tmp_buffer_declaration_template % (
-                tmp_index, w.shape[1])
-            weight_name = weight_name_template % tmp_index
+            weight_name = weight_name_template % i
             mult = mult_template % (
                 inputs, 1, w.shape[0], weight_name, w.shape[0], w.shape[1],
                 tmp_name)
-            s += error_handling_template % mult
+            s = error_handling_template % mult
 
             if len(parameters) > 1:
                 # add bias
                 b = parameters[1]
-                bias_name = bias_name_template % tmp_index
+                bias_name = bias_name_template % i
                 add = add_template % (
                     tmp_name, 1, w.shape[1], bias_name, 1, b.shape[0],
                     tmp_name)
@@ -143,13 +150,12 @@ class Enclave(Sequential):
             _, h, w, c = layer.input_shape
             f = layer.output_shape[-1]
             new_size = np.prod(layer.output_shape[1:])
-            s = tmp_buffer_declaration_template % (tmp_index, new_size)
             new_buffer = tmp_buffer_template % tmp_index
             kh, kw = layer.kernel_size
-            kernels = weight_name_template % tmp_index
-            biases = bias_name_template % tmp_index
+            kernels = weight_name_template % i
+            biases = bias_name_template % i
             
-            s += conv_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
+            s = conv_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
 
             if layer.activation.__name__ == 'relu':
                 # relu
@@ -162,8 +168,7 @@ class Enclave(Sequential):
 
         elif type(layer) in [layers.GlobalAveragePooling2D]:
             _, h, w, c = layer.input_shape
-            s = tmp_buffer_declaration_template % (tmp_index, c)
-            s += global_average_pooling_2d_template % (inputs, h, w, c, tmp_buffer_template % tmp_index)
+            s = global_average_pooling_2d_template % (inputs, h, w, c, tmp_buffer_template % tmp_index)
 
         elif type(layer) in [layers.MaxPooling2D]:
             _, h, w, c = layer.input_shape
@@ -172,8 +177,7 @@ class Enclave(Sequential):
                 raise NotImplementedError("Non-square pooling is not implemented")
 
             new_size = np.prod(layer.output_shape[1:])
-            s = tmp_buffer_declaration_template % (tmp_index, new_size)
-            s += max_pooling_2d_template % (inputs, h, w, c, pool_size, tmp_buffer_template % tmp_index)
+            s = max_pooling_2d_template % (inputs, h, w, c, pool_size, tmp_buffer_template % tmp_index)
 
         elif type(layer) in [layers.Dropout]:
             # these layers are inactive during inference, so they can be skipped
