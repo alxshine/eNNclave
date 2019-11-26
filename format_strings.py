@@ -1,4 +1,6 @@
 preamble_template = """
+#include <stdlib.h>
+
 #include "state.hpp"
 #include "matutil.hpp"
 #include "forward.hpp"
@@ -14,7 +16,8 @@ postamble = """
 
 
 tmp_buffer_template = 'tmp%d'
-tmp_buffer_declaration_template = "  float tmp%d[%d];\n"
+tmp_buffer_declaration_template = "  float *tmp%d = (float*) malloc(%d*sizeof(float));\n"
+tmp_buffer_release_template = "  free(tmp%d);\n"
 
 weight_name_template = "w%d"
 bias_name_template = "b%d"

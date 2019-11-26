@@ -75,9 +75,9 @@ class Enclave(Sequential):
         # declare tmp buffers
         output_sizes = [np.prod(l.output_shape[1:]) for l in self.layers]
         output_sizes.sort(reverse = True)
-        # TODO: declare the largest and second largest, instead of largest twice (requires coordination with tmp_index)
+        # TODO: check for even and odd layers to get optimal allocation size
         forward_file.write(tmp_buffer_declaration_template % (0, output_sizes[0]))
-        forward_file.write(tmp_buffer_declaration_template % (1, output_sizes[1]))
+        forward_file.write(tmp_buffer_declaration_template % (1, output_sizes[0]))
             
         tmp_index = 0
         inputs = 'm'
@@ -90,7 +90,10 @@ class Enclave(Sequential):
             if generated_ops:
                 inputs = tmp_buffer_template % tmp_index
                 tmp_index = 1-tmp_index
-                
+
+        #free tmp buffers
+        forward_file.write(tmp_buffer_release_template % 0)
+        forward_file.write(tmp_buffer_release_template % 1)
         forward_file.write(postamble)
         forward_file.close()
 
