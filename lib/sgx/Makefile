@@ -193,7 +193,9 @@ endif
 .PHONY: all target run
 all: .config_$(Build_Mode)_$(SGX_ARCH)
 	@$(MAKE) target
-	@cp enclave.so enclave.signed.so libmatutil.so -d ..
+	@ln -s sgx/libmatutil.so ../
+	@ln -s lib/sgx/enclave.so ${ROOT}/
+	@ln -s lib/sgx/enclave.signed.so ${ROOT}/
 
 ifeq ($(Build_Mode), HW_RELEASE)
 target:  $(App_Name) $(wrapper_name) $(Enclave_Name)
