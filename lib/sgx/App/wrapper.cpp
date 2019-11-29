@@ -201,9 +201,6 @@ void test(void)
     // ecall_thread_functions();
 
     do_something(global_eid);
-    int result;
-    multiply(global_eid, &result, 2,4);
-    printf("result: %d\n", result);
 
     /* Destroy the enclave */
     sgx_destroy_enclave(global_eid);
@@ -229,44 +226,11 @@ int matutil_teardown(){
   return sgx_destroy_enclave(global_eid);
 }
 
-void matutil_get_new_dimensions(int r1, int c1, int r2, int c2, int *rr,
-                                int *cr) {
-  *rr = r1;
-  *cr = c2;
-}
-
-int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
-                     float *ret) {
-  int status;
-  matmul(global_eid, &status, m1, r1*c1, r1, c1, m2, r2*c2, r2, c2, ret, r1*c2);
-  if(status)
-    fprintf(stderr, "Incompatible matrix dimensions for multiplication %dx%d and %dx%d\n", r1, c1, r2, c2);
-  return status;
-}
-
-int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
-                float *ret) {
-  int status;
-  add(global_eid, &status, m1, r1*c1, r1, c1, m2, r2*c2, r2, c2, ret, r1*c2);
-  if(status)
-    fprintf(stderr, "Incompatible matrix dimensions for addition %dx%d and %dx%d\n", r1, c1, r2, c2);
-  return status;
-}
-
-void matutil_relu(float *m, int r, int c) {
-  relu(global_eid, m, r*c, r, c);
-}
-
-
-int matutil_forward(float *m, int r, int c, int *label){
+int matutil_forward(float *m, int s, int *label){
   int sts;
   // *label=-1; //so invalid results are visible
-  sgx_status_t sgx_status = forward(global_eid, &sts, m, r*c, label);
+  sgx_status_t sgx_status = forward(global_eid, &sts, m, s, label);
   if(sgx_status != SGX_SUCCESS)
     print_error_message(sgx_status);
   return sts;
-}
-
-void matutil_dump_matrix(float *m, int r, int c) {
-  dump_matrix(global_eid, m, r*c, r, c);  
 }

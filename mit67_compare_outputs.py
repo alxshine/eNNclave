@@ -5,6 +5,7 @@ import numpy as np
 from enclave_model import Enclave
 from enclave_layer import EnclaveLayer
 import utils
+import interop.pymatutil as pymatutil
 
 import os
 from os.path import join
@@ -64,7 +65,9 @@ print("TF model accuracy: {}".format(tf_accuracy))
 
 print("Predicting with Enclave model")
 enclave_before = time.time()
+pymatutil.initialize()
 enclave_predictions = enclave_model.predict(test_images)
+pymatutil.teardown()
 enclave_after = time.time()
 enclave_labels = np.argmax(enclave_predictions, axis=1)
 enclave_time = enclave_after - enclave_before

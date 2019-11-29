@@ -196,7 +196,7 @@ all: .config_$(Build_Mode)_$(SGX_ARCH)
 	@cp enclave.so enclave.signed.so libmatutil.so -d ..
 
 ifeq ($(Build_Mode), HW_RELEASE)
-target:  $(App_Name) $(wrapper_name) $(Enclave_Name) wrapper_test
+target:  $(App_Name) $(wrapper_name) $(Enclave_Name)
 	@echo "The project has been built in release hardware mode."
 	@echo "Please sign the $(Enclave_Name) first with your signing key before you run the $(App_Name) to launch and access the enclave."
 	@echo "To sign the enclave use the command:"
@@ -206,7 +206,7 @@ target:  $(App_Name) $(wrapper_name) $(Enclave_Name) wrapper_test
 
 
 else
-target: $(App_Name) $(wrapper_name) $(Signed_Enclave_Name) wrapper_test
+target: $(App_Name) $(wrapper_name) $(Signed_Enclave_Name)
 ifeq ($(Build_Mode), HW_DEBUG)
 	@echo "The project has been built in debug hardware mode."
 else ifeq ($(Build_Mode), SIM_DEBUG)
@@ -248,17 +248,12 @@ App/%.o: App/%.cpp  App/Enclave_u.h
 	@echo "CXX  <=  $<"
 
 $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
-	@$(CXX) $^ -o $@ $(App_Link_Flags)
+	 $(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
 $(wrapper_name): App/Enclave_u.o $(wrapper_cpp_objects) Enclave/state.cpp $(Weight_Objects)
 	@$(CXX) $^ -shared -fPIC -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
-
-wrapper_test: test.c $(wrapper_name)
-	@echo "Building test.c"
-	@$(CXX) test.c $(SGX_COMMON_CXXFLAGS) $(App_Cpp_Flags) $(App_Link_Flags) -L. -lmatutil -o test
-
 
 ######## Enclave Objects ########
 
