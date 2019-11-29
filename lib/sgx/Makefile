@@ -164,6 +164,8 @@ Enclave_Link_Flags := $(Enclave_Security_Link_Flags) \
 	-Wl,--version-script=Enclave/Enclave.lds
 
 Enclave_Cpp_Objects := $(sort $(Enclave_Cpp_Files:.cpp=.o))
+Weights := $(wildcard Enclave/*.bin)
+Weight_Objects := $(Weights:.bin=.bin_o)
 
 Enclave_Name := enclave.so
 Signed_Enclave_Name := enclave.signed.so
@@ -249,7 +251,7 @@ $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
-$(wrapper_name): App/Enclave_u.o $(wrapper_cpp_objects) Enclave/state.cpp
+$(wrapper_name): App/Enclave_u.o $(wrapper_cpp_objects) Enclave/state.cpp $(Weight_Objects)
 	@$(CXX) $^ -shared -fPIC -o $@ $(App_Link_Flags)
 	@echo "LINK =>  $@"
 
@@ -270,11 +272,14 @@ Enclave/Enclave_t.o: Enclave/Enclave_t.c
 	@$(CC) $(SGX_COMMON_CFLAGS) $(Enclave_C_Flags) -c $< -o $@
 	@echo "CC   <=  $<"
 
-Enclave/%.o: Enclave/%.cpp Enclave/Enclave_t.h
+Enclave/%.bin_o: Enclave/%.bin
+	@(cd Enclave && ld -r -b binary $(notdir $<) -o $(notdir $@))
+
+Enclave/%.o: Enclave/%.cpp Enclave/Enclave_t.h $(Weight_Objects)
 	@$(CXX) $(SGX_COMMON_CXXFLAGS) $(Enclave_Cpp_Flags) -c $< -o $@
 	@echo "CXX  <=  $<"
 
-$(Enclave_Name): Enclave/Enclave_t.o $(Enclave_Cpp_Objects)
+$(Enclave_Name): Enclave/Enclave_t.o $(Enclave_Cpp_Objects) $(Weight_Objects)
 	@$(CXX) $^ -o $@ $(Enclave_Link_Flags)
 	@echo "LINK =>  $@"
 
@@ -282,7 +287,11 @@ $(Signed_Enclave_Name): $(Enclave_Name)
 	@$(SGX_ENCLAVE_SIGNER) sign -key Enclave/Enclave_private.pem -enclave $(Enclave_Name) -out $@ -config $(Enclave_Config_File)
 	@echo "SIGN =>  $@"
 
-.PHONY: clean
+.PHONY: clean, debug
 
 clean:
-	@rm -f .config_* $(App_Name) $(wrapper_name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) $(wrapper_cpp_objects) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.* test
+	@rm -f .config_* $(App_Name) $(wrapper_name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) $(wrapper_cpp_objects) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.* test Enclave/*.bin_o
+
+debug:
+	@echo $(value Weights)
+	@echo $(value Weight_Objects)

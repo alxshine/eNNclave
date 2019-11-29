@@ -49,7 +49,7 @@ extern "C" {
   int add(float *m1, int s1, int r1, int c1, float *m2, int s2, int r2, int c2,
 	  float *ret, int sr);
   void relu(float *m, int s, int r, int c);
-  int forward(float *m, int s, int r, int c, int *label);
+  int forward(float *m, int s, int *label);
 
 #if defined(__cplusplus)
 }

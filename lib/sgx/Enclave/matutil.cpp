@@ -53,10 +53,99 @@ int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
   return 0;
 }
 
+int matutil_conv(float *input, int h, int w, int c, int f, float *kernels,
+                 int kh, int kw, float *biases, float *ret) {
+  // clear ret
+  int len_ret = h * w * f;
+  for (int i = 0; i < len_ret; ++i) {
+    ret[i] = 0;
+  }
+
+  int min_row_offset = kh / 2;
+  int min_col_offset = kw / 2;
+
+  for (int i = 0; i < h; ++i) {
+    for (int j = 0; j < w; ++j) {
+      for (int ki = 0; ki < kh; ++ki) {
+        for (int kj = 0; kj < kw; ++kj) {
+          for (int ci = 0; ci < c; ++ci) {
+            for (int fi = 0; fi < f; ++fi) {
+              int input_i = i - min_row_offset + ki;
+              int input_j = j - min_col_offset + kj;
+	      
+              // zero padding // TODO: make this data independent
+              if (input_i < 0 || input_i >= h || input_j < 0 || input_j >= w)
+                continue;
+
+              ret[i * w * f + j * f + fi] +=
+		input[input_i * w * c + input_j * c + ci] *
+		kernels[ki * kw * c * f + kj * c * f + ci * f + fi];
+            }
+          }
+        }
+      }
+      
+      for (int fi = 0; fi < f; ++fi) {
+	ret[i*w*f + j*f + fi] += biases[fi];
+      }
+    }
+  }
+
+  return 0;
+}
+
 void matutil_relu(float *m, int r, int c) {
   for (int i = 0; i < r * c; i++)
     if (m[i] < 0)
       m[i] = 0;
+}
+
+
+void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret){
+  //calculate the average per channel (averaging over h and w)
+  for (int i=0; i < c; ++i) {
+    ret[i] = 0;
+  }
+
+  for (int i = 0; i<h; ++i) {
+    for (int j = 0; j<w; ++j) {
+      for(int ci=0; ci<c; ++ci) {
+	ret[ci] += m[i*w*c + j*c + ci];
+      }
+    }
+  }
+
+  int div = h*w;
+  for (int ci=0; ci < c; ++ci) {
+    ret[ci] /= div;
+  }
+}
+
+void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float *ret){
+  int ret_h = h/pool_size;
+  int ret_w = w/pool_size;
+  
+  for (int i = 0; i < ret_h; ++i) {
+    int input_i = i*pool_size;
+    for (int j = 0; j < ret_w; ++j) {
+      int input_j = j*pool_size;
+
+      for (int ci = 0; ci < c; ++ci) {
+	float current_max = m[input_i*w*c + input_j*c + ci];
+	
+	for (int di=0; di < pool_size; ++di) {
+	  for (int dj=0; dj < pool_size; ++dj) {
+	    int current_i = input_i + di;
+	    int current_j = input_j + dj;
+	    float to_compare = m[current_i*w*c + current_j*c + ci];
+	    current_max = to_compare > current_max ? to_compare : current_max;
+	  }
+	}
+
+	ret[i*ret_w*c + j*c + ci] = current_max;
+      }
+    }
+  }
 }
 
 void matutil_dump_matrix(float *m, int r, int c) {
@@ -68,6 +157,18 @@ void matutil_dump_matrix(float *m, int r, int c) {
   }
 }
 
-int matutil_forward(float *m, int r, int c, int *label){
-  return forward(m, r*c, r, c, label);
+void matutil_dump_matrix3(float *m, int h, int w, int c){
+  for (int ci = 0; ci < c; ++ci) {
+    printf("Ci=%d:\n", ci);
+    for (int i = 0; i < h; ++i) {
+      for (int j = 0; j < w; ++j) {
+	printf("%f, ", m[i*w*c + j*c + ci]);
+      }
+      printf("\n");
+    }
+  }
+}
+
+int matutil_forward(float *m, int size, int *label){
+  return forward(m, size, label);
 }
