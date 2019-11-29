@@ -15,5 +15,5 @@ all: matutil.cpp forward.cpp state.cpp $(weight_objects)
 .PHONY:
 clean:
 	rm -rf *.so *.o *.bin forward.cpp state.cpp
-	cp dummy_forward.cpp forward.cpp
-	cp dummy_state.cpp state.cpp
+	cp ../dummy_forward.cpp forward.cpp
+	cp ../dummy_state.cpp state.cpp

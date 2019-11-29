@@ -14,5 +14,6 @@ interop:
 clean:
 	$(MAKE) -C lib clean
 	$(MAKE) -C interop clean
+	rm -f enclave.so enclave.signed.so
 
 .PHONY: lib python interop clean

@@ -193,9 +193,9 @@ endif
 .PHONY: all target run
 all: .config_$(Build_Mode)_$(SGX_ARCH)
 	@$(MAKE) target
-	@ln -s sgx/libmatutil.so ../
-	@ln -s lib/sgx/enclave.so ${ROOT}/
-	@ln -s lib/sgx/enclave.signed.so ${ROOT}/
+	@ln -sf sgx/libmatutil.so ../
+	@ln -sf lib/sgx/enclave.so ${ROOT}/
+	@ln -sf lib/sgx/enclave.signed.so ${ROOT}/
 
 ifeq ($(Build_Mode), HW_RELEASE)
 target:  $(App_Name) $(wrapper_name) $(Enclave_Name)
@@ -287,7 +287,9 @@ $(Signed_Enclave_Name): $(Enclave_Name)
 .PHONY: clean, debug
 
 clean:
-	@rm -f .config_* $(App_Name) $(wrapper_name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) $(wrapper_cpp_objects) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.* test Enclave/*.bin_o
+	rm -f .config_* $(App_Name) $(wrapper_name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) $(wrapper_cpp_objects) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.* test Enclave/*.bin*
+	cp ../dummy_forward.cpp Enclave/forward.cpp
+	cp ../dummy_state.cpp Enclave/state.cpp
 
 debug:
 	@echo $(value Weights)
