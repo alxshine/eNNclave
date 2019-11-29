@@ -34,7 +34,6 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "state.hpp"
 
 #if defined(__cplusplus)
 extern "C" {

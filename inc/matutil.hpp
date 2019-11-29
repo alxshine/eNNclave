@@ -1,8 +1,6 @@
 #ifndef MATUTIL_H
 #define MATUTIL_H
 
-#include <stdio.h>
-
 #if defined(__cplusplus)
 extern "C" {
 #endif

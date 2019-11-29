@@ -1,6 +1,7 @@
 #include "matutil.hpp"
 #include "state.hpp"
 #include "forward.hpp"
+#include "Enclave.h"
 
 int matutil_initialize(void) { return 0; }
 
@@ -153,7 +154,7 @@ void matutil_dump_matrix(float *m, int r, int c) {
     for (int j = 0; j < c; ++j) {
       printf("%f, ", m[i * c + j]);
     }
-    printf("\n");
+    printf("\n", 0);
   }
 }
 
@@ -164,7 +165,7 @@ void matutil_dump_matrix3(float *m, int h, int w, int c){
       for (int j = 0; j < w; ++j) {
 	printf("%f, ", m[i*w*c + j*c + ci]);
       }
-      printf("\n");
+      printf("\n", 0);
     }
   }
 }
