@@ -5,9 +5,7 @@ MODE:=native
 
 all:
 	@$(MAKE) lib
-ifeq ($(MODE), native)
 	@$(MAKE) test
-endif
 
 lib:
 	@printf "\n\nMaking library in $(MODE) mode\n\n\n"

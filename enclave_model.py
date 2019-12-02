@@ -36,8 +36,13 @@ class Enclave(Sequential):
                         "extern const char _binary_w%d_bin_start;\n" % i)
                     cpp_file.write(
                         "const float *w%d = (const float*) &_binary_w%d_bin_start;\n" % (i, i))
-                    cpp_file.write("int w%d_r = %d;\n" % (i, w.shape[0]))
-                    cpp_file.write("int w%d_c = %d;\n\n" % (i, w.shape[1]))
+                    cpp_file.write("int w%d_h = %d;\n" % (i, w.shape[0]))
+                    cpp_file.write("int w%d_w = %d;\n" % (i, w.shape[1]))
+                    if len(w.shape) > 2:
+                        cpp_file.write("int w%d_c = %d;\n" % (i, w.shape[2]))
+                    if len(w.shape) > 3:
+                        cpp_file.write("int w%d_f = %d;\n" % (i, w.shape[3]))
+                    cpp_file.write("\n")
 
                 if len(parameters) > 1:
                     b = parameters[1]

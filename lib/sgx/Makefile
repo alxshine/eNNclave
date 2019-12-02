@@ -196,6 +196,8 @@ all: .config_$(Build_Mode)_$(SGX_ARCH)
 	@ln -sf sgx/libmatutil.so ../
 	@ln -sf lib/sgx/enclave.so ${ROOT}/
 	@ln -sf lib/sgx/enclave.signed.so ${ROOT}/
+	@ln -sf sgx/enclave.so ../
+	@ln -sf sgx/enclave.signed.so ../
 
 ifeq ($(Build_Mode), HW_RELEASE)
 target:  $(App_Name) $(wrapper_name) $(Enclave_Name)
