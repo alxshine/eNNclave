@@ -15,7 +15,7 @@ mkdir -p $sgx_dir
 #install linux-sgx-driver
 sudo apt-get install -y linux-headers-$(uname -r)
 
-git clone $driver_git $driver_dir
+git clone --single-branch --branch sgx2 $driver_git $driver_dir
 cd $driver_dir
 make
 
