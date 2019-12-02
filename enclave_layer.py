@@ -18,7 +18,7 @@ class EnclaveLayer(Layer):
         ret = np.zeros((xs.shape[0],self.num_classes))
         for i, x in enumerate(xs):
             label = pymatutil.forward(x.astype(np.float32).tobytes(),
-                                    1, x.shape[0])
+                                      np.prod(x.shape))
             ret[i, label] = 1
         return ret
 

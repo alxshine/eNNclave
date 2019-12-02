@@ -20,14 +20,14 @@ static PyObject *pymatutil_test_bytes(PyObject *self, PyObject *args) {
 
 static PyObject *pymatutil_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
-  int r, c;
+  int s;
 
-  if (!PyArg_ParseTuple(args, "Sii", &b, &r, &c))
+  if (!PyArg_ParseTuple(args, "Si", &b, &s))
     return NULL;
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   int label;
-  int sts = matutil_forward(m, r*c, &label);
+  int sts = matutil_forward(m, s, &label);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error in enclave");
     return NULL; // TODO: do some error handling
