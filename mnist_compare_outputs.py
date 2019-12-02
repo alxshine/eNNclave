@@ -15,7 +15,7 @@ if len(sys.argv) < 3:
     print("Usage: {} regular_model enclave_model".format(sys.argv[0]))
     sys.exit(1)
 
-NUM_IMAGES = 1
+NUM_IMAGES = 10
 
 tf_model_file = sys.argv[1]
 tf_model = load_model(tf_model_file)
