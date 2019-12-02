@@ -1,5 +1,5 @@
 import tensorflow_datasets as tfds
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model, Sequential
 import tensorflow as tf
 
 import numpy as np
@@ -7,16 +7,15 @@ import sys
 import time
 
 import utils
+import interop.pymatutil as pymatutil
 
 from enclave_layer import EnclaveLayer
-
-tf.compat.v1.enable_eager_execution()
 
 if len(sys.argv) < 3:
     print("Usage: {} regular_model enclave_model".format(sys.argv[0]))
     sys.exit(1)
 
-NUM_IMAGES = 100
+NUM_IMAGES = 1
 
 tf_model_file = sys.argv[1]
 tf_model = load_model(tf_model_file)
@@ -26,7 +25,7 @@ enclave_model = load_model(enclave_model_file, custom_objects={'EnclaveLayer': E
 print("Taking {} images from MNIST test_set".format(NUM_IMAGES))
 test_ds = tfds.load('mnist', split=tfds.Split.TEST, as_supervised=True)
 test_ds = test_ds.map(utils.preprocess_mnist)
-test_ds = test_ds.shuffle(32).take(100)
+test_ds = test_ds.shuffle(32).take(NUM_IMAGES)
 test_tuples = [(x.numpy(),y.numpy()) for x,y in test_ds]
 test_images, test_labels = zip(*test_tuples)
 test_images = np.array(test_images)
@@ -43,7 +42,9 @@ print("TF model accuracy: {}".format(tf_accuracy))
 
 print("Predicting with Enclave model")
 enclave_before = time.time()
+pymatutil.initialize()
 enclave_predictions = enclave_model.predict(test_images)
+pymatutil.teardown()
 enclave_after = time.time()
 enclave_labels = np.argmax(enclave_predictions, axis=1)
 enclave_time = enclave_after - enclave_before
