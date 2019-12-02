@@ -82,7 +82,9 @@ class Enclave(Sequential):
         output_sizes.sort(reverse = True)
         # TODO: check for even and odd layers to get optimal allocation size
         forward_file.write(tmp_buffer_declaration_template % (0, output_sizes[0]))
+        forward_file.write(declaration_error_handling_template % (0, output_sizes[0]))
         forward_file.write(tmp_buffer_declaration_template % (1, output_sizes[0]))
+        forward_file.write(declaration_error_handling_template % (1, output_sizes[1]))
             
         tmp_index = 0
         inputs = 'm'

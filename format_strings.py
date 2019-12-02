@@ -17,6 +17,11 @@ postamble = """
 
 tmp_buffer_template = 'tmp%d'
 tmp_buffer_declaration_template = "  float *tmp%d = (float*) malloc(%d*sizeof(float));\n"
+declaration_error_handling_template = """  if(tmp%d == NULL){
+  print_error("\\n\\nENCLAVE ERROR:Could not allocate buffer of size %d\\n\\n\\n");
+  return 1;
+  }
+"""
 tmp_buffer_release_template = "  free(tmp%d);\n"
 
 weight_name_template = "w%d"
