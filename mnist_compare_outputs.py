@@ -15,7 +15,7 @@ if len(sys.argv) < 3:
     print("Usage: {} regular_model enclave_model".format(sys.argv[0]))
     sys.exit(1)
 
-NUM_IMAGES = 10
+NUM_IMAGES = 100
 
 tf_model_file = sys.argv[1]
 tf_model = load_model(tf_model_file)
@@ -51,4 +51,5 @@ enclave_time = enclave_after - enclave_before
 print("Prediction took {:05f} seconds".format(enclave_time))
 
 same_labels = np.equal(tf_labels, enclave_labels)
-print("{} of {} labels are equal".format(same_labels.sum(), len(same_labels)))
+
+print("{} of {} labels are equal, slowdown factor: {:.03f}".format(same_labels.sum(), len(same_labels), enclave_time/tf_time))

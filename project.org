@@ -17,6 +17,16 @@ Predicting with Enclave model
 Prediction took 972.469672 seconds
 10 of 10 labels are equal, slowdown factor: 1668.591
 #+END_SRC
+And for MNIST:
+#+BEGIN_SRC text
+Taking 100 images from MNIST test_set
+Predicting with TF model
+Prediction took 0.059973 seconds
+TF model accuracy: 0.9
+Predicting with Enclave model
+Prediction took 3.748415 seconds
+100 of 100 labels are equal, slowdown factor: 62.502
+#+END_SRC
 
 The slowdown is incurred due to the ineficcient way memory is accessed during convolution, and also because memory has to be paged constantly.
 
