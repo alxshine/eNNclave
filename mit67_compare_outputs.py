@@ -19,7 +19,7 @@ tf.compat.v1.enable_eager_execution()
 if len(sys.argv) < 3:
     print("Usage: {} tf_model enclave_model".format(sys.argv[0]))
 
-NUM_IMAGES = 5
+NUM_IMAGES = 10
 
 tf_model_file = sys.argv[1]
 tf_model = load_model(tf_model_file)

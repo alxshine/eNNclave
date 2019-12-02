@@ -1,35 +1,54 @@
 
 # Table of Contents
 
-1.  [NN SGX](#org64b8a25)
-    1.  [People](#orgf2cbbca)
-    2.  [Setting up a testing environment](#orgda225ab)
-    3.  [Training a model](#org76bd313)
-    4.  [Extracting the enclave](#org0bbe198)
-    5.  [Compiling the enclave](#org1522344)
-    6.  [Running the enclave](#org0a08901)
-        1.  [Setting up `LD_LIBRARY_PATH`](#org6f56aa8)
-        2.  [Evaluating models](#org1569a5a)
-    7.  [Under the hood](#org460b3c8)
-    8.  [Related Work](#org048697d)
+1.  [NN SGX](#org90464c2)
+    1.  [People](#orgd6ca25d)
+    2.  [Current Status](#orgf70e679)
+    3.  [Setting up a testing environment](#orgba9e88e)
+    4.  [Training a model](#orgd08d641)
+    5.  [Extracting the enclave](#orgb00705a)
+    6.  [Compiling the enclave](#orgc5690dc)
+    7.  [Running the enclave](#org61b3e55)
+        1.  [Setting up `LD_LIBRARY_PATH`](#orgb4d6c26)
+        2.  [Evaluating models](#orge4b4e5d)
+    8.  [Under the hood](#org421d9b8)
+    9.  [Related Work](#org94fdd53)
 
 
-<a id="org64b8a25"></a>
+<a id="org90464c2"></a>
 
 # NN SGX
 
-Running the dense part of CNNs inside the trusted enclave to reduce leakage and protect against model stealing.
+Running some parts or all of a CNN inside the trusted enclave to reduce leakage and protect against model stealing.
 We hope to make this as robust against model stealing as online oracles.
 
 
-<a id="orgf2cbbca"></a>
+<a id="orgd6ca25d"></a>
 
 ## People
 
 RBO, CPA, ASC
 
 
-<a id="orgda225ab"></a>
+<a id="orgf70e679"></a>
+
+## Current Status
+
+As of now moving large models (VGG16) into the enclave works correctly, but with massive slowdown.
+Some results:
+
+    Taking 10 images from MIT67 test_set
+    Predicting with TF model
+    Prediction took 0.582809 seconds
+    TF model accuracy: 0.6
+    Predicting with Enclave model
+    Prediction took 972.469672 seconds
+    10 of 10 labels are equal, slowdown factor: 1668.591
+
+The slowdown is incurred due to the ineficcient way memory is accessed during convolution, and also because memory has to be paged constantly.
+
+
+<a id="orgba9e88e"></a>
 
 ## Setting up a testing environment
 
@@ -40,7 +59,7 @@ Our test machines run Ubuntu Server 18.04, and I provide a setup script for the 
 The python requirements are all in [requirements.txt](requirements.txt).
 
 
-<a id="org76bd313"></a>
+<a id="orgd08d641"></a>
 
 ## Training a model
 
@@ -52,7 +71,7 @@ Our training scripts expect the extracted data to be in `data/mit67`, with both 
 The model can then be trained using the `mit67_train.py` script.
 
 
-<a id="org0bbe198"></a>
+<a id="orgb00705a"></a>
 
 ## Extracting the enclave
 
@@ -61,12 +80,12 @@ It takes two parameters: the original model file, and the number of layers to ex
 The extracted layers will be replaced by an `EnclaveLayer`, which wraps the generated enclave in a manner compatible with the TensorFlow API.
 From the original layers that were not extracted and the new `EnclaveLayer` it builds a new model, and saves it.
 
-The script creates a `dense.cpp` and multiple `.bin` files.
+The script creates a `forward.cpp` and multiple `.bin` files.
 Inside the `.bin` files are the layer weights which will be compiled into the enclave.
-The `dense.cpp` file contains the dense function of the enclave.
+The `forward.cpp` file contains the forward function of the enclave.
 
 
-<a id="org1522344"></a>
+<a id="orgc5690dc"></a>
 
 ## Compiling the enclave
 
@@ -76,12 +95,12 @@ The decision which version to build is decided based on the `MODE` environment v
 All directories contain Makefiles, so running `make` in the project root will build all necessary subdirectories.
 
 
-<a id="org0a08901"></a>
+<a id="org61b3e55"></a>
 
 ## Running the enclave
 
 
-<a id="org6f56aa8"></a>
+<a id="orgb4d6c26"></a>
 
 ### Setting up `LD_LIBRARY_PATH`
 
@@ -91,14 +110,14 @@ To provide the location of the libraries, please run this command from the proje
     source setup/setup_ld_path.sh
 
 
-<a id="org1569a5a"></a>
+<a id="orge4b4e5d"></a>
 
 ### Evaluating models
 
 TODO
 
 
-<a id="org460b3c8"></a>
+<a id="org421d9b8"></a>
 
 ## Under the hood
 
@@ -113,7 +132,7 @@ The enclave also consists of two shared libraries, one in the enclave and one be
 The rest is "basic" C interaction.
 
 
-<a id="org048697d"></a>
+<a id="org94fdd53"></a>
 
 ## Related Work
 
