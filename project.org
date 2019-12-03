@@ -5,6 +5,17 @@ We hope to make this as robust against model stealing as online oracles.
 ** People
 RBO, CPA, ASC
 
+** Datasets
+Currently only image recognition tasks are used for testing.
+The tasks are MNIST using a small CNN, and MIT67 using a pretrained VGG16 network as feature extractor.
+The VGG16 model has its weights fixed during retraining.
+All datasets are stored in ~data~.
+
+I am in the process of "onboarding" text recognition tasks, namely IMDB review sentiment classification using MLPs, and Rotten Tomatoes review sentiment classification using CNNs on sequences.
+The code for these is taken from [[https://github.com/google/eng-edu/tree/master/ml/guides/text_classification][here]].
+
+This gives us classification using CNNs on two different media types.
+
 ** Current Status
 As of now moving large models (VGG16) into the enclave works correctly, but with massive slowdown.
 Some results:
