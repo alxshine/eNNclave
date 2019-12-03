@@ -35,7 +35,7 @@ def load_rotten_tomatoes_sentiment_analysis_dataset(data_path,
     """Loads the rotten tomatoes sentiment analysis dataset.
 
     # Arguments
-        data_path: string, path to the data directory.
+        data_path: string, path to the data base directory.
         validation_split: float, percentage of data to use for validation.
         seed: int, seed for randomizer.
 
