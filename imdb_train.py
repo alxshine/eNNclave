@@ -23,24 +23,7 @@ import utils
 
 FLAGS = None
 
-def _get_last_layer_units_and_activation(num_classes):
-    """Gets the # units and activation function for the last network layer.
-
-    # Arguments
-        num_classes: int, number of classes.
-
-    # Returns
-        units, activation values.
-    """
-    if num_classes == 2:
-        activation = 'sigmoid'
-        units = 1
-    else:
-        activation = 'softmax'
-        units = num_classes
-    return units, activation
-
-def mlp_model(num_layers, units, dropout_rate, input_shape, num_classes):
+def mlp_model(num_layers, units, dropout_rate, input_shape):
     """Creates an instance of a multi-layer perceptron model.
 
     # Arguments
@@ -48,12 +31,10 @@ def mlp_model(num_layers, units, dropout_rate, input_shape, num_classes):
         units: int, output dimension of the layers.
         dropout_rate: float, percentage of input to drop at Dropout layers.
         input_shape: tuple, shape of input to the model.
-        num_classes: int, number of output classes.
 
     # Returns
         An MLP model instance.
     """
-    op_units, op_activation = _get_last_layer_units_and_activation(num_classes)
     model = models.Sequential()
     model.add(layers.Dropout(rate=dropout_rate, input_shape=input_shape))
 
@@ -61,7 +42,7 @@ def mlp_model(num_layers, units, dropout_rate, input_shape, num_classes):
         model.add(layers.Dense(units=units, activation='relu'))
         model.add(layers.Dropout(rate=dropout_rate))
 
-    model.add(layers.Dense(units=op_units, activation=op_activation))
+    model.add(layers.Dense(units=1, activation='sigmoid'))
     return model
 
 def train_ngram_model(data,
@@ -89,15 +70,14 @@ def train_ngram_model(data,
     # Get the data.
     (train_texts, train_labels), (val_texts, val_labels) = data
 
-    # Verify that validation labels are in the same range as training labels.
-    num_classes = utils.get_num_classes(train_labels)
-    unexpected_labels = [v for v in val_labels if v not in range(num_classes)]
+    # Verify that validation labels are binary
+    unexpected_labels = [v for v in val_labels if v not in range(2)]
+    # Same thing for training data
+    unexpected_labels += [v for v in val_labels if v not in range(2)]
     if len(unexpected_labels):
         raise ValueError('Unexpected label values found in the validation set:'
                          ' {unexpected_labels}. Please make sure that the '
-                         'labels in the validation set are in the same range '
-                         'as training labels.'.format(
-                             unexpected_labels=unexpected_labels))
+                         'labels in the training and validation set are binary')
 
     # Vectorize texts.
     x_train, x_val = ngram_vectorize(
@@ -107,14 +87,10 @@ def train_ngram_model(data,
     model = mlp_model(num_layers=num_layers,
                                   units=units,
                                   dropout_rate=dropout_rate,
-                                  input_shape=x_train.shape[1:],
-                                  num_classes=num_classes)
+                                  input_shape=x_train.shape[1:])
 
     # Compile model with learning parameters.
-    if num_classes == 2:
-        loss = 'binary_crossentropy'
-    else:
-        loss = 'sparse_categorical_crossentropy'
+    loss = 'binary_crossentropy'
     optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
     model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
 
