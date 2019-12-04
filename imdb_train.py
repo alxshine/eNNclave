@@ -18,7 +18,7 @@ import numpy as np
 import tensorflow.keras.models as models
 import tensorflow.keras.layers as layers
 
-from imdb_prepare_data import load_imdb_sentiment_analysis_dataset, ngram_vectorize
+from imdb_prepare_data import load_imdb, ngram_vectorize
 import utils
 
 FLAGS = None
@@ -68,20 +68,7 @@ def train_ngram_model(data,
             in the training data.
     """
     # Get the data.
-    (train_texts, train_labels), (val_texts, val_labels) = data
-
-    # Verify that validation labels are binary
-    unexpected_labels = [v for v in val_labels if v not in range(2)]
-    # Same thing for training data
-    unexpected_labels += [v for v in val_labels if v not in range(2)]
-    if len(unexpected_labels):
-        raise ValueError('Unexpected label values found in the validation set:'
-                         ' {unexpected_labels}. Please make sure that the '
-                         'labels in the training and validation set are binary')
-
-    # Vectorize texts.
-    x_train, x_val = ngram_vectorize(
-        train_texts, train_labels, val_texts)
+    x_train, y_train, x_test, y_test = data
 
     # Create model instance.
     model = mlp_model(num_layers=num_layers,
@@ -102,10 +89,10 @@ def train_ngram_model(data,
     # Train and validate model.
     history = model.fit(
             x_train,
-            train_labels,
+            y_train,
             epochs=epochs,
             callbacks=callbacks,
-            validation_data=(x_val, val_labels),
+            validation_data=(x_test, y_test),
             verbose=2,  # Logs once per epoch.
             batch_size=batch_size)
 
@@ -120,11 +107,6 @@ def train_ngram_model(data,
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='./data',
-                        help='input data directory')
-    FLAGS, unparsed = parser.parse_known_args()
-
     # Using the IMDb movie reviews dataset to demonstrate training n-gram model
-    data = load_imdb_sentiment_analysis_dataset(FLAGS.data_dir)
+    data = load_imdb('./data')
     train_ngram_model(data)

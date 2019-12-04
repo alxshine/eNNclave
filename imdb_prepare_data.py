@@ -29,8 +29,46 @@ MIN_DOCUMENT_FREQUENCY = 2
 # will be truncated.
 MAX_SEQUENCE_LENGTH = 500
 
+def load_imdb(data_path):
+    imdb_data_path = os.path.join(data_path, 'aclImdb')
 
-def load_imdb_sentiment_analysis_dataset(data_path, seed=123):
+    try:
+        # try and load saved np arrays
+        print("Trying to load previously generated data and labels")
+        x_train = np.load(os.path.join(imdb_data_path, 'x_train.npy'))
+        y_train = np.load(os.path.join(imdb_data_path, 'y_train.npy'))
+        x_test = np.load(os.path.join(imdb_data_path, 'x_test.npy'))
+        y_test = np.load(os.path.join(imdb_data_path, 'y_test.npy'))
+    except IOError:
+        # generate numpy arrays for future use
+        print("No data found, generating...")
+        data = load_imdb_sentiment_analysis_dataset(imdb_data_path)
+        (train_texts, train_labels), (val_texts, val_labels) = data
+
+        # Verify that validation labels are binary
+        unexpected_labels = [v for v in val_labels if v not in range(2)]
+        # Same thing for training data
+        unexpected_labels += [v for v in val_labels if v not in range(2)]
+        if len(unexpected_labels):
+            raise ValueError('Unexpected label values found in the validation set:'
+                             ' {unexpected_labels}. Please make sure that the '
+                             'labels in the training and validation set are binary')
+
+        # Vectorize texts.
+        x_train, x_test = ngram_vectorize(
+            train_texts, train_labels, val_texts)
+        y_train = train_labels
+        y_test = val_labels
+
+        np.save(os.path.join(imdb_data_path, 'x_train.npy'), x_train)
+        np.save(os.path.join(imdb_data_path, 'y_train.npy'), y_train)
+        np.save(os.path.join(imdb_data_path, 'x_test.npy'), x_test)
+        np.save(os.path.join(imdb_data_path, 'y_test.npy'), y_test)
+
+    return x_train, y_train, x_test, y_test
+
+
+def load_imdb_sentiment_analysis_dataset(imdb_data_path, seed=123):
     """Loads the Imdb movie reviews sentiment analysis dataset.
 
     # Arguments
@@ -49,8 +87,6 @@ def load_imdb_sentiment_analysis_dataset(data_path, seed=123):
         Download and uncompress archive from:
         http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
     """
-    imdb_data_path = os.path.join(data_path, 'aclImdb')
-
     # Load the training data
     train_texts = []
     train_labels = []
