@@ -1,5 +1,6 @@
 preamble_template = """
 #include <stdlib.h>
+#include <math.h>
 
 #include "state.hpp"
 #include "matutil.hpp"
@@ -42,6 +43,9 @@ softmax_template = """
 
   *label = max_index;
 """
+sigmoid_template = """
+  // fake sigmoid
+  *label = %s[0] > 0.5;"""
 global_average_pooling_2d_template = "  matutil_global_average_pooling_2d(%s, %d, %d, %d, %s);\n"
 max_pooling_2d_template = "  matutil_max_pooling_2d(%s, %d, %d, %d, %d, %s);\n"
 unknown_layer_template = "  //No call method generated for layer %s of type %s\n"

@@ -149,6 +149,8 @@ class Enclave(Sequential):
                 # here we compute the actual label
                 softmax = softmax_template % (w.shape[1], tmp_name, tmp_name)
                 s += softmax
+            elif layer.activation.__name__ == 'sigmoid':
+                s += sigmoid_template % tmp_name
             else:
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <math.h>
+
 #include "forward.hpp"
 #include "matutil.hpp"
 #include "state.hpp"
@@ -104,7 +106,6 @@ void matutil_relu(float *m, int r, int c) {
     if (m[i] < 0)
       m[i] = 0;
 }
-
 
 void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret){
   //calculate the average per channel (averaging over h and w)
