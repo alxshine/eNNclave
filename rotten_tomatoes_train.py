@@ -15,7 +15,6 @@ import tensorflow.keras.layers as layers
 import numpy as np
 
 import rotten_tomatoes_prepare_data as load_data
-from rotten_tomatoes_prepare_data import load_rotten_tomatoes_sentiment_analysis_dataset, sequence_vectorize
 
 import utils
 
@@ -152,21 +151,9 @@ def train_sequence_model(data,
             in the training data.
     """
     # Get the data.
-    (train_texts, train_labels), (val_texts, val_labels) = data
-
-    # Verify that validation labels are in the same range as training labels.
-    num_classes = utils.get_num_classes(train_labels)
-    unexpected_labels = [v for v in val_labels if v not in range(num_classes)]
-    if len(unexpected_labels):
-        raise ValueError('Unexpected label values found in the validation set:'
-                         ' {unexpected_labels}. Please make sure that the '
-                         'labels in the validation set are in the same range '
-                         'as training labels.'.format(
-                             unexpected_labels=unexpected_labels))
-
-    # Vectorize texts.
-    x_train, x_val, word_index = sequence_vectorize(
-            train_texts, val_texts)
+    x_train, y_train, x_test, y_test, word_index = data
+    # the labels have already been validated while loading
+    num_classes = y_train.max() + 1
 
     # Number of features will be the embedding input dimension. Add 1 for the
     # reserved index 0.
@@ -174,14 +161,14 @@ def train_sequence_model(data,
 
     # Create model instance.
     model = sepcnn_model(blocks=blocks,
-                                     filters=filters,
-                                     kernel_size=kernel_size,
-                                     embedding_dim=embedding_dim,
-                                     dropout_rate=dropout_rate,
-                                     pool_size=pool_size,
-                                     input_shape=x_train.shape[1:],
-                                     num_classes=num_classes,
-                                     num_features=num_features)
+                         filters=filters,
+                         kernel_size=kernel_size,
+                         embedding_dim=embedding_dim,
+                         dropout_rate=dropout_rate,
+                         pool_size=pool_size,
+                         input_shape=x_train.shape[1:],
+                         num_classes=num_classes,
+                         num_features=num_features)
 
     # Compile model with learning parameters.
     if num_classes == 2:
@@ -199,10 +186,10 @@ def train_sequence_model(data,
     # Train and validate model.
     history = model.fit(
             x_train,
-            train_labels,
+            y_train,
             epochs=epochs,
             callbacks=callbacks,
-            validation_data=(x_val, val_labels),
+            validation_data=(x_test, y_test),
             verbose=2,  # Logs once per epoch.
             batch_size=batch_size)
 
@@ -224,6 +211,5 @@ if __name__ == '__main__':
 
     # Using the Rotten tomatoes movie reviews dataset to demonstrate
     # training sequence model.
-    data = load_data.load_rotten_tomatoes_sentiment_analysis_dataset(
-            FLAGS.data_dir)
+    data = load_data.load_rotten_tomatoes('./data')
     train_sequence_model(data)
