@@ -60,7 +60,7 @@ int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
   return 0;
 }
 
-int matutil_conv(float *input, int h, int w, int c, int f, float *kernels,
+int matutil_conv2(float *input, int h, int w, int c, int f, float *kernels,
                  int kh, int kw, float *biases, float *ret) {
   // clear ret
   int len_ret = h * w * f;

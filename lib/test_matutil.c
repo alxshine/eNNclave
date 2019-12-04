@@ -69,7 +69,7 @@ int main(void) {
   /* float biases[2] = {0,0}; */
 
   /* float results[18]; */
-  /* matutil_conv(conv_input, 3, 3, 2, 2, weights, 3, 3, biases, results); */
+  /* matutil_conv2(conv_input, 3, 3, 2, 2, weights, 3, 3, biases, results); */
 
   /* printf("Inputs:\n"); */
   /* matutil_dump_matrix3(conv_input, 3, 3, 2); */
