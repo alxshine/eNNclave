@@ -18,7 +18,7 @@ import numpy as np
 import tensorflow.keras.models as models
 import tensorflow.keras.layers as layers
 
-from imdb_prepare_data import load_imdb, ngram_vectorize
+from imdb_prepare_data import load_imdb
 import utils
 
 FLAGS = None

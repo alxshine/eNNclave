@@ -19,7 +19,10 @@ class EnclaveLayer(Layer):
         for i, x in enumerate(xs):
             label = pymatutil.forward(x.astype(np.float32).tobytes(),
                                       np.prod(x.shape))
-            ret[i, label] = 1
+            if self.num_classes > 1:
+                ret[i, label] = 1
+            else:
+                ret[i] = label
         return ret
 
     def call(self, inputs):
