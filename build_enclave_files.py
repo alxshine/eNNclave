@@ -51,7 +51,7 @@ enclave.generate_forward()
 # build replacement layer for original model
 enclave_model = Sequential(all_layers[:-n])
 enclave_model.add(EnclaveLayer(model.layers[-1].output_shape[1]))
-enclave_model.build()
+enclave_model.build(enclave_input_shape)
 print("New model:")
 enclave_model.summary()
 
