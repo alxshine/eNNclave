@@ -146,6 +146,22 @@ void matutil_relu(float *m, int r, int c) {
       m[i] = 0;
 }
 
+void matutil_global_average_pooling_1d(float *m, int steps, int c, float *ret){
+  for (int ci = 0; ci < c; ++fi) {
+    ret[ci] = 0;
+  }
+
+  for (int i = 1; i < steps; ++i) {
+    for (int ci = 0; ci < c; ++ci) {
+      ret[ci] += m[i*c + ci];
+    }
+  }
+
+  for (int ci=0; ci < c; ++ci) {
+    ret[ci] /= steps;
+  }
+}
+
 void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret){
   //calculate the average per channel (averaging over h and w)
   for (int i=0; i < c; ++i) {
