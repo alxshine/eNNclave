@@ -65,7 +65,7 @@ class Enclave(Sequential):
                 #declare all arrays
                 header_file.write("extern float *depth_kernels%d;\n" % i)
                 header_file.write("extern float *point_kernels%d;\n" % i)
-                header_file.write("extern float *biases%d;\n" % i)
+                header_file.write("extern float *b%d;\n" % i)
 
                 #create binary files
                 with open('depth%d.bin' %i, 'wb+') as df:
@@ -185,6 +185,30 @@ class Enclave(Sequential):
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
 
+        elif type(layer) in [layers.SeparableConv1D]:
+            if layer.padding != 'same':
+                raise NotImplementedError("Padding modes other than 'same' are not implemented")
+
+            _, steps, c = layer.input_shape
+            f = layer.output_shape[-1]
+            new_size = np.prod(layer.output_shape[1:])
+            new_buffer = tmp_buffer_template % tmp_index
+            ks = layer.kernel_size[0]
+            depth_kernels = depth_kernel_template % i
+            point_kernels = point_kernel_template % i
+            biases = bias_name_template % i
+
+            s = sep_conv1_template % (inputs, steps, c, f, depth_kernels, point_kernels, ks, biases, new_buffer)
+
+            if layer.activation.__name__ == 'relu':
+                # relu
+                s += relu_template % (new_buffer, 1, new_size)
+            elif layer.activation.__name__ == 'linear':
+                s += "  // no activation function for layer {}".format(layer.name)
+            else:
+                raise NotImplementedError("Unknown activation function {} in layer {}".format(
+                    layer.activation.__name__, layer.name))
+                        
         elif type(layer) in [layers.Conv2D]:
             if layer.padding != 'same':
                 raise NotImplementedError("Padding modes other than 'same' are not implemented")

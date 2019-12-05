@@ -26,6 +26,8 @@ declaration_error_handling_template = """  if(tmp%d == NULL){
 tmp_buffer_release_template = "  free(tmp%d);\n"
 
 weight_name_template = "w%d"
+depth_kernel_template = "depth_kernels%d"
+point_kernel_template = "point_kernels%d"
 bias_name_template = "b%d"
 
 error_handling_template = """  if ((sts = %s))
