@@ -59,6 +59,36 @@ class Enclave(Sequential):
                         "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                     cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
 
+            elif type(l) in [layers.SeparableConv1D]:
+                depth_kernels, point_kernels, biases = l.get_weights()
+
+                #declare all arrays
+                header_file.write("extern float *depth_kernels%d;\n" % i)
+                header_file.write("extern float *point_kernels%d;\n" % i)
+                header_file.write("extern float *biases%d;\n" % i)
+
+                #create binary files
+                with open('depth%d.bin' %i, 'wb+') as df:
+                    df.write(depth_kernels.astype(np.float32).tobytes())
+                with open('point%d.bin' %i, 'wb+') as pf:
+                    pf.write(point_kernels.astype(np.float32).tobytes())
+                with open('b%d.bin' %i, 'wb+') as bf:
+                    bf.write(biases.astype(np.float32).tobytes())
+
+                #create nicer handles
+                cpp_file.write(
+                    "extern const char _binary_depth%d_bin_start;\n" %i)
+                cpp_file.write(
+                    "const float *depth_kernels%d = (const float*) &_binary_depth%d_bin_start;\n" % (i, i))
+                cpp_file.write(
+                    "extern const char _binary_point%d_bin_start;\n" %i)
+                cpp_file.write(
+                    "const float *point_kernels%d = (const float*) &_binary_point%d_bin_start;\n" % (i, i))
+                cpp_file.write(
+                    "extern const char _binary_b%d_bin_start;\n" %i)
+                cpp_file.write(
+                    "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
+                
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D, layers.MaxPooling2D]:
                 # these layers are either not used during inference or have no parameters
                 continue

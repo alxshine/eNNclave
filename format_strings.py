@@ -33,6 +33,7 @@ error_handling_template = """  if ((sts = %s))
 """
 add_template = "matutil_add(%s, %d, %d, %s, %d, %d, %s)"
 mult_template = "matutil_multiply(%s, %d, %d, %s, %d, %d, %s)"
+sep_conv1_template = "  matutil_sep_conv1(%s, %d, %d, %d, %s, %s, %d, %s, %s);\n"
 conv2_template = "  matutil_conv2(%s, %d, %d, %d, %d, %s, %d, %d, %s, %s);\n"
 relu_template = "  matutil_relu(%s, %d, %d);\n"
 softmax_template = """
