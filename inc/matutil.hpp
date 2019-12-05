@@ -21,7 +21,7 @@ extern "C" {
 
   void matutil_relu(float *m, int r, int c); // TODO: This doesn't need 2 dimensions
 
-  void matutil_global_average_pooling_2d(float *m, int steps, int c);
+  void matutil_global_average_pooling_1d(float *m, int steps, int c, float *ret);
 
   void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret);
 

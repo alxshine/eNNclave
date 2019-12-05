@@ -46,6 +46,7 @@ softmax_template = """
 sigmoid_template = """
   // fake sigmoid
   *label = %s[0] > 0.5;"""
+global_average_pooling_1d_template = "  matutil_global_average_pooling_1d(%s, %d, %d, %s);\n"
 global_average_pooling_2d_template = "  matutil_global_average_pooling_2d(%s, %d, %d, %d, %s);\n"
 max_pooling_2d_template = "  matutil_max_pooling_2d(%s, %d, %d, %d, %d, %s);\n"
 unknown_layer_template = "  //No call method generated for layer %s of type %s\n"

@@ -59,7 +59,7 @@ class Enclave(Sequential):
                         "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                     cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
 
-            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling2D, layers.MaxPooling2D]:
+            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D, layers.MaxPooling2D]:
                 # these layers are either not used during inference or have no parameters
                 continue
             else:
@@ -178,6 +178,10 @@ class Enclave(Sequential):
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
 
+        elif type(layer) in [layers.GlobalAveragePooling1D]:
+            _, steps, c = layer.input_shape
+            s = global_average_pooling_1d_template % (inputs, steps, c, tmp_buffer_template % tmp_index)
+            
         elif type(layer) in [layers.GlobalAveragePooling2D]:
             _, h, w, c = layer.input_shape
             s = global_average_pooling_2d_template % (inputs, h, w, c, tmp_buffer_template % tmp_index)

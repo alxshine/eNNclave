@@ -147,7 +147,7 @@ void matutil_relu(float *m, int r, int c) {
 }
 
 void matutil_global_average_pooling_1d(float *m, int steps, int c, float *ret){
-  for (int ci = 0; ci < c; ++fi) {
+  for (int ci = 0; ci < c; ++ci) {
     ret[ci] = 0;
   }
 
