@@ -15,6 +15,8 @@ extern "C" {
 
   int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2, float *ret);
 
+  int matutil_sep_conv1(float *input, int steps, int c, int f, float *depth_kernels, float *point_kernels, int ks, float *biases, float *ret);
+
   int matutil_conv2(float *input, int h, int w, int c, int f, float *kernels, int kh, int kw, float *biases, float *ret);
 
   void matutil_relu(float *m, int r, int c); // TODO: This doesn't need 2 dimensions

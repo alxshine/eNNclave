@@ -167,7 +167,7 @@ class Enclave(Sequential):
             kernels = weight_name_template % i
             biases = bias_name_template % i
             
-            s = conv_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
+            s = conv2_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
 
             if layer.activation.__name__ == 'relu':
                 # relu
