@@ -61,10 +61,9 @@ int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
 }
 
 int matutil_sep_conv1(float *input, int steps, int c, int f, float *depth_kernels, float *point_kernels, int ks, float *biases, float *ret){
-
   //perform depthwise convolution (over points on same channel)
   //output shape: (steps*c)
-  //depth_kernels shape: (ks*c)
+  //depth_kernels shape: (c*ks)
   float *tmp = (float*) calloc(steps*c, sizeof(float));
   int min_offset = ks/2;
   
@@ -72,10 +71,10 @@ int matutil_sep_conv1(float *input, int steps, int c, int f, float *depth_kernel
     for (int ci = 0; ci < c; ++ci) {
       for (int ki = 0; ki < ks; ++ki) {
 	int input_i = i - min_offset + ki;
-	if (input_i < 0 || input_i >= i)
+	if (input_i < 0 || input_i >= steps)
 	  continue;
-	  
-	tmp[i*c + ci] += input[input_i*c + ci] * depth_kernels[ki*c + ci];
+
+	tmp[i*c + ci] += input[input_i*c + ci] * depth_kernels[ci*ks + ki];
       }
     }
   }
@@ -83,6 +82,8 @@ int matutil_sep_conv1(float *input, int steps, int c, int f, float *depth_kernel
   //perform pointwise convolution
   //output shape: (steps*f)
   //point_kernels shape: (c*f)
+  //bias shape: (f)
+    
   int len_ret = steps*f;
   for (int i = 0; i < len_ret; ++i) {
     ret[i] = 0;
@@ -92,10 +93,16 @@ int matutil_sep_conv1(float *input, int steps, int c, int f, float *depth_kernel
     for (int ci = 0; ci < c; ++ci) {
       for (int fi = 0; fi < f; ++fi) {
 	ret[i*f + fi] += tmp[i*c + ci] * point_kernels[ci*f + fi];
-      }
+      }      
     }
+
+    for (int fi = 0; fi < f; ++fi) {
+      ret[i*f + fi] += biases[fi];
+    }
+
   }
 
+  free(tmp);
   return 0;
 }
 
