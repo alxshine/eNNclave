@@ -239,7 +239,7 @@ void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float 
 void matutil_dump_matrix(float *m, int r, int c) {
   for (int i = 0; i < r; ++i) {
     for (int j = 0; j < c; ++j) {
-      printf("%f, ", m[i * c + j]);
+      printf("%.09f, ", m[i * c + j]);
     }
     printf("\n");
   }
@@ -250,7 +250,7 @@ void matutil_dump_matrix3(float *m, int h, int w, int c){
     printf("Ci=%d:\n", ci);
     for (int i = 0; i < h; ++i) {
       for (int j = 0; j < w; ++j) {
-	printf("%f, ", m[i*w*c + j*c + ci]);
+	printf("%.07f, ", m[i*w*c + j*c + ci]);
       }
       printf("\n");
     }
@@ -268,5 +268,15 @@ int print_error(const char *fmt, ...) {
   vsnprintf(buf, BUFSIZ, fmt, ap);
   va_end(ap);
   fprintf(stderr, "%s", buf);
+  return (int)strnlen(buf, BUFSIZ - 1) + 1;
+}
+
+int print(const char *fmt, ...) {
+  char buf[BUFSIZ] = {'\0'};
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(buf, BUFSIZ, fmt, ap);
+  va_end(ap);
+  fprintf(stdout, "%s", buf);
   return (int)strnlen(buf, BUFSIZ - 1) + 1;
 }
