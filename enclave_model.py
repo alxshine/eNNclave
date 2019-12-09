@@ -115,7 +115,7 @@ class Enclave(Sequential):
         forward_file.write(tmp_buffer_declaration_template % (0, output_sizes[0]))
         forward_file.write(declaration_error_handling_template % (0, output_sizes[0]))
         forward_file.write(tmp_buffer_declaration_template % (1, output_sizes[0]))
-        forward_file.write(declaration_error_handling_template % (1, output_sizes[1]))
+        forward_file.write(declaration_error_handling_template % (1, output_sizes[0]))
             
         tmp_index = 0
         inputs = 'm'
