@@ -24,24 +24,25 @@ class Enclave(Sequential):
                 if len(parameters) > 0:
                     w = parameters[0]
 
-                    lhs_string = "float *w%d" % (i)
+                    weight_name = weight_name_template % i
+                    lhs_string = "float *%s" % (weight_name)
                     header_file.write("extern " + lhs_string + ";\n")
-                    header_file.write("extern int w%d_r;\n" % i)
-                    header_file.write("extern int w%d_c;\n\n" % i)
+                    header_file.write("extern int %s_r;\n" % weight_name)
+                    header_file.write("extern int %s_c;\n\n" % weight_name)
 
-                    with open('w%d.bin' % i, 'wb+') as f:
+                    with open('%s.bin' % weight_name, 'wb+') as f:
                         f.write(w.astype(np.float32).tobytes())
 
                     cpp_file.write(
-                        "extern const char _binary_w%d_bin_start;\n" % i)
+                        "extern const char _binary_%s_bin_start;\n" % (weight_name))
                     cpp_file.write(
-                        "const float *w%d = (const float*) &_binary_w%d_bin_start;\n" % (i, i))
-                    cpp_file.write("int w%d_h = %d;\n" % (i, w.shape[0]))
-                    cpp_file.write("int w%d_w = %d;\n" % (i, w.shape[1]))
+                        "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (weight_name, weight_name))
+                    cpp_file.write("int %s_h = %d;\n" % (weight_name, w.shape[0]))
+                    cpp_file.write("int %s_w = %d;\n" % (weight_name, w.shape[1]))
                     if len(w.shape) > 2:
-                        cpp_file.write("int w%d_c = %d;\n" % (i, w.shape[2]))
+                        cpp_file.write("int %s_c = %d;\n" % (weight_name, w.shape[2]))
                     if len(w.shape) > 3:
-                        cpp_file.write("int w%d_f = %d;\n" % (i, w.shape[3]))
+                        cpp_file.write("int %s_f = %d;\n" % (weight_name, w.shape[3]))
                     cpp_file.write("\n")
 
                 if len(parameters) > 1:
