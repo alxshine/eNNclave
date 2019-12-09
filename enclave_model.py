@@ -62,29 +62,31 @@ class Enclave(Sequential):
 
             elif type(l) in [layers.SeparableConv1D]:
                 depth_kernels, point_kernels, biases = l.get_weights()
+                dk_name = depth_kernel_template % i
+                pk_name = point_kernel_template % i
 
                 #declare all arrays
-                header_file.write("extern float *depth_kernels%d;\n" % i)
-                header_file.write("extern float *point_kernels%d;\n" % i)
+                header_file.write("extern float *%s;\n" % dk_name)
+                header_file.write("extern float *%s;\n" % pk_name)
                 header_file.write("extern float *b%d;\n" % i)
 
                 #create binary files
-                with open('depth%d.bin' %i, 'wb+') as df:
+                with open('%s.bin' % dk_name, 'wb+') as df:
                     df.write(depth_kernels.astype(np.float32).tobytes())
-                with open('point%d.bin' %i, 'wb+') as pf:
+                with open('%s.bin' % pk_name, 'wb+') as pf:
                     pf.write(point_kernels.astype(np.float32).tobytes())
                 with open('b%d.bin' %i, 'wb+') as bf:
                     bf.write(biases.astype(np.float32).tobytes())
 
                 #create nicer handles
                 cpp_file.write(
-                    "extern const char _binary_depth%d_bin_start;\n" %i)
+                    "extern const char _binary_%s_bin_start;\n" % dk_name)
                 cpp_file.write(
-                    "const float *depth_kernels%d = (const float*) &_binary_depth%d_bin_start;\n" % (i, i))
+                    "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (dk_name, dk_name))
                 cpp_file.write(
-                    "extern const char _binary_point%d_bin_start;\n" %i)
+                    "extern const char _binary_%s_bin_start;\n" % pk_name)
                 cpp_file.write(
-                    "const float *point_kernels%d = (const float*) &_binary_point%d_bin_start;\n" % (i, i))
+                    "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (pk_name, pk_name))
                 cpp_file.write(
                     "extern const char _binary_b%d_bin_start;\n" %i)
                 cpp_file.write(
