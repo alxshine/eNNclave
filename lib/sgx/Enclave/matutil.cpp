@@ -54,6 +54,36 @@ int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
   return 0;
 }
 
+int matutil_sep_conv1(float *input, int steps, int c, int f, float *depth_kernels, float *point_kernels, int ks, float *biases, float *ret){
+  int len_ret = steps*f;
+  for (int i = 0; i < len_ret; ++i) {
+    ret[i] = 0;
+  }
+
+  int min_offset = ks/2;
+  for (int i = 0; i < steps; ++i) {
+    for (int di = 0; di < ks; ++di) {
+      int input_i = i - min_offset + di;
+      if(input_i < 0 || input_i >= steps)
+	continue;
+      
+      for (int ci = 0; ci < c; ++ci) {
+	for (int fi = 0; fi < f; ++fi) {
+	  ret[i*f + fi] += input[input_i*c + ci] * depth_kernels[di*c + ci] * point_kernels[ci*f + fi];
+	}      
+      }
+    }
+
+
+    for (int fi = 0; fi < f; ++fi) {
+      ret[i*f + fi] += biases[fi];
+    }
+
+  }
+
+  return 0;
+}
+
 int matutil_conv2(float *input, int h, int w, int c, int f, float *kernels,
                  int kh, int kw, float *biases, float *ret) {
   // clear ret
@@ -101,6 +131,21 @@ void matutil_relu(float *m, int r, int c) {
       m[i] = 0;
 }
 
+void matutil_global_average_pooling_1d(float *m, int steps, int c, float *ret){
+  for (int ci = 0; ci < c; ++ci) {
+    ret[ci] = 0;
+  }
+
+  for (int i = 1; i < steps; ++i) {
+    for (int ci = 0; ci < c; ++ci) {
+      ret[ci] += m[i*c + ci];
+    }
+  }
+
+  for (int ci=0; ci < c; ++ci) {
+    ret[ci] /= steps;
+  }
+}
 
 void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret){
   //calculate the average per channel (averaging over h and w)
@@ -119,6 +164,26 @@ void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret
   int div = h*w;
   for (int ci=0; ci < c; ++ci) {
     ret[ci] /= div;
+  }
+}
+
+void matutil_max_pooling_1d(float *m, int steps, int c, int pool_size, float *ret){
+  int ret_steps = steps/pool_size;
+
+  for (int i = 0; i < ret_steps; ++i) {
+    int input_start = i*pool_size;
+    
+    for (int ci = 0; ci < c; ++ci) {
+      float current_max = m[input_start*c + ci];
+
+      for (int di=0; di < pool_size; ++di) {
+	int current_i = input_start+di;
+	float to_compare = m[current_i*c + ci];
+	current_max = to_compare > current_max ? to_compare : current_max;
+      }
+      
+      ret[i*c + ci] = current_max;
+    }
   }
 }
 
