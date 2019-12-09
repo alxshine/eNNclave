@@ -25,10 +25,10 @@ declaration_error_handling_template = """  if(tmp%d == NULL){
 """
 tmp_buffer_release_template = "  free(tmp%d);\n"
 
-weight_name_template = "w%d"
+weight_name_template = "weights%d"
 depth_kernel_template = "depth_kernels%d"
 point_kernel_template = "point_kernels%d"
-bias_name_template = "b%d"
+bias_name_template = "biases%d"
 
 error_handling_template = """  if ((sts = %s))
     return sts;

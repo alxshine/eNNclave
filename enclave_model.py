@@ -47,35 +47,38 @@ class Enclave(Sequential):
 
                 if len(parameters) > 1:
                     b = parameters[1]
-                    lhs_string = "float *b%d" % (i)
+                    bias_name = bias_name_template % i
+                    
+                    lhs_string = "float *%s" % (bias_name)
                     header_file.write("extern " + lhs_string + ";\n")
-                    header_file.write("extern int b%d_c;\n\n" % i)
+                    header_file.write("extern int %s_c;\n\n" % bias_name)
 
-                    with open('b%d.bin' % i, 'wb+') as bf:
+                    with open('%s.bin' % bias_name, 'wb+') as bf:
                         bf.write(b.astype(np.float32).tobytes())
 
                     cpp_file.write(
-                        "extern const char _binary_b%d_bin_start;\n" % i)
+                        "extern const char _binary_%s_bin_start;\n" % bias_name)
                     cpp_file.write(
-                        "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
+                        "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (bias_name, bias_name))
                     cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
 
             elif type(l) in [layers.SeparableConv1D]:
                 depth_kernels, point_kernels, biases = l.get_weights()
                 dk_name = depth_kernel_template % i
                 pk_name = point_kernel_template % i
+                bias_name = bias_name_template % i
 
                 #declare all arrays
                 header_file.write("extern float *%s;\n" % dk_name)
                 header_file.write("extern float *%s;\n" % pk_name)
-                header_file.write("extern float *b%d;\n" % i)
+                header_file.write("extern float *%s;\n" % bias_name)
 
                 #create binary files
                 with open('%s.bin' % dk_name, 'wb+') as df:
                     df.write(depth_kernels.astype(np.float32).tobytes())
                 with open('%s.bin' % pk_name, 'wb+') as pf:
                     pf.write(point_kernels.astype(np.float32).tobytes())
-                with open('b%d.bin' %i, 'wb+') as bf:
+                with open('%s.bin' % bias_name, 'wb+') as bf:
                     bf.write(biases.astype(np.float32).tobytes())
 
                 #create nicer handles
@@ -88,9 +91,9 @@ class Enclave(Sequential):
                 cpp_file.write(
                     "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (pk_name, pk_name))
                 cpp_file.write(
-                    "extern const char _binary_b%d_bin_start;\n" %i)
+                    "extern const char _binary_%s_bin_start;\n" % bias_name)
                 cpp_file.write(
-                    "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
+                    "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (bias_name, bias_name))
                 
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
                              layers.MaxPooling1D,layers.MaxPooling2D]:
