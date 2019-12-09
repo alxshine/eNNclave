@@ -8,14 +8,16 @@ tf.compat.v1.enable_eager_execution()
 input_shape = (1, 3, 2)
 inputs = np.arange(np.prod(input_shape)).reshape(input_shape).astype(np.float32)
 conv_layer = layers.SeparableConv1D(
-    1,2, strides=1, input_shape=inputs.shape[1:], depthwise_initializer='ones', pointwise_initializer='ones', padding='same')
+    2,2, strides=1, input_shape=inputs.shape[1:], depthwise_initializer='ones', pointwise_initializer='ones', padding='same')
 
 results = conv_layer(inputs)
 depthwise = conv_layer.get_weights()[0]
 pointwise = conv_layer.get_weights()[1]
 bias = conv_layer.get_weights()[2]
 
-conv_layer.set_weights([np.array([2,2,2,2]).reshape(depthwise.shape), np.array([1,0]).reshape(pointwise.shape), bias])
+pointwise = np.arange(np.prod(pointwise.shape)).reshape(pointwise.shape)
+
+conv_layer.set_weights([np.array([2,2,2,2]).reshape(depthwise.shape), np.arange(np.prod(pointwise.shape)).reshape(pointwise.shape), bias])
 results = conv_layer(inputs)
 depthwise = conv_layer.get_weights()[0]
 pointwise = conv_layer.get_weights()[1]
@@ -41,6 +43,8 @@ print(pointwise.shape)
 for fi in range(pointwise.shape[2]):
     print("fi={}".format(fi))
     print(pointwise[:,:,fi])
+
+print(pointwise.astype(np.int32).tobytes())
 
 print()
 

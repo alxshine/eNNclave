@@ -25,6 +25,8 @@ extern "C" {
 
   void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret);
 
+  void matutil_max_pooling_1d(float *m, int steps, int c, int pool_size, float *ret);
+
   void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float *ret);
 
   int matutil_forward(float *m, int size, int *label);

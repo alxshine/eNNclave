@@ -189,6 +189,26 @@ void matutil_global_average_pooling_2d(float *m, int h, int w, int c, float *ret
   }
 }
 
+void matutil_max_pooling_1d(float *m, int steps, int c, int pool_size, float *ret){
+  int ret_steps = steps/pool_size;
+
+  for (int i = 0; i < ret_steps; ++i) {
+    int input_start = i*pool_size;
+    
+    for (int ci = 0; ci < c; ++ci) {
+      float current_max = m[input_start*c + ci];
+
+      for (int di=0; di < pool_size; ++di) {
+	int current_i = input_start+di;
+	float to_compare = m[current_i*c + ci];
+	current_max = to_compare > current_max ? to_compare : current_max;
+      }
+      
+      ret[i*c + ci] = current_max;
+    }
+  }
+}
+
 void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float *ret){
   int ret_h = h/pool_size;
   int ret_w = w/pool_size;

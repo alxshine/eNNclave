@@ -1,4 +1,4 @@
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model, Sequential
 import tensorflow as tf
 import numpy as np
 
@@ -52,7 +52,10 @@ pymatutil.teardown()
 enclave_after = time.time()
 enclave_labels = np.argmax(enclave_predictions, axis=1)
 enclave_time = enclave_after - enclave_before
+
+enclave_accuracy = np.equal(enclave_labels, y_test).sum()/len(y_test)
 print("Prediction took {:05f} seconds".format(enclave_time))
+print("Enclave model accuracy: {}".format(enclave_accuracy))
 
 same_labels = np.equal(tf_labels, enclave_labels)
 print("{} of {} labels are equal, slowdown factor: {:.03f}".format(same_labels.sum(), len(same_labels), enclave_time/tf_time))

@@ -89,7 +89,8 @@ class Enclave(Sequential):
                 cpp_file.write(
                     "const float *b%d = (const float*) &_binary_b%d_bin_start;\n" % (i, i))
                 
-            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D, layers.MaxPooling2D]:
+            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
+                             layers.MaxPooling1D,layers.MaxPooling2D]:
                 # these layers are either not used during inference or have no parameters
                 continue
             else:
@@ -240,6 +241,9 @@ class Enclave(Sequential):
             _, h, w, c = layer.input_shape
             s = global_average_pooling_2d_template % (inputs, h, w, c, tmp_buffer_template % tmp_index)
 
+        elif type(layer) in [layers.MaxPooling1D]:
+            _, steps, c = layer.input_shape
+            s = max_pooling_1d_template % (inputs, steps, c, layer.pool_size[0], tmp_buffer_template % tmp_index)
         elif type(layer) in [layers.MaxPooling2D]:
             _, h, w, c = layer.input_shape
             pool_size = layer.pool_size[0]
