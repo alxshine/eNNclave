@@ -41,6 +41,46 @@ Prediction took 3.748415 seconds
 
 The slowdown is incurred due to the ineficcient way memory is accessed during convolution, and also because memory has to be paged constantly.
 
+** Timing measurements
+
+*** Rotten Tomatoes
+The times are averaged over 50 batches.
+
+**** Tensorflow Times
+
+#+PLOT: ind:1 deps:(9)
+|-----------------+---+---+---+---+---+---+---+----------|
+| #(Batch)\Layers | 1 | 2 | 3 | 4 | 5 | 6 | 7 |        8 |
+|-----------------+---+---+---+---+---+---+---+----------|
+|               1 |   |   |   |   |   |   |   | 0.021786 |
+|               5 |   |   |   |   |   |   |   | 0.021172 |
+|              10 |   |   |   |   |   |   |   | 0.021476 |
+|              50 |   |   |   |   |   |   |   | 0.025178 |
+|             100 |   |   |   |   |   |   |   | 0.031222 |
+|             500 |   |   |   |   |   |   |   | 0.071315 |
+|            1000 |   |   |   |   |   |   |   | 0.138775 |
+|            5000 |   |   |   |   |   |   |   | 0.997463 |
+|            7500 |   |   |   |   |   |   |   | 1.509626 |
+|           10000 |   |   |   |   |   |   |   | 2.390654 |
+|-----------------+---+---+---+---+---+---+---+----------|
+
+**** Enclave Times
+
+#+PLOT: ind:1 deps:(9)
+|-----------------+---+---+---+---+---+---+---+-----------|
+| #(Batch)\Layers | 1 | 2 | 3 | 4 | 5 | 6 | 7 |         8 |
+|-----------------+---+---+---+---+---+---+---+-----------|
+|               1 |   |   |   |   |   |   |   |  0.017241 |
+|               5 |   |   |   |   |   |   |   |  0.066643 |
+|              10 |   |   |   |   |   |   |   |  0.128432 |
+|              50 |   |   |   |   |   |   |   |  0.627604 |
+|             100 |   |   |   |   |   |   |   |  1.247830 |
+|             500 |   |   |   |   |   |   |   |  6.303066 |
+|            1000 |   |   |   |   |   |   |   | 12.533901 |
+|            5000 |   |   |   |   |   |   |   | 62.745630 |
+|            7500 |   |   |   |   |   |   |   | 93.974223 |
+|-----------------+---+---+---+---+---+---+---+-----------|
+
 ** Related Work
 We have different areas of related work that are relevant to this project.
 The most directly relevant area is model stealing attacks and adversarial robustness.
