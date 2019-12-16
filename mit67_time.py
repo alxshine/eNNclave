@@ -17,12 +17,16 @@ import time
 tf.compat.v1.enable_eager_execution()
 
 if len(sys.argv) < 3:
-    print("Usage: {} tf_model enclave_model".format(sys.argv[0]))
+    print("Usage: {} tf_model enclave_model [batch_size]".format(sys.argv[0]))
     sys.exit(1)
 
-BATCH_SIZE = 1
 NUM_BATCHES = 5
 SKIP_FIRST = 1
+
+try:
+    BATCH_SIZE = int(sys.argv[3])
+except IndexError:
+    BATCH_SIZE = 5
 
 tf_model_file = sys.argv[1]
 tf_model = load_model(tf_model_file)
