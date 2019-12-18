@@ -29,7 +29,7 @@ model = load_model(model_file, custom_objects={
 all_layers = get_all_layers(model)
 lens = [len(l.name) for l in all_layers]
 max_len = max(lens)
-for l in all_layers:
+for i, l in enumerate(all_layers):
     try:
         shape_string = str(l.output_shape)
     except AttributeError:
@@ -37,4 +37,4 @@ for l in all_layers:
 
     name = l.name
     name += ":" + " " * (max_len - len(name))
-    print("{:}\t{}".format(name, shape_string))
+    print("{}\t{:}\t{}".format(len(all_layers)-i, name, shape_string))
