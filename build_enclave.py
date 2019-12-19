@@ -4,6 +4,8 @@ from tensorflow.keras.models import load_model, Model, Sequential
 
 import argparse
 import pathlib
+import subprocess
+import sys
 
 def get_all_layers(model):
     """ Get all layers of model, including ones inside a nested model """
@@ -69,3 +71,11 @@ target_file = target_dir.joinpath(new_filename)
 print('\n')
 print('Saving model to {}'.format(target_file))
 enclave_model.save(target_file)
+
+# compile the enclave
+print("Compiling enclave")
+make_result = subprocess.run(["make", "MODE=sgx", "Build_Mode=HW_PRERELEASE"], capture_output=True)
+if make_result.returncode != 0:
+    print(make_result.stderr, file=sys.stderr)
+    sys.exit(make.returncode)
+print("Success!")
