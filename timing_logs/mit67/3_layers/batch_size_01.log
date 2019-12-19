@@ -1,0 +1,47 @@
+Loading data
+Batch 0
+Batch 1
+Batch 2
+Batch 3
+Batch 4
+Batch 5
+Batch 6
+Batch 7
+Batch 8
+Batch 9
+Batch 10
+
+BATCH SIZE:	1
+NUM BATCHES:	10
+SKIPPING FIRST 1 RESULTS
+
+Tensorflow times:
+[1.42193627 0.02442741 0.02598047 0.0251658  0.02582884 0.02565861
+ 0.02510691 0.02622485 0.02556896 0.02530265 0.02523327]
+Mean:	0.025450
+Min:	0.024427
+Max:	0.026225
+
+Tensorflow accuracies:
+[1. 0. 1. 0. 1. 1. 0. 1. 1. 1. 1.]
+Mean:	0.700000
+Min:	0.000000
+Max:	1.000000
+
+Enclave times:
+[0.16824627 0.10118747 0.10058022 0.10217357 0.09752917 0.10008979
+ 0.10176921 0.10135031 0.10045886 0.09520054 0.09775209]
+Mean:	0.099809
+Min:	0.095201
+Max:	0.102174
+
+Enclave accuracies:
+[1. 0. 1. 0. 1. 1. 0. 1. 1. 1. 1.]
+Mean:	0.700000
+Min:	0.000000
+Max:	1.000000
+
+Enclave is slower than TF by a factor of 3.921807
+Number of same results for Enclave and TF per batch:
+[1. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+Total measurement took 2.950720 seconds
