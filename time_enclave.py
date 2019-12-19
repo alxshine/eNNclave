@@ -1,14 +1,28 @@
 from tensorflow.keras.models import load_model, Sequential
+from tensorflow.keras.backend import clear_session
+import tensorflow as tf
 
 import numpy as np
 import time
 import json
+import multiprocessing
 
 import interop.pymatutil as pymatutil
+import enclave_layer
 
 import build_enclave
 import mit67_prepare_data
 
+def time_from_file(model_path, samples, conn=None):
+    model = load_model(model_path, custom_objects={'EnclaveLayer': enclave_layer.EnclaveLayer})
+    time_dict = time_enclave_prediction(model, samples)
+    
+    #send output to parent process
+    if conn != None:
+        conn.send(time_dict)
+    return time_dict
+
+    
 def time_enclave_prediction(model, samples):
     # test if model has enclave part
     has_enclave = any(["enclave" in l.name for l in model.layers])
@@ -20,6 +34,8 @@ def time_enclave_prediction(model, samples):
 
     tf_part = Sequential(model.layers[:enclave_start])
     enclave_part = model.layers[enclave_start]
+
+    # try and force tf to reinitialize
 
     before = time.time()
     pymatutil.initialize()
@@ -35,24 +51,40 @@ def time_enclave_prediction(model, samples):
     pymatutil.teardown()
     after_teardown = time.time()
 
-    setup_time = after_setup - before
+    enclave_setup_time = after_setup - before
     gpu_time = after_tf - after_setup
     enclave_time = after_enclave - after_tf
     teardown_time = after_teardown - after_enclave
     total_time = after_teardown - before
-    return {
-        'setup_time': setup_time,
+
+    time_dict = {
+        'enclave_setup_time': enclave_setup_time,
         'gpu_time': gpu_time,
         'enclave_time': enclave_time,
-        'teardown_time': teardown_time
+        'teardown_time': teardown_time,
+        'combined_enclave_time': enclave_time+enclave_setup_time+teardown_time
     }
+    
+    return time_dict
+
 
 def time_cuts(model_path, cuts, samples):
+    """ Generates a model for every cut and runs timing in subprocess """
     times = {}
+    new_filename = build_enclave.get_new_filename(model_path)
     
     for cut in cuts:
-        enclave_model = build_enclave.build_enclave(model_path, cut)
-        times[cut] = time_enclave_prediction(enclave_model, samples)
+        build_child = multiprocessing.Process(target=build_enclave.build_enclave,
+                                              args=(model_path, cut))
+        build_child.start()
+        build_child.join()
+
+        time_p_conn, time_c_conn = multiprocessing.Pipe()
+        child = multiprocessing.Process(target=time_from_file, args=(new_filename, samples, time_c_conn))
+        print("Timing cut at layer %d" % cut)
+        child.start()
+        times[cut] = time_p_conn.recv()
+        child.join()
         
     return times
 

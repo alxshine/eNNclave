@@ -9,7 +9,18 @@ import pathlib
 import subprocess
 import sys
 
-def build_enclave(model_file, n):
+def get_new_filename(model_path):
+    model_path = pathlib.Path(model_path)
+    target_dir = model_path.parent
+    target_basename = model_path.stem
+    target_ending = model_path.suffix
+
+    new_filename = target_basename + '_enclave' + target_ending
+    target_file = target_dir.joinpath(new_filename)
+    
+    return target_file
+
+def build_enclave(model_file, n, conn=None):
     print('Loading model from %s' % model_file)
     model = load_model(model_file, custom_objects={'Enclave': Enclave})
     
@@ -40,17 +51,11 @@ def build_enclave(model_file, n):
     print("Enclave:")
     enclave.summary()
 
-    model_path = pathlib.Path(model_file)
-    target_dir = model_path.parent
-    target_basename = model_path.stem
-    target_ending = model_path.suffix
-
-    new_filename = target_basename + '_enclave' + target_ending
-    target_file = target_dir.joinpath(new_filename)
+    new_filename = get_new_filename(model_file)
     
     print('\n')
-    print('Saving model to {}'.format(target_file))
-    enclave_model.save(target_file)
+    print('Saving model to {}'.format(new_filename))
+    enclave_model.save(new_filename)
 
     # compile the enclave
     print("Compiling enclave")

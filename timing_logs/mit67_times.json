@@ -1,50 +1,58 @@
 {
   "1": {
-    "setup_time": 1.378026008605957,
-    "gpu_time": 1.3424954414367676,
-    "enclave_time": 0.001596689224243164,
-    "teardown_time": 0.0793309211730957
+    "enclave_setup_time": 1.367387294769287,
+    "gpu_time": 1.3234975337982178,
+    "enclave_time": 0.001344442367553711,
+    "teardown_time": 0.07768392562866211,
+    "combined_enclave_time": 1.446415662765503
   },
   "3": {
-    "setup_time": 1.3872320652008057,
-    "gpu_time": 0.009705066680908203,
-    "enclave_time": 0.08591032028198242,
-    "teardown_time": 0.07843136787414551
+    "enclave_setup_time": 1.3678934574127197,
+    "gpu_time": 1.3240649700164795,
+    "enclave_time": 0.08319211006164551,
+    "teardown_time": 0.0781559944152832,
+    "combined_enclave_time": 1.5292415618896484
   },
   "5": {
-    "setup_time": 1.3901822566986084,
-    "gpu_time": 0.00653076171875,
-    "enclave_time": 0.09732222557067871,
-    "teardown_time": 0.07864570617675781
+    "enclave_setup_time": 1.3739650249481201,
+    "gpu_time": 1.2186832427978516,
+    "enclave_time": 0.09509110450744629,
+    "teardown_time": 0.07916593551635742,
+    "combined_enclave_time": 1.5482220649719238
   },
   "10": {
-    "setup_time": 1.4024989604949951,
-    "gpu_time": 0.00548553466796875,
-    "enclave_time": 8.388795137405396,
-    "teardown_time": 0.07963371276855469
+    "enclave_setup_time": 1.391829252243042,
+    "gpu_time": 1.1521451473236084,
+    "enclave_time": 8.362065315246582,
+    "teardown_time": 0.0800771713256836,
+    "combined_enclave_time": 9.833971738815308
   },
   "14": {
-    "setup_time": 1.4025321006774902,
-    "gpu_time": 0.004523038864135742,
-    "enclave_time": 34.16786861419678,
-    "teardown_time": 0.07962489128112793
+    "enclave_setup_time": 1.3985040187835693,
+    "gpu_time": 1.0766327381134033,
+    "enclave_time": 33.94528079032898,
+    "teardown_time": 0.07950067520141602,
+    "combined_enclave_time": 35.423285484313965
   },
   "18": {
-    "setup_time": 1.4048314094543457,
-    "gpu_time": 0.003413677215576172,
-    "enclave_time": 62.56287384033203,
-    "teardown_time": 0.07990121841430664
+    "enclave_setup_time": 1.422689437866211,
+    "gpu_time": 0.9697265625,
+    "enclave_time": 62.12679862976074,
+    "teardown_time": 0.0799863338470459,
+    "combined_enclave_time": 63.629474401474
   },
   "21": {
-    "setup_time": 1.406050682067871,
-    "gpu_time": 0.002779245376586914,
-    "enclave_time": 77.26879954338074,
-    "teardown_time": 0.07956624031066895
+    "enclave_setup_time": 1.4040536880493164,
+    "gpu_time": 0.8201608657836914,
+    "enclave_time": 77.85521483421326,
+    "teardown_time": 0.08246779441833496,
+    "combined_enclave_time": 79.34173631668091
   },
   "24": {
-    "setup_time": 1.4116761684417725,
-    "gpu_time": 0.001634359359741211,
-    "enclave_time": 96.80609178543091,
-    "teardown_time": 0.07982420921325684
+    "enclave_setup_time": 1.443138599395752,
+    "gpu_time": 0.3295907974243164,
+    "enclave_time": 96.69417572021484,
+    "teardown_time": 0.08319973945617676,
+    "combined_enclave_time": 98.22051405906677
   }
 }
