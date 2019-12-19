@@ -1,3 +1,5 @@
+""" Taken from GoogleML training git at git https://github.com/google/eng-edu """
+
 """Module to train sequence model.
 
 Vectorizes training and validation texts into sequences and uses that for

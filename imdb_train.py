@@ -1,3 +1,5 @@
+""" Taken from GoogleML training git at git https://github.com/google/eng-edu """
+
 """Module to train n-gram model.
 
 Vectorizes training and validation texts into n-grams and uses that for
