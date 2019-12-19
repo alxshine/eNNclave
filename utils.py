@@ -1,5 +1,14 @@
 import tensorflow as tf
 
+def get_all_layers(model):
+    """ Get all layers of model, including ones inside a nested model """
+    layers = []
+    for l in model.layers:
+        if hasattr(l, 'layers'):
+            layers += get_all_layers(l)
+        else:
+            layers.append(l)
+    return layers
 
 def preprocess(x, y, img_size):
     image = tf.io.read_file(x)
