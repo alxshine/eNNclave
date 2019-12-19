@@ -1,0 +1,16 @@
+\documentclass{article}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+% load macros
+\input{macros/netsummary}
+
+\begin{document}
+\begin{tikzpicture}[>=stealth]
+  \draw[->] (0,0) -- (\netwidth,0);
+  \netsummary{-0.2}
+\end{tikzpicture}
+
+
+\end{document}

@@ -17,3 +17,4 @@ sbatch_launch.sh
 **/*.npy
 /hists/
 *.csv
+/tex/macros/*
