@@ -21,7 +21,9 @@ def get_tikz(model):
     width = 1.8
     height = 0.4
     node_distance = 0.5
+    space_between = node_distance - height
 
+    graph_x_ticks = '\\newcommand{\\graphxticks}{'
     layers = get_all_layers(model)
     ret = ''
     ret += '\\newcommand{\\netsummary}[1]{\n'
@@ -31,7 +33,16 @@ def get_tikz(model):
         ret += "\\node[draw=black,minimum width=%fcm,minimum height=%fcm,rotate=-90, anchor=south west] at (%f,#1) {\\tiny %s};" \
             % (width, height, current_x, cleaned_name)
         ret += "\n"
+
+        if i > 0:
+            if i > 1:
+                graph_x_ticks += ','
+            graph_x_ticks += '%f' % (current_x - space_between/2)
+        
     ret += '}\n'
+
+    graph_x_ticks += '}\n'
+    ret += graph_x_ticks
 
     ret += '\\newcommand{\\netwidth}{%f}\n' % (current_x + height)
 

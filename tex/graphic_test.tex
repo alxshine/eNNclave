@@ -9,6 +9,11 @@
 \begin{document}
 \begin{tikzpicture}[>=stealth]
   \draw[->] (0,0) -- (\netwidth,0);
+
+  \foreach \x in \graphxticks {
+    \draw (\x,0) -- (\x, -0.1);
+  }
+  
   \netsummary{-0.2}
 \end{tikzpicture}
 
