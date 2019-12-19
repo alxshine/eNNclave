@@ -1,4 +1,4 @@
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model, Sequential
 import tensorflow as tf
 import numpy as np
 
@@ -16,25 +16,17 @@ import time
 
 tf.compat.v1.enable_eager_execution()
 
-if len(sys.argv) < 3:
-    print("Usage: {} tf_model enclave_model [batch_size]".format(sys.argv[0]))
+if len(sys.argv) < 2:
+    print("Usage: {} model".format(sys.argv[0]))
     sys.exit(1)
 
-NUM_BATCHES = 5
-SKIP_FIRST = 1
-
-try:
-    BATCH_SIZE = int(sys.argv[3])
-except IndexError:
-    BATCH_SIZE = 5
-
-tf_model_file = sys.argv[1]
-tf_model = load_model(tf_model_file)
-enclave_model_file = sys.argv[2]
-enclave_model = load_model(enclave_model_file, custom_objects={'EnclaveLayer': EnclaveLayer})
+model_file = sys.argv[1]
+model = load_model(model_file, custom_objects={'EnclaveLayer': EnclaveLayer})
 
 data_dir = 'data/mit67'
 test_file = 'TestImages.txt'
+
+np.random.seed(1337)
 
 print('Loading data')
 # build label mapping from directories
@@ -59,78 +51,46 @@ x_test = processed_images
 y_test = np.array(test_labels)
 all_indices = np.arange(x_test.shape[0])
 
-total_batches = NUM_BATCHES + SKIP_FIRST
-tf_times = np.empty(total_batches)
-tf_accuracies = np.empty(total_batches)
-enclave_times = np.empty(total_batches)
-enclave_accuracies = np.empty(total_batches)
-enclave_same = np.empty(total_batches)
 
-pymatutil.initialize()
+test_indices = np.random.choice(all_indices, 1)
+samples = x_test[test_indices]
+correct_labels = y_test[test_indices]
 
-total_time_before = time.time()
+# test if model has enclave part
+has_enclave = any(["enclave" in l.name for l in model.layers])
 
-for i in range(total_batches):
-    test_indices = np.random.choice(all_indices, BATCH_SIZE)
-    samples = x_test[test_indices]
-    correct_labels = y_test[test_indices]
+if has_enclave:
+    # split model into TF and enclave part
+    for enclave_start,l in enumerate(model.layers):
+        if "enclave" in l.name:
+            break
 
-    print("Batch %d" % i)
-    
+    tf_part = Sequential(model.layers[:enclave_start])
+    enclave_part = model.layers[enclave_start]
+        
+    before = time.time()
+    pymatutil.initialize()
+    after_setup = time.time()
+
     # predict dataset
-    tf_before = time.time()
-    tf_predictions = tf_model.predict(samples)
-    tf_after = time.time()
-    tf_times[i] = tf_after - tf_before
-    tf_labels = np.argmax(tf_predictions, axis=1)
-    tf_accuracies[i] = np.equal(tf_labels, correct_labels).sum()/len(correct_labels)
+    tf_prediction = tf_part(samples)
+    after_tf = time.time()
 
-    enclave_before = time.time()
-    enclave_predictions = enclave_model.predict(samples)
-    enclave_after = time.time()
-    enclave_times[i] = enclave_after - enclave_before
-    enclave_labels = np.argmax(enclave_predictions, axis=1)
-    enclave_accuracies[i] = np.equal(enclave_labels, correct_labels).sum()/len(correct_labels)
-    enclave_same[i] = np.equal(enclave_labels, tf_labels).sum()
+    final_prediction = enclave_part(tf_prediction)
+    after_enclave = time.time()
+    
+    pymatutil.teardown()
+    after_teardown = time.time()
 
-pymatutil.teardown()
-
-print()
-print("BATCH SIZE:\t%d" % BATCH_SIZE)
-print("NUM BATCHES:\t%d" % NUM_BATCHES)
-print("SKIPPING FIRST %d RESULTS" % SKIP_FIRST)
-measured_tf_times = tf_times[SKIP_FIRST:]
-measured_enclave_times = enclave_times[SKIP_FIRST:]
-measured_tf_accuracies = tf_accuracies[SKIP_FIRST:]
-measured_enclave_accuracies = enclave_accuracies[SKIP_FIRST:]
-
-print()
-print("Tensorflow times:")
-print(tf_times)
-print("Mean:\t%f" % measured_tf_times.mean())
-print("Min:\t%f" % measured_tf_times.min())
-print("Max:\t%f" % measured_tf_times.max())
-print()
-print("Tensorflow accuracies:")
-print(tf_accuracies)
-print("Mean:\t%f" % measured_tf_accuracies.mean())
-print("Min:\t%f" % measured_tf_accuracies.min())
-print("Max:\t%f" % measured_tf_accuracies.max())
-
-print()
-print("Enclave times:")
-print(enclave_times)
-print("Mean:\t%f" % measured_enclave_times.mean())
-print("Min:\t%f" % measured_enclave_times.min())
-print("Max:\t%f" % measured_enclave_times.max())
-print()
-print("Enclave accuracies:")
-print(enclave_accuracies)
-print("Mean:\t%f" % measured_enclave_accuracies.mean())
-print("Min:\t%f" % measured_enclave_accuracies.min())
-print("Max:\t%f" % measured_enclave_accuracies.max())
-
-print("\nEnclave is slower than TF by a factor of %f" % (measured_enclave_times.mean()/measured_tf_times.mean()))
-print("Number of same results for Enclave and TF per batch:")
-print(enclave_same)
-print("Total measurement took %f seconds" % (time.time() - total_time_before))
+    print()
+    setup_time = after_setup - before
+    gpu_time = after_tf - after_setup
+    enclave_time = after_enclave - after_tf
+    teardown_time = after_teardown - after_enclave
+    total_time = after_teardown - before
+    print("Enclave setup time: {} seconds".format(setup_time))
+    print("GPU time: {} seconds".format(gpu_time))
+    print("Enclave time: {} seconds".format(enclave_time))
+    print("Enclave teardown time: {} seconds".format(teardown_time))
+    print("Total time: {} seconds".format(total_time))
+    print("Difference between sum of times and total time: {}".format(total_time - (setup_time + gpu_time + enclave_time + teardown_time)))
