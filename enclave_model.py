@@ -3,16 +3,18 @@ import tensorflow.keras.layers as layers
 import tensorflow as tf
 from format_strings import *
 import numpy as np
+import os
 
 
 class Enclave(Sequential):
     def __init__(self, layers=None, name='Enclave'):
         super().__init__(layers=layers, name=name)
 
-    def generate_state(self, to_file_base='state'):
-        file_template = to_file_base + "%s"
+    def generate_state(self, to_file_base='state', target_dir=''):
+        file_template = os.path.join(target_dir, to_file_base) + "%s"
         header_file = open(file_template % ".hpp", "w+")
         cpp_file = open(file_template % ".cpp", 'w+')
+        bin_file_template = os.path.join(target_dir, '%s.bin')
 
         header_file.write("#ifndef STATE_H\n")
         header_file.write("#define STATE_H\n\n")
@@ -30,7 +32,7 @@ class Enclave(Sequential):
                     header_file.write("extern int %s_r;\n" % weight_name)
                     header_file.write("extern int %s_c;\n\n" % weight_name)
 
-                    with open('%s.bin' % weight_name, 'wb+') as f:
+                    with open(bin_file_template % weight_name, 'wb+') as f:
                         f.write(w.astype(np.float32).tobytes())
 
                     cpp_file.write(
@@ -53,7 +55,7 @@ class Enclave(Sequential):
                     header_file.write("extern " + lhs_string + ";\n")
                     header_file.write("extern int %s_c;\n\n" % bias_name)
 
-                    with open('%s.bin' % bias_name, 'wb+') as bf:
+                    with open(bin_file_template % bias_name, 'wb+') as bf:
                         bf.write(b.astype(np.float32).tobytes())
 
                     cpp_file.write(
@@ -74,11 +76,11 @@ class Enclave(Sequential):
                 header_file.write("extern float *%s;\n" % bias_name)
 
                 #create binary files
-                with open('%s.bin' % dk_name, 'wb+') as df:
+                with open(bin_file_template % dk_name, 'wb+') as df:
                     df.write(depth_kernels.astype(np.float32).tobytes())
-                with open('%s.bin' % pk_name, 'wb+') as pf:
+                with open(bin_file_template % pk_name, 'wb+') as pf:
                     pf.write(point_kernels.astype(np.float32).tobytes())
-                with open('%s.bin' % bias_name, 'wb+') as bf:
+                with open(bin_file_template % bias_name, 'wb+') as bf:
                     bf.write(biases.astype(np.float32).tobytes())
 
                 #create nicer handles
@@ -107,8 +109,9 @@ class Enclave(Sequential):
         header_file.close()
         cpp_file.close()
 
-    def generate_forward(self, to_file='forward.cpp'):
-        forward_file = open(to_file, 'w+')
+    def generate_forward(self, to_file='forward.cpp', target_dir=''):
+        target_file = os.path.join(target_dir, to_file)
+        forward_file = open(target_file, 'w+')
 
         # the first dim of input_shape is num_samples in batch, so skip that
         expected_c = self.layers[0].input_shape[1]

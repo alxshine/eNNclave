@@ -45,8 +45,8 @@ enclave_input_shape = all_layers[-n].input_shape
 enclave.build(input_shape=enclave_input_shape)
 
 # build cpp and bin files for enclave
-enclave.generate_state()
-enclave.generate_forward()
+enclave.generate_state(target_dir='lib/sgx/Enclave')
+enclave.generate_forward(target_dir='lib/sgx/Enclave')
 
 # build replacement layer for original model
 enclave_model = Sequential(all_layers[:-n])
