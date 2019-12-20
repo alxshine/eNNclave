@@ -22,6 +22,17 @@ def time_from_file(model_path, samples, conn=None):
         conn.send(time_dict)
     return time_dict
 
+def _predict_samples(samples, num_classes, forward):
+    # do the work of the enclave layer by hand to make CPU timing easier
+    result = np.zeros((samples.shape[0], num_classes))
+    for i, x in enumerate(samples):
+        label = forward(x.astype(np.float32).tobytes(), np.prod(x.shape))
+
+        if num_classes > 1:
+            result[i, label] = 1
+        else:
+            result[i] = label
+    return result
     
 def time_enclave_prediction(model, samples):
     # test if model has enclave part
@@ -33,7 +44,8 @@ def time_enclave_prediction(model, samples):
             break
 
     tf_part = Sequential(model.layers[:enclave_start])
-    enclave_part = model.layers[enclave_start]
+    enclave_layer = model.layers[enclave_start]
+    num_classes = enclave_layer.num_classes
 
     before = time.time()
     pymatutil.initialize()
@@ -44,11 +56,7 @@ def time_enclave_prediction(model, samples):
     after_tf = time.time()
 
     # final_prediction = enclave_part(tf_prediction)
-    # do the work of the enclave layer by hand to make CPU timing easier
-    breakpoint()
-    xs = samples.numpy()
-    ret = np.zeros((xs.shape[0],tf_part.output_shape[1]))
-    
+    final_predictions = _predict_samples(samples, num_classes, pymatutil.enclave_forward)
         
     after_enclave = time.time()
 
@@ -56,20 +64,22 @@ def time_enclave_prediction(model, samples):
     after_teardown = time.time()
 
     # before_native = time.time()
-    
+    # _predict_samples(samples, num_classes, pymatutil.native_forward)
+    # after_native = time.time()
 
     enclave_setup_time = after_setup - before
     gpu_time = after_tf - after_setup
     enclave_time = after_enclave - after_tf
     teardown_time = after_teardown - after_enclave
-    total_time = after_teardown - before
+    # native_time = after_native - before_native
 
     time_dict = {
         'enclave_setup_time': enclave_setup_time,
         'gpu_time': gpu_time,
         'enclave_time': enclave_time,
         'teardown_time': teardown_time,
-        'combined_enclave_time': enclave_time+enclave_setup_time+teardown_time
+        'combined_enclave_time': enclave_time+enclave_setup_time+teardown_time,
+        # 'native_time': native_time
     }
     
     return time_dict

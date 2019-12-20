@@ -14,6 +14,7 @@ class EnclaveLayer(Layer):
         return {'num_classes': self.num_classes, 'name': super().name}
     
     def wrap_matutil(self, xs):
+        # TODO: not using py_function seems faster, see time_enclave.py
         xs = xs.numpy()
         ret = np.zeros((xs.shape[0],self.num_classes))
         for i, x in enumerate(xs):
