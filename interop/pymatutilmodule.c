@@ -5,7 +5,8 @@
 #include <python3.6m/Python.h>
 #endif
 
-#include "matutil.hpp"
+#include "enclave.hpp"
+#include "native.hpp"
 
 static PyObject *pymatutil_test_bytes(PyObject *self, PyObject *args) {
   // return range(10) to test return value interoperability
@@ -18,7 +19,7 @@ static PyObject *pymatutil_test_bytes(PyObject *self, PyObject *args) {
   return ret;
 }
 
-static PyObject *pymatutil_forward(PyObject *self, PyObject *args) {
+static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
   int s;
 
@@ -27,7 +28,25 @@ static PyObject *pymatutil_forward(PyObject *self, PyObject *args) {
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   int label;
-  int sts = matutil_forward(m, s, &label);
+  int sts = enclave_forward(m, s, &label);
+  if (sts){
+    PyErr_SetString(PyExc_IOError, "Error in enclave");
+    return NULL; // TODO: do some error handling
+  }
+
+  return PyLong_FromLong(label);
+}
+
+static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
+  const PyBytesObject *b;
+  int s;
+
+  if (!PyArg_ParseTuple(args, "Si", &b, &s))
+    return NULL;
+
+  float *m = (float *)PyBytes_AsString((PyObject *)b);
+  int label;
+  int sts = native_forward(m, s, &label);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error in enclave");
     return NULL; // TODO: do some error handling
@@ -37,19 +56,19 @@ static PyObject *pymatutil_forward(PyObject *self, PyObject *args) {
 }
 
 static PyObject *pymatutil_initialize(PyObject *self, PyObject *args){
-  matutil_initialize();
+  enclave_initialize();
   return Py_None;
 }
 
 static PyObject *pymatutil_teardown(PyObject *self, PyObject *args){
-  matutil_teardown();
+  enclave_teardown();
   return Py_None;
 }
 
 static PyMethodDef PymatutilMethods[] = {
     {"initialize", pymatutil_initialize, METH_VARARGS, "Initialize matutil"},
     {"teardown", pymatutil_teardown, METH_VARARGS, "Teardown matutil"},
-    {"forward", pymatutil_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
+    {"enclave_forward", pymatutil_enclave_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
 

@@ -38,8 +38,8 @@ def build_enclave(model_file, n, conn=None):
     enclave.build(input_shape=enclave_input_shape)
 
     # build cpp and bin files for enclave
-    enclave.generate_state(target_dir='lib/sgx/Enclave')
-    enclave.generate_forward(target_dir='lib/sgx/Enclave')
+    enclave.generate_state(target_dir='lib/enclave/Enclave')
+    enclave.generate_forward(target_dir='lib/enclave/Enclave')
     # same for regular C
     enclave.generate_state(target_dir='lib/native')
     enclave.generate_forward(target_dir='lib/native')
@@ -62,7 +62,7 @@ def build_enclave(model_file, n, conn=None):
 
     # compile the enclave
     print("Compiling enclave")
-    make_result = subprocess.run(["make", "MODE=sgx", "Build_Mode=HW_PRERELEASE"], capture_output=True)
+    make_result = subprocess.run(["make", "Build_Mode=HW_PRERELEASE"], capture_output=True)
     if make_result.returncode != 0:
         raise OSError(make_result.stderr)
     

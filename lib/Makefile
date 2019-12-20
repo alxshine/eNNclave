@@ -7,7 +7,6 @@ all:
 	@$(MAKE) -C native
 	@printf "\n\nMaking library in sgx mode\n\n\n"
 	@$(MAKE) -C enclave
-	@ln -sf libenclave.so libmatutil.so
 
 .PHONY: clean
 clean:
