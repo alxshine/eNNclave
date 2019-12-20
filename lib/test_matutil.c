@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "matutil.hpp"
+/* #include "matutil.hpp" */
+/* #include "native.hpp" */
+#include "enclave.hpp"
 
 int main(void) {
-  matutil_initialize();
+  /* matutil_initialize(); */
+  enclave_initialize();
   printf("Matutil initialized\n");
 
   /* int r1 = 2, c1 = 3; */
@@ -52,7 +55,7 @@ int main(void) {
 
   int label = -1;
   printf("forward\n");
-  matutil_forward(input, c, &label);
+  enclave_forward(input, c, &label);
   printf("Output label: %d\n", label);
 
   /* printf("\n\nConvolution:\n"); */
@@ -108,7 +111,8 @@ int main(void) {
   /* printf("Outputs:\n"); */
   /* matutil_dump_matrix3(mp_results, 2,2,2); */
 
-  matutil_teardown();
+  /* enclave_teardown(); */
+  /* matutil_teardown(); */
   printf("Matutil torn down\n");
   return 0;
 }

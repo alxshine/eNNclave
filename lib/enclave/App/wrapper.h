@@ -9,7 +9,8 @@
 #include "sgx_error.h"       /* sgx_status_t */
 #include "sgx_eid.h"     /* sgx_enclave_id_t */
 
-#include "matutil.hpp"
+/* #include "matutil.hpp" */
+#include "enclave.hpp"
 
 #ifndef TRUE
 # define TRUE 1

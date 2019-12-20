@@ -106,7 +106,7 @@ void test(void) {
   getchar();
 }
 
-int matutil_initialize() {
+int enclave_initialize() {
   if (initialize_enclave() < 0) {
     getchar();
     return -1;
@@ -114,9 +114,9 @@ int matutil_initialize() {
   return 0;
 }
 
-int matutil_teardown() { return sgx_destroy_enclave(global_eid); }
+int enclave_teardown() { return sgx_destroy_enclave(global_eid); }
 
-int matutil_forward(float *m, int s, int *label) {
+int enclave_forward(float *m, int s, int *label) {
   int sts;
   *label = -1; // so invalid results are visible
   sgx_status_t sgx_status = forward(global_eid, &sts, m, s, label);
