@@ -118,7 +118,7 @@ App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 wrapper_cpp_objects := $(wrapper_cpp_files:.cpp=.o)
 
 App_Name := app
-wrapper_name := libmatutil.so
+wrapper_name := libsgx.so
 
 ######## Enclave Settings ########
 
@@ -193,7 +193,7 @@ endif
 .PHONY: all target run
 all: .config_$(Build_Mode)_$(SGX_ARCH)
 	@$(MAKE) target
-	@ln -sf sgx/libmatutil.so ../
+	@ln -sf sgx/${wrapper_name} ../
 	@ln -sf lib/sgx/enclave.so ${ROOT}/
 	@ln -sf lib/sgx/enclave.signed.so ${ROOT}/
 	@ln -sf sgx/enclave.so ../

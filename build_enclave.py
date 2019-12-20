@@ -40,6 +40,9 @@ def build_enclave(model_file, n, conn=None):
     # build cpp and bin files for enclave
     enclave.generate_state(target_dir='lib/sgx/Enclave')
     enclave.generate_forward(target_dir='lib/sgx/Enclave')
+    # same for regular C
+    enclave.generate_state(target_dir='lib/native')
+    enclave.generate_forward(target_dir='lib/native')
 
     # build replacement layer for original model
     enclave_model = Sequential(all_layers[:-n])

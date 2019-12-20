@@ -1,20 +1,15 @@
 ROOT=${HOME}/Projects/nn-sgx
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
-MODE:=native
 
 all:
-	@$(MAKE) lib
-	@$(MAKE) test
+	@printf "\n\nMaking library in native mode\n\n\n"
+	@$(MAKE) -C native
+	@printf "\n\nMaking library in sgx mode\n\n\n"
+	@$(MAKE) -C sgx
+	@ln -sf libsgx.so libmatutil.so
 
-lib:
-	@printf "\n\nMaking library in $(MODE) mode\n\n\n"
-	$(MAKE) -C $(MODE)
-
-test: test_matutil.c
-	$(CC) -g test_matutil.c -lmatutil -I${INC} -L${LIB} -o test_matutil
-
-.PHONY: native sgx
+.PHONY: clean
 clean:
 	rm -rf *.o test_matutil *.so
 	make -C native clean
