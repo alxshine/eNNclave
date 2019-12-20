@@ -26,6 +26,12 @@ def _texify_number(num):
         num //= 10
     return ret[::-1]
 
+def _calc_log_coord(lin_coord):
+    scale_bottom = -2.5 #value of -2.5 shall at 0
+    scale_top = 4.7 #value of 4.7 shall be at y_max
+
+    return (np.log(lin_coord)-scale_bottom)/(scale_top-scale_bottom)
+
 def net_summary(model):
     start_x = 0
     width = 1.8
@@ -65,15 +71,13 @@ def net_summary(model):
 
 def time_rectangles(time_dict):
     y_max = 5
-    scale_bottom = -2.5 #value of -2.5 shall at 0
-    scale_top = 4.7 #value of 4.7 shall be at y_max
     y_ticks = np.concatenate([np.arange(0.1, 1, 0.1), np.arange(1, 10, 1), np.arange(10, 110, 10)])
 
     ret = ''
     ret += '\\newcommand{\\ymax}{%f}\n' % y_max
     ret += '\\newcommand{\\yticks}{'
     for i,y in enumerate(y_ticks):
-        coordinate = (np.log(y)-scale_bottom)/(scale_top-scale_bottom)
+        coordinate = _calc_log_coord(y)
         
         if i > 0:
             ret += ','
@@ -81,9 +85,15 @@ def time_rectangles(time_dict):
     ret += '}\n'
 
     for split in time_dict:
+        times = time_dict[split]
         split = int(split)
+        
         x_coordinate = '\\netwidth-\\layerheight-%d*\\nodedistance-\\spacebetween/2' % (split-1)
-        node = '\\node[anchor=south, draw] at (%s, 0) {};' % x_coordinate
+        gpu_height = _calc_log_coord(times['gpu_time'])*y_max
+        enclave_height = _calc_log_coord(times['combined_enclave_time'])*y_max
+        
+        node = '\\node[anchor=south, draw, minimum height=%fcm] at (%s, 0) {};\n' % (gpu_height, x_coordinate)
+        node += '\\node[anchor=south, draw, minimum height=%fcm] at (%s, %f) {};' % (enclave_height, x_coordinate, gpu_height)
 
         ret += '\\newcommand{\\split%s}{%s}\n' % (_texify_number(split), node)
         
