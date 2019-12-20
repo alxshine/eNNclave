@@ -1,7 +1,7 @@
 \documentclass{article}
 
 \usepackage{tikz}
-\usetikzlibrary{arrows}
+\usetikzlibrary{arrows, patterns}
 
 % load macros
 \input{macros/netsummary}
@@ -9,12 +9,25 @@
 \begin{document}
 \begin{tikzpicture}[>=stealth]
   \draw[->] (0,0) -- (\netwidth,0);
-
-  \foreach \x in \graphxticks {
+  \foreach \x in \xticks {
     \draw (\x,0) -- (\x, -0.1);
+  }
+
+  \draw[->] (0,0) -- (0,\ymax+0.1);
+  \foreach \y in \yticks {
+    \draw (-0.1,\y) -- (0.1,\y);
   }
   
   \netsummary{-0.2}
+
+  \node[anchor=south, draw, minimum width=0.2cm, minimum height = 1.1521cm] at (9.95, 0) {};
+  \node[anchor=south, draw, minimum width=0.2cm, minimum height = 1.154822cm, pattern=north west lines] at (9.95, 1.1521) {};
+
+  \node[anchor=south, draw, minimum width=0.2cm, minimum height = 0.32959cm] at (0.45, 0) {};
+  \node[anchor=south, draw, minimum width=0.2cm, minimum height = 98.2205] at (0.45, 0.32959) {};
+
+  \splita
+  \splitba
 \end{tikzpicture}
 
 
