@@ -69,6 +69,7 @@ static PyMethodDef PymatutilMethods[] = {
     {"initialize", pymatutil_initialize, METH_VARARGS, "Initialize matutil"},
     {"teardown", pymatutil_teardown, METH_VARARGS, "Teardown matutil"},
     {"enclave_forward", pymatutil_enclave_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
+    {"native_forward", pymatutil_native_forward, METH_VARARGS, "Execute forward pass of enclave layers in native C"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
 

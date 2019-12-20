@@ -35,8 +35,6 @@ def time_enclave_prediction(model, samples):
     tf_part = Sequential(model.layers[:enclave_start])
     enclave_part = model.layers[enclave_start]
 
-    # try and force tf to reinitialize
-
     before = time.time()
     pymatutil.initialize()
     after_setup = time.time()
@@ -45,11 +43,20 @@ def time_enclave_prediction(model, samples):
     tf_prediction = tf_part(samples)
     after_tf = time.time()
 
-    final_prediction = enclave_part(tf_prediction)
+    # final_prediction = enclave_part(tf_prediction)
+    # do the work of the enclave layer by hand to make CPU timing easier
+    breakpoint()
+    xs = samples.numpy()
+    ret = np.zeros((xs.shape[0],tf_part.output_shape[1]))
+    
+        
     after_enclave = time.time()
 
     pymatutil.teardown()
     after_teardown = time.time()
+
+    # before_native = time.time()
+    
 
     enclave_setup_time = after_setup - before
     gpu_time = after_tf - after_setup
