@@ -3,7 +3,8 @@ preamble_template = """
 #include <math.h>
 
 #include "state.hpp"
-#include "matutil.hpp"
+#include "native.hpp"
+#include "enclave.hpp"
 #include "forward.hpp"
 
 int forward(float *m, int, int *label) {

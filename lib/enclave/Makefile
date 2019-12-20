@@ -118,7 +118,7 @@ App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 wrapper_cpp_objects := $(wrapper_cpp_files:.cpp=.o)
 
 App_Name := app
-wrapper_name := libsgx.so
+wrapper_name := libenclave.so
 
 ######## Enclave Settings ########
 
@@ -193,11 +193,11 @@ endif
 .PHONY: all target run
 all: .config_$(Build_Mode)_$(SGX_ARCH)
 	@$(MAKE) target
-	@ln -sf sgx/${wrapper_name} ../
-	@ln -sf lib/sgx/enclave.so ${ROOT}/
-	@ln -sf lib/sgx/enclave.signed.so ${ROOT}/
-	@ln -sf sgx/enclave.so ../
-	@ln -sf sgx/enclave.signed.so ../
+	@ln -sf enclave/${wrapper_name} ../
+	@ln -sf lib/enclave/enclave.so ${ROOT}/
+	@ln -sf lib/enclave/enclave.signed.so ${ROOT}/
+	@ln -sf enclave/enclave.so ../
+	@ln -sf enclave/enclave.signed.so ../
 
 ifeq ($(Build_Mode), HW_RELEASE)
 target:  $(App_Name) $(wrapper_name) $(Enclave_Name)
