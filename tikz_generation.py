@@ -86,14 +86,17 @@ def time_rectangles(time_dict):
 
     for split in time_dict:
         times = time_dict[split]
+        gpu_time = times['gpu_time']
+        enclave_time = times['combined_enclave_time']
         split = int(split)
         
         x_coordinate = '\\netwidth-\\layerheight-%d*\\nodedistance-\\spacebetween/2' % (split-1)
-        gpu_height = _calc_log_coord(times['gpu_time'])*y_max
-        enclave_height = _calc_log_coord(times['combined_enclave_time'])*y_max
+        gpu_height = _calc_log_coord(gpu_time)*y_max
+        enclave_north = _calc_log_coord(gpu_time+enclave_time)*y_max
+        enclave_height = enclave_north - gpu_height
         
         node = '\\node[anchor=south, draw, minimum height=%fcm] at (%s, 0) {};\n' % (gpu_height, x_coordinate)
-        node += '\\node[anchor=south, draw, minimum height=%fcm] at (%s, %f) {};' % (enclave_height, x_coordinate, gpu_height)
+        node += '\\node[anchor=south, draw, minimum height=%fcm, pattern=north west lines] at (%s, %f) {};' % (enclave_height, x_coordinate, gpu_height)
 
         ret += '\\newcommand{\\split%s}{%s}\n' % (_texify_number(split), node)
         
