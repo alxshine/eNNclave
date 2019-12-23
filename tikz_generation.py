@@ -73,6 +73,7 @@ def net_summary(model):
 def time_rectangles(times):
     y_max = 5
     y_ticks = np.concatenate([np.arange(0.1, 1, 0.1), np.arange(1, 10, 1), np.arange(10, 110, 10)])
+    rectangle_width = 0.2
 
     ret = ''
     ret += '\\newcommand{\\ymax}{%f}\n' % y_max
@@ -91,16 +92,16 @@ def time_rectangles(times):
         native_time = row['native_time']
         split = int(row['layers_in_enclave'])
         
-        x_coordinate = '\\netwidth-\\layerheight-%d*\\nodedistance-\\spacebetween/2' % (split-1)
-        gpu_height = _calc_log_coord(gpu_time)*y_max
-        native_north = _calc_log_coord(gpu_time+native_time)*y_max
-        native_height = native_north - gpu_height
-        enclave_north = _calc_log_coord(gpu_time+enclave_time)*y_max
-        enclave_height = enclave_north - native_height - gpu_height
+        left_coordinate = '\\netwidth-\\layerheight-%d*\\nodedistance-\\spacebetween/2-%f' % (split-1, rectangle_width/2)
+        right_coordinate = left_coordinate + ("+%f" % rectangle_width)
         
-        node = '\\node[anchor=south, draw, minimum height=%fcm] at (%s, 0) {};\n' % (gpu_height, x_coordinate)
-        node += '\\node[anchor=south, draw, minimum height=%fcm] at (%s, %f) {};' % (native_height, x_coordinate, gpu_height)
-        node += '\\node[anchor=south, draw, minimum height=%fcm] at (%s, %f) {};' % (enclave_height, x_coordinate, gpu_height+native_height)
+        gpu_north = _calc_log_coord(gpu_time)*y_max
+        native_north = _calc_log_coord(gpu_time+native_time)*y_max
+        enclave_north = _calc_log_coord(gpu_time+enclave_time)*y_max
+        
+        node = '\\draw (%s, 0) rectangle (%s, %f);\n' % (left_coordinate, right_coordinate, gpu_north)
+        node += '\\draw[pattern=north east lines] (%s, %f) rectangle (%s, %f);\n' % (left_coordinate, gpu_north, right_coordinate, native_north)
+        node += '\\draw[pattern=north west lines] (%s, %f) rectangle (%s, %f);\n' % (left_coordinate, native_north, right_coordinate, enclave_north)
 
         ret += '\\newcommand{\\split%s}{%s}\n' % (_texify_number(split), node)
         
@@ -118,6 +119,6 @@ if __name__ == "__main__":
     tikz = net_summary(model)
     print(tikz)
 
-    time_file = 'timing_logs/mit67_times_important_cuts.csv'
+    time_file = 'timing_logs/mit67_times.csv'
     times = pd.read_csv(time_file)
     print(time_rectangles(times))
