@@ -62,7 +62,7 @@ def build_enclave(model_file, n, conn=None):
 
     # compile the enclave
     print("Compiling enclave")
-    make_result = subprocess.run(["make", "Build_Mode=HW_PRERELEASE"], capture_output=True)
+    make_result = subprocess.run(["make", "lib", "Build_Mode=HW_PRERELEASE"])
     if make_result.returncode != 0:
         raise OSError(make_result.stderr)
     

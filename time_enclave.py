@@ -6,6 +6,8 @@ import numpy as np
 import time
 import json
 import multiprocessing
+import sys
+import os
 
 import interop.pymatutil as pymatutil
 import enclave_layer
@@ -13,20 +15,22 @@ import enclave_layer
 import build_enclave
 import mit67_prepare_data
 
-def time_from_file(model_path, samples, conn=None):
+def time_from_file(model_path, samples):
     model = load_model(model_path, custom_objects={'EnclaveLayer': enclave_layer.EnclaveLayer})
     time_dict = time_enclave_prediction(model, samples)
-    
-    #send output to parent process
-    if conn != None:
-        conn.send(time_dict)
     return time_dict
 
 def _predict_samples(samples, num_classes, forward):
+    #  print("\n\nPredicting with " + str(forward))
     # do the work of the enclave layer by hand to make CPU timing easier
     result = np.zeros((samples.shape[0], num_classes))
     for i, x in enumerate(samples):
         label = forward(x.astype(np.float32).tobytes(), np.prod(x.shape))
+        #  print('label: %d\n' % label)
+
+        if label >= num_classes:
+            #  print("Got label %d, out of %d possible..." % (label, num_classes))
+            continue
 
         if num_classes > 1:
             result[i, label] = 1
@@ -56,22 +60,30 @@ def time_enclave_prediction(model, samples):
     after_tf = time.time()
 
     # final_prediction = enclave_part(tf_prediction)
-    final_predictions = _predict_samples(samples, num_classes, pymatutil.enclave_forward)
+    enclave_results = _predict_samples(samples, num_classes, pymatutil.enclave_forward)
         
     after_enclave = time.time()
 
     pymatutil.teardown()
     after_teardown = time.time()
 
-    # before_native = time.time()
-    # _predict_samples(samples, num_classes, pymatutil.native_forward)
-    # after_native = time.time()
+    before_native = time.time()
+    native_results = _predict_samples(samples, num_classes, pymatutil.native_forward)
+    after_native = time.time()
+
+    if not np.array_equal(enclave_results, native_results):
+        print("\n\n\n\n\nERROR: native results are not the same as enclave results")
+        print("Enclave results:")
+        print(enclave_results)
+        print("Native results:")
+        print(native_results)
+        print("\n\n\n\n\nERROR END\n\n\n\n\n")
 
     enclave_setup_time = after_setup - before
     gpu_time = after_tf - after_setup
     enclave_time = after_enclave - after_tf
     teardown_time = after_teardown - after_enclave
-    # native_time = after_native - before_native
+    native_time = after_native - before_native
 
     time_dict = {
         'enclave_setup_time': enclave_setup_time,
@@ -79,44 +91,49 @@ def time_enclave_prediction(model, samples):
         'enclave_time': enclave_time,
         'teardown_time': teardown_time,
         'combined_enclave_time': enclave_time+enclave_setup_time+teardown_time,
-        # 'native_time': native_time
+        'native_time': native_time
     }
     
     return time_dict
 
+def _dump_to_csv(time_dict, f, write_header=False):
+    if write_header:
+        # write header line
+        for i,k in enumerate(time_dict):
+            if i > 0:
+                f.write(',')
+            f.write(k)
+        f.write('\n')
 
-def time_cuts(model_path, cuts, samples):
-    """ Generates a model for every cut and runs timing in subprocess """
-    times = {}
-    new_filename = build_enclave.get_new_filename(model_path)
-    
-    for cut in cuts:
-        build_child = multiprocessing.Process(target=build_enclave.build_enclave,
-                                              args=(model_path, cut))
-        build_child.start()
-        build_child.join()
-
-        time_p_conn, time_c_conn = multiprocessing.Pipe()
-        child = multiprocessing.Process(target=time_from_file, args=(new_filename, samples, time_c_conn))
-        print("Timing cut at layer %d" % cut)
-        child.start()
-        times[cut] = time_p_conn.recv()
-        child.join()
-        
-    return times
+    for i,kv in enumerate(time_dict.items()):
+        k,v = kv
+        if i > 0:
+            f.write(',')
+        f.write(str(v))
+    f.write('\n')
 
 if __name__ == '__main__':
-    original_file = 'models/mit67.h5'
-    cuts = [1, 3, 5, 10, 14, 18, 21, 24]
+    if len(sys.argv) < 3:
+        print("Usage {} path/to/model layers_in_enclave".format(sys.argv[0]))
+        sys.exit(1)
+
+    model_path = sys.argv[1]
+    layers_in_enclave = int(sys.argv[2])
 
     np.random.seed(1337)
     x_test, _ = mit67_prepare_data.load_test_set()
-    sample_index = np.random.randint(x_test.shape[0])
+    #  sample_index = np.random.randint(x_test.shape[0])
+    sample_index = 42
     samples = x_test[sample_index:sample_index+1]
     
-    times = time_cuts(original_file, cuts, samples)
+    time_dict = time_from_file(model_path, samples)
+    time_dict['layers_in_enclave'] = layers_in_enclave
 
     print("\n\n")
-    print(json.dumps(times, indent=2))
-    with open('timing_logs/mit67_times.json', 'w+') as f:
-        json.dump(times, f, indent=2)
+    print(json.dumps(time_dict, indent=2))
+
+    output_file = 'timing_logs/mit67_times.csv'
+    print("Saving to file {}".format(output_file))
+    file_existed = os.path.isfile(output_file)
+    with open(output_file, 'a+') as f:
+        _dump_to_csv(time_dict, f, write_header = not file_existed)

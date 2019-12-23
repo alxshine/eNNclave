@@ -2,9 +2,7 @@ export ROOT:=$(shell pwd)
 export INC:=${ROOT}/inc
 export LIB:=${ROOT}/lib
 
-all:
-	$(MAKE) lib
-	$(MAKE) interop
+all: lib interop
 
 lib:
 	$(MAKE) -C lib -e

@@ -234,7 +234,3 @@ void matutil_dump_matrix3(float *m, int h, int w, int c){
     }
   }
 }
-
-int matutil_forward(float *m, int size, int *label){
-  return forward(m, size, label);
-}

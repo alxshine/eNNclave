@@ -48,7 +48,7 @@ static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
   int label;
   int sts = native_forward(m, s, &label);
   if (sts){
-    PyErr_SetString(PyExc_IOError, "Error in enclave");
+    PyErr_SetString(PyExc_IOError, "Error during native forward");
     return NULL; // TODO: do some error handling
   }
 

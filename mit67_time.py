@@ -26,6 +26,7 @@ if __name__ == '__main__':
     np.random.seed(1337)
 
     x_test, _ = load_test_set()
-    sample_index = np.random.randint(x_test.shape[0])
+    #  sample_index = np.random.randint(x_test.shape[0])
+    sample_index = 42
     times = time_enclave_prediction(model, x_test[sample_index:sample_index+1])
     print(json.dumps(times, indent=2))
