@@ -5,6 +5,7 @@ from enclave_layer import EnclaveLayer
 from enclave_model import Enclave
 
 import numpy as np
+import pandas as pd
 
 import sys
 import json
@@ -69,7 +70,7 @@ def net_summary(model):
 
     return ret
 
-def time_rectangles(time_dict):
+def time_rectangles(times):
     y_max = 5
     y_ticks = np.concatenate([np.arange(0.1, 1, 0.1), np.arange(1, 10, 1), np.arange(10, 110, 10)])
 
@@ -84,19 +85,22 @@ def time_rectangles(time_dict):
         ret += '%f' % (coordinate*y_max)
     ret += '}\n'
 
-    for split in time_dict:
-        times = time_dict[split]
-        gpu_time = times['gpu_time']
-        enclave_time = times['combined_enclave_time']
-        split = int(split)
+    for i, row in times.iterrows():
+        gpu_time = row['gpu_time']
+        enclave_time = row['combined_enclave_time']
+        native_time = row['native_time']
+        split = int(row['layers_in_enclave'])
         
         x_coordinate = '\\netwidth-\\layerheight-%d*\\nodedistance-\\spacebetween/2' % (split-1)
         gpu_height = _calc_log_coord(gpu_time)*y_max
+        native_north = _calc_log_coord(gpu_time+native_time)*y_max
+        native_height = native_north - gpu_height
         enclave_north = _calc_log_coord(gpu_time+enclave_time)*y_max
-        enclave_height = enclave_north - gpu_height
+        enclave_height = enclave_north - native_height - gpu_height
         
         node = '\\node[anchor=south, draw, minimum height=%fcm] at (%s, 0) {};\n' % (gpu_height, x_coordinate)
-        node += '\\node[anchor=south, draw, minimum height=%fcm, pattern=north west lines] at (%s, %f) {};' % (enclave_height, x_coordinate, gpu_height)
+        node += '\\node[anchor=south, draw, minimum height=%fcm] at (%s, %f) {};' % (native_height, x_coordinate, gpu_height)
+        node += '\\node[anchor=south, draw, minimum height=%fcm] at (%s, %f) {};' % (enclave_height, x_coordinate, gpu_height+native_height)
 
         ret += '\\newcommand{\\split%s}{%s}\n' % (_texify_number(split), node)
         
@@ -114,6 +118,6 @@ if __name__ == "__main__":
     tikz = net_summary(model)
     print(tikz)
 
-    with open('timing_logs/mit67_times.json', 'r') as f:
-        time_dict = json.load(f)
-    print(time_rectangles(time_dict))
+    time_file = 'timing_logs/mit67_times_important_cuts.csv'
+    times = pd.read_csv(time_file)
+    print(time_rectangles(times))

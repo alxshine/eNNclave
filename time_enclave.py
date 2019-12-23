@@ -59,8 +59,10 @@ def time_enclave_prediction(model, samples):
     tf_prediction = tf_part(samples)
     after_tf = time.time()
 
+    tf_prediction = tf_prediction.numpy()
+
     # final_prediction = enclave_part(tf_prediction)
-    enclave_results = _predict_samples(samples, num_classes, pymatutil.enclave_forward)
+    enclave_results = _predict_samples(tf_prediction, num_classes, pymatutil.enclave_forward)
         
     after_enclave = time.time()
 
@@ -68,16 +70,18 @@ def time_enclave_prediction(model, samples):
     after_teardown = time.time()
 
     before_native = time.time()
-    native_results = _predict_samples(samples, num_classes, pymatutil.native_forward)
+    native_results = _predict_samples(tf_prediction, num_classes, pymatutil.native_forward)
     after_native = time.time()
 
-    if not np.array_equal(enclave_results, native_results):
-        print("\n\n\n\n\nERROR: native results are not the same as enclave results")
-        print("Enclave results:")
-        print(enclave_results)
-        print("Native results:")
-        print(native_results)
-        print("\n\n\n\n\nERROR END\n\n\n\n\n")
+    enclave_label = np.argmax(enclave_results, axis=1)
+    enclave_label = int(enclave_label[0]) # numpy does some type stuff we have to fix
+    native_label = np.argmax(native_results, axis=1)
+    native_label = int(native_label[0])
+
+    print('\n')
+    print('Enclave label: %d' % enclave_label)
+    print('Native label: %d' % native_label)
+
 
     enclave_setup_time = after_setup - before
     gpu_time = after_tf - after_setup
@@ -91,7 +95,9 @@ def time_enclave_prediction(model, samples):
         'enclave_time': enclave_time,
         'teardown_time': teardown_time,
         'combined_enclave_time': enclave_time+enclave_setup_time+teardown_time,
-        'native_time': native_time
+        'native_time': native_time,
+        'enclave_label': enclave_label,
+        'native_label': native_label
     }
     
     return time_dict
@@ -114,7 +120,7 @@ def _dump_to_csv(time_dict, f, write_header=False):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("Usage {} path/to/model layers_in_enclave".format(sys.argv[0]))
+        print("Usage {} path/to/enclave_model layers_in_enclave".format(sys.argv[0]))
         sys.exit(1)
 
     model_path = sys.argv[1]
