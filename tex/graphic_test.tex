@@ -3,6 +3,11 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows, patterns}
 
+\RequirePackage{xcolor}
+\definecolor{color1}{cmyk}{0,0.5,1,0}
+\definecolor{color2}{cmyk}{1,0.6,0,0.56}
+\definecolor{color3}{cmyk}{0.5,0.6,0,0.56}
+
 % load macros
 \input{macros/netsummary}
 
@@ -17,12 +22,13 @@
   \foreach \y in \yticks {
     \draw (-0.1,\y) -- (0.1,\y);
   }
+  \ylabels{-.5}
   
   \netsummary{-0.2}
 
   \splita
   % \splitb
-  \splitc
+  % \splitc
   \splitd
   \splitf
   \splitba
