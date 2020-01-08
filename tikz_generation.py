@@ -131,8 +131,8 @@ def time_rectangles(times):
                 print("GPU time: %f, native time: %f, enclave time: %f" % (gpu_time, native_time, enclave_time), file=sys.stderr)
         
         node = '\\draw[fill=color1] (%s, 0) rectangle (%s, %f);\n' % (left_0, right_0, gpu_north)
-        node += '\\draw[fill=color2] (%s, 0) rectangle (%s, %f);\n' % (right_0, right_1, native_north)
-        node += '\\draw[fill=color3] (%s, 0) rectangle (%s, %f);\n' % (right_1, right_2, enclave_north)
+        node += '\\draw[fill=color4] (%s, 0) rectangle (%s, %f);\n' % (right_0, right_1, native_north)
+        node += '\\draw[fill=color7] (%s, 0) rectangle (%s, %f);\n' % (right_1, right_2, enclave_north)
 
         ret += '\\newcommand{\\split%s}{%s}\n' % (_texify_number(split), node)
 
