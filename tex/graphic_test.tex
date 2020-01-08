@@ -12,6 +12,18 @@
 \definecolor{color6}{HTML}{F9E7AE}
 \definecolor{color7}{HTML}{FFFFC8}
 
+\newcommand{\legend}[2]{
+  \begin{scope}[xshift=#1, yshift=#2]
+    \draw[draw] (0,0) rectangle ++(3,-1);
+    \draw[draw, fill=color1] (0.1,-0.1) rectangle ++(0.4,-0.2);
+    \draw[anchor=west] (0.5, -0.2) node {\scriptsize GPU time};
+    \draw[draw, fill=color4] (0.1,-0.4) rectangle ++(0.4,-0.2);
+    \draw[anchor=west] (0.5, -0.5) node {\scriptsize CPU time};
+    \draw[draw, fill=color7] (0.1,-0.7) rectangle ++(0.4,-0.2);
+    \draw[anchor=west] (0.5, -0.8) node {\scriptsize Enclave time};
+  \end{scope}
+}
+
 % load macros
 \input{macros/mit}
 
@@ -40,6 +52,9 @@
   \mitgpusplitbi
   \mitgpusplitcb
   \mitgpusplitce
+
+  \legend{9cm}{6.3cm}
+
 \end{tikzpicture}
 
 \section{CPU Times}
@@ -66,6 +81,8 @@
   \mitcpusplitbi
   \mitcpusplitcb
   \mitcpusplitce
+
+  \legend{9cm}{6.3cm}
 \end{tikzpicture}
 
 \end{document}
