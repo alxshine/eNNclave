@@ -15,6 +15,21 @@ import os.path as path
 # global config
 Y_MAX = 7
 
+def _get_constant_dict(model_name):
+    template_start_x = '\\%sstartx'
+    template_node_distance = '\\%snodedistance'
+    template_space_between = '\\%sspacebetween'
+    template_layer_height = '\\%slayerheight'
+    template_net_width = '\\%snetwidth'
+
+    return {
+            'start_x': template_start_x % model_name,
+            'node_distance': template_node_distance % model_name,
+            'space_between': template_space_between % model_name,
+            'layer_height': template_layer_height % model_name,
+            'net_width': template_net_width % model_name
+            }
+
 
 def _texify_number(num):
     "uses a-j instead of 0-9 to work with tex"
@@ -56,23 +71,24 @@ def _calc_log_coord(lin_coord):
     log_coord = np.log10(lin_coord)
     return (log_coord-scale_bottom)/scale_width
 
-def net_summary(model, command_prefix):
+def net_summary(model, model_name):
     start_x = 0
     width = 1.8
     height = 0.4
     node_distance = 0.5
     space_between = node_distance - height
+    constant_dict = _get_constant_dict(model_name)
 
     ret = ''
-    ret += '\\newcommand{\\%sstartx}{%f}\n' % (command_prefix, start_x)
-    ret += '\\newcommand{\\%snodedistance}{%f}\n' % (command_prefix, node_distance)
-    ret += '\\newcommand{\\%sspacebetween}{%f}\n' % (command_prefix, space_between)
-    ret += '\\newcommand{\\%slayerheight}{%f}\n' % (command_prefix, height)
+    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['start_x'], start_x)
+    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['node_distance'], node_distance)
+    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['space_between'], space_between)
+    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['layer_height'], height)
     
-    x_ticks = '\\newcommand{\\%sxticks}{' % (command_prefix)
+    x_ticks = '\\newcommand{\\%sxticks}{' % (model_name)
     
     layers = get_all_layers(model)
-    ret += '\n\\newcommand{\\%snetsummary}[1]{\n' % (command_prefix)  
+    ret += '\n\\newcommand{\\%snetsummary}[1]{\n' % (model_name)  
     for i,l in enumerate(layers):
         cleaned_name = l.name.replace('_','\_')
         current_x = start_x + node_distance*i
@@ -89,7 +105,7 @@ def net_summary(model, command_prefix):
     ret += '}\n'
 
     ret += x_ticks
-    ret += '\\newcommand{\\netwidth}{%f}\n' % (current_x + height)
+    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['net_width'], current_x + height)
 
     return ret
 
@@ -126,8 +142,9 @@ def generate_y_axis():
     return ret
 
 
-def time_rectangles(times, command_prefix):
+def time_rectangles(times, model_name, platform):
     rectangle_width = 0.15
+    constant_dict = _get_constant_dict(model_name)
 
     ret = ''
 
@@ -138,7 +155,8 @@ def time_rectangles(times, command_prefix):
         native_time = row['native_time']
         split = int(row['layers_in_enclave'])
         
-        left_0 = '\\netwidth-\\layerheight-%d*\\nodedistance-\\spacebetween/2-%f' % (split-1, rectangle_width*3/2)
+        left_0 = '%s - %s - %d*%s - %s/2 - %f' % (constant_dict['net_width'], constant_dict['layer_height'],
+                split-1, constant_dict['node_distance'], constant_dict['space_between'], rectangle_width*3/2)
         right_0 = left_0 + ("+%f" % rectangle_width)
         right_1 = left_0 + ("+%f" % (2*rectangle_width))
         right_2 = left_0 + ("+%f" % (3*rectangle_width))
@@ -156,14 +174,14 @@ def time_rectangles(times, command_prefix):
         node += '\\draw[fill=color4] (%s, 0) rectangle (%s, %f);\n' % (right_0, right_1, native_north)
         node += '\\draw[fill=color7] (%s, 0) rectangle (%s, %f);\n' % (right_1, right_2, enclave_north)
 
-        ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (command_prefix, _texify_number(split), node)
+        ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (model_name+platform, _texify_number(split), node)
 
         
     return ret
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate tikz graphics')
-    parser.add_argument('time_files', metavar='time_file', type=str, nargs='+',
+    parser.add_argument('--time', dest='time_files', metavar='time_file', type=str, nargs='+',
             help='a time file to load generate a graphic for')
     parser.add_argument('--model', dest='model_files', metavar='model_file', type=str, nargs='+',
             help='a model file to generate a summary for')
@@ -172,15 +190,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    for f in args.time_files:
-        times = pd.read_csv(f)
-        basename = path.basename(f)
-        without_extension,_ = path.splitext(basename)
-        parts = without_extension.split('_')
-        device = parts[-1]
-        model_name = parts[0]
-        command_prefix = model_name + device
-        print(time_rectangles(times, command_prefix))
+    if args.time_files:
+        for f in args.time_files:
+            times = pd.read_csv(f)
+            basename = path.basename(f)
+            without_extension,_ = path.splitext(basename)
+            parts = without_extension.split('_')
+            device = parts[-1]
+            model_name = parts[0]
+            print(time_rectangles(times, model_name, device))
 
     if args.model_files:
         for f in args.model_files:

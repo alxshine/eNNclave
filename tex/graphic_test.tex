@@ -13,12 +13,14 @@
 \definecolor{color7}{HTML}{FFFFC8}
 
 % load macros
-\input{macros/netsummary}
+\input{macros/mit}
 
 \begin{document}
+\section{GPU Times}
+
 \begin{tikzpicture}[>=stealth]
-  \draw[->] (0,0) -- (\netwidth,0);
-  \foreach \x in \xticks {
+  \draw[->] (0,0) -- (\mitnetwidth,0);
+  \foreach \x in \mitxticks {
     \draw (\x,0) -- (\x, -0.1);
   }
 
@@ -28,19 +30,42 @@
   }
   \ylabels{-.5}
   
-  \netsummary{-0.2}
+  \mitnetsummary{-0.2}
 
-  \splita
-  % \splitb
-  % \splitc
-  \splitd
-  \splitf
-  \splitba
-  \splitbe
-  \splitbi
-  \splitcb
-  \splitce
+  \mitgpusplita
+  \mitgpusplitd
+  \mitgpusplitf
+  \mitgpusplitba
+  \mitgpusplitbe
+  \mitgpusplitbi
+  \mitgpusplitcb
+  \mitgpusplitce
 \end{tikzpicture}
 
+\section{CPU Times}
+
+\begin{tikzpicture}[>=stealth]
+  \draw[->] (0,0) -- (\mitnetwidth,0);
+  \foreach \x in \mitxticks {
+    \draw (\x,0) -- (\x, -0.1);
+  }
+
+  \draw[->] (0,0) -- (0,\ymax+0.1);
+  \foreach \y in \yticks {
+    \draw (-0.1,\y) -- (0.1,\y);
+  }
+  \ylabels{-.5}
+  
+  \mitnetsummary{-0.2}
+
+  \mitcpusplita
+  \mitcpusplitd
+  \mitcpusplitf
+  \mitcpusplitba
+  \mitcpusplitbe
+  \mitcpusplitbi
+  \mitcpusplitcb
+  \mitcpusplitce
+\end{tikzpicture}
 
 \end{document}
