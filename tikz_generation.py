@@ -9,6 +9,12 @@ import pandas as pd
 
 import sys
 import json
+import argparse
+import os.path as path
+
+# global config
+Y_MAX = 7
+
 
 def _texify_number(num):
     "uses a-j instead of 0-9 to work with tex"
@@ -44,13 +50,13 @@ def _build_log_scale(smallest_exponent, largest_exponent):
 
 def _calc_log_coord(lin_coord):
     scale_bottom = -3.2 #y value to be at tikz 0
-    scale_top = 2.2 #y value to be at y_max
+    scale_top = 2.2 #y value to be at Y_MAX
 
     scale_width = scale_top - scale_bottom
     log_coord = np.log10(lin_coord)
     return (log_coord-scale_bottom)/scale_width
 
-def net_summary(model):
+def net_summary(model, command_prefix):
     start_x = 0
     width = 1.8
     height = 0.4
@@ -58,15 +64,15 @@ def net_summary(model):
     space_between = node_distance - height
 
     ret = ''
-    ret += '\\newcommand{\\startx}{%f}\n' % (start_x)
-    ret += '\\newcommand{\\nodedistance}{%f}\n' % (node_distance)
-    ret += '\\newcommand{\\spacebetween}{%f}\n' % (space_between)
-    ret += '\\newcommand{\\layerheight}{%f}\n' % (height)
+    ret += '\\newcommand{\\%sstartx}{%f}\n' % (command_prefix, start_x)
+    ret += '\\newcommand{\\%snodedistance}{%f}\n' % (command_prefix, node_distance)
+    ret += '\\newcommand{\\%sspacebetween}{%f}\n' % (command_prefix, space_between)
+    ret += '\\newcommand{\\%slayerheight}{%f}\n' % (command_prefix, height)
     
-    x_ticks = '\\newcommand{\\xticks}{'
+    x_ticks = '\\newcommand{\\%sxticks}{' % (command_prefix)
     
     layers = get_all_layers(model)
-    ret += '\n\\newcommand{\\netsummary}[1]{\n'
+    ret += '\n\\newcommand{\\%snetsummary}[1]{\n' % (command_prefix)  
     for i,l in enumerate(layers):
         cleaned_name = l.name.replace('_','\_')
         current_x = start_x + node_distance*i
@@ -87,13 +93,10 @@ def net_summary(model):
 
     return ret
 
-def time_rectangles(times):
-    y_max = 7
+def generate_y_axis():
     y_ticks, y_labels = _build_log_scale(-3, 1)
-    rectangle_width = 0.15
-
     ret = ''
-    ret += '\\newcommand{\\ymax}{%f}\n' % y_max
+    ret += '\\newcommand{\\ymax}{%f}\n' % Y_MAX
     ret += '\\newcommand{\\yticks}{'
     with np.errstate(all='raise'):
         try:
@@ -102,12 +105,31 @@ def time_rectangles(times):
             
                 if i > 0:
                     ret += ','
-                ret += '%f' % (coordinate*y_max)
+                ret += '%f' % (coordinate*Y_MAX)
         except FloatingPointError as e:
             print("ERROR: %s" % e, file=sys.stderr)
             print("y: %f" % y, file=sys.stderr)
 
     ret += '}\n'
+
+    # generate command for y labels
+    label_command = "\\newcommand{\\ylabels}[1]{\n"
+    for lin_y, label_text in y_labels:
+        log_y = _calc_log_coord(lin_y)
+
+        current_label = "\\draw (#1, %f) node {\\tiny $%s$};\n" % (log_y * Y_MAX, label_text)
+        label_command += current_label
+    label_command += "}\n"
+
+    ret += label_command
+
+    return ret
+
+
+def time_rectangles(times, command_prefix):
+    rectangle_width = 0.15
+
+    ret = ''
 
     # generate time rectangles
     for i, row in times.iterrows():
@@ -123,9 +145,9 @@ def time_rectangles(times):
         
         with np.errstate(all='raise'):
             try:
-                gpu_north = _calc_log_coord(gpu_time)*y_max
-                native_north = _calc_log_coord(native_time)*y_max
-                enclave_north = _calc_log_coord(enclave_time)*y_max
+                gpu_north = _calc_log_coord(gpu_time)*Y_MAX
+                native_north = _calc_log_coord(native_time)*Y_MAX
+                enclave_north = _calc_log_coord(enclave_time)*Y_MAX
             except FloatingPointError as e:
                 print("ERROR: %s" % e, file=sys.stderr)
                 print("GPU time: %f, native time: %f, enclave time: %f" % (gpu_time, native_time, enclave_time), file=sys.stderr)
@@ -134,33 +156,39 @@ def time_rectangles(times):
         node += '\\draw[fill=color4] (%s, 0) rectangle (%s, %f);\n' % (right_0, right_1, native_north)
         node += '\\draw[fill=color7] (%s, 0) rectangle (%s, %f);\n' % (right_1, right_2, enclave_north)
 
-        ret += '\\newcommand{\\split%s}{%s}\n' % (_texify_number(split), node)
+        ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (command_prefix, _texify_number(split), node)
 
-    # generate command for y labels
-    label_command = "\\newcommand{\\ylabels}[1]{\n"
-    for lin_y, label_text in y_labels:
-        log_y = _calc_log_coord(lin_y)
-
-        current_label = "\\draw (#1, %f) node {\\tiny $%s$};\n" % (log_y * y_max, label_text)
-        label_command += current_label
-    label_command += "}\n"
-
-    ret += label_command
         
     return ret
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: {} model_file time_file".format(sys.argv[0]))
-        sys.exit(1)
-    
-    model_file = sys.argv[1]
-    model = load_model(model_file, custom_objects={
-                       "Enclave": Enclave, "EnclaveLayer": EnclaveLayer})
+    parser = argparse.ArgumentParser(description='Generate tikz graphics')
+    parser.add_argument('time_files', metavar='time_file', type=str, nargs='+',
+            help='a time file to load generate a graphic for')
+    parser.add_argument('--model', dest='model_files', metavar='model_file', type=str, nargs='+',
+            help='a model file to generate a summary for')
+    parser.add_argument('--y_axis', action='store_true',
+            help='generate macro for y axis ticks and labels')
 
-    tikz = net_summary(model)
-    print(tikz)
+    args = parser.parse_args()
 
-    time_file = sys.argv[2]
-    times = pd.read_csv(time_file)
-    print(time_rectangles(times))
+    for f in args.time_files:
+        times = pd.read_csv(f)
+        basename = path.basename(f)
+        without_extension,_ = path.splitext(basename)
+        parts = without_extension.split('_')
+        device = parts[-1]
+        model_name = parts[0]
+        command_prefix = model_name + device
+        print(time_rectangles(times, command_prefix))
+
+    if args.model_files:
+        for f in args.model_files:
+            basename = path.basename(f)
+            without_extension,_ = path.splitext(basename)
+            model_name = without_extension.split('_')[0]
+            model = load_model(f, custom_objects={'EnclaveLayer': EnclaveLayer, 'Enclave': Enclave})
+            print(net_summary(model, model_name))
+
+    if args.y_axis:
+        print(generate_y_axis())
