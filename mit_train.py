@@ -15,7 +15,7 @@ import json
 import utils
 
 # global config
-data_dir = 'data/mit67'
+data_dir = 'data/mit'
 label_file = join(data_dir, 'class_labels.json')
 train_file = 'TrainImages.txt'
 test_file = 'TestImages.txt'
@@ -41,8 +41,8 @@ test_ds = utils.generate_dataset(
     test_images, test_labels, shuffle=False, repeat=False)
 
 # build model
-MODEL_FILE = 'models/mit67.h5'
-HIST_FILE = 'hist_mit67.csv'
+MODEL_FILE = 'models/mit.h5'
+HIST_FILE = 'hist_mit.csv'
 HIDDEN_NEURONS = 2048
 DROPOUT_RATIO=0.4
 NUM_EPOCHS = 1000

@@ -12,7 +12,7 @@ import sys
 import json
 import time
 
-from mit67_prepare_data import load_test_set
+from mit_prepare_data import load_test_set
 from time_enclave import time_enclave_prediction
 
 if __name__ == '__main__':
