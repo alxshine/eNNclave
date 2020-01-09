@@ -64,8 +64,8 @@ def _build_log_scale(smallest_exponent, largest_exponent):
     return y_ticks, y_labels
 
 def _calc_log_coord(lin_coord):
-    scale_bottom = -3.2 #y value to be at tikz 0
-    scale_top = 2.2 #y value to be at Y_MAX
+    scale_bottom = -2.1 #y value to be at tikz 0
+    scale_top = 3.2 #y value to be at Y_MAX
 
     scale_width = scale_top - scale_bottom
     log_coord = np.log10(lin_coord)
@@ -110,7 +110,7 @@ def net_summary(model, model_name):
     return ret
 
 def generate_y_axis():
-    y_ticks, y_labels = _build_log_scale(-3, 1)
+    y_ticks, y_labels = _build_log_scale(-1, 2)
     ret = ''
     ret += '\\newcommand{\\ymax}{%f}\n' % Y_MAX
     ret += '\\newcommand{\\yticks}{'
@@ -143,7 +143,7 @@ def generate_y_axis():
 
 
 def time_rectangles(times, model_name, platform):
-    rectangle_width = 0.15
+    rectangle_width = 0.3
     constant_dict = _get_constant_dict(model_name)
 
     ret = ''
@@ -156,22 +156,22 @@ def time_rectangles(times, model_name, platform):
         split = int(row['layers_in_enclave'])
         
         left_0 = '%s - %s - %d*%s - %s/2 - %f' % (constant_dict['net_width'], constant_dict['layer_height'],
-                split-1, constant_dict['node_distance'], constant_dict['space_between'], rectangle_width*3/2)
+                split-1, constant_dict['node_distance'], constant_dict['space_between'], rectangle_width/2)
         right_0 = left_0 + ("+%f" % rectangle_width)
         right_1 = left_0 + ("+%f" % (2*rectangle_width))
         
         with np.errstate(all='raise'):
             try:
-                gpu_north = _calc_log_coord(tf_time)*Y_MAX
-                native_north = _calc_log_coord(native_time)*Y_MAX
-                enclave_north = _calc_log_coord(enclave_time)*Y_MAX
+                tf_north = _calc_log_coord(tf_time)*Y_MAX
+                native_north = _calc_log_coord(tf_time + native_time)*Y_MAX
+                enclave_north = _calc_log_coord(tf_time + native_time + enclave_time)*Y_MAX
             except FloatingPointError as e:
                 print("ERROR: %s" % e, file=sys.stderr)
                 print("GPU time: %f, native time: %f, enclave time: %f" % (tf_time, native_time, enclave_time), file=sys.stderr)
         
-        node = '\\draw[fill=color1] (%s, 0) rectangle (%s, %f);\n' % (left_0, right_0, gpu_north)
-        node += '\\draw[fill=color4] (%s, 0) rectangle (%s, %f);\n' % (right_0, right_1, native_north)
-        node += '\\draw[fill=color7] (%s, 0) rectangle (%s, %f);\n' % (right_1, right_2, enclave_north)
+        node = '\\draw[fill=color1] (%s, 0) rectangle (%s, %f);\n' % (left_0, right_0, tf_north)
+        node += '\\draw[fill=color4] (%s, %s) rectangle (%s, %f);\n' % (left_0, tf_north, right_0, native_north)
+        node += '\\draw[preaction={fill,color7}, pattern=north east lines] (%s, %s) rectangle (%s, %f);\n' % (left_0, native_north, right_0, enclave_north)
 
         ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (model_name+platform, _texify_number(split), node)
 

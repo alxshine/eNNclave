@@ -16,11 +16,11 @@
   \begin{scope}[xshift=#1, yshift=#2]
     \draw[draw] (0,0) rectangle ++(3,-1);
     \draw[draw, fill=color1] (0.1,-0.1) rectangle ++(0.4,-0.2);
-    \draw[anchor=west] (0.5, -0.2) node {\scriptsize GPU time};
+    \draw[anchor=west] (0.5, -0.2) node {\scriptsize Tensorflow time};
     \draw[draw, fill=color4] (0.1,-0.4) rectangle ++(0.4,-0.2);
     \draw[anchor=west] (0.5, -0.5) node {\scriptsize CPU time};
-    \draw[draw, fill=color7] (0.1,-0.7) rectangle ++(0.4,-0.2);
-    \draw[anchor=west] (0.5, -0.8) node {\scriptsize Enclave time};
+    \draw[draw, preaction={fill,color7}, pattern=north east lines] (0.1,-0.7) rectangle ++(0.4,-0.2);
+    \draw[anchor=west] (0.5, -0.8) node {\scriptsize Enclave penalty};
   \end{scope}
 }
 
@@ -31,7 +31,7 @@
 \section{GPU Times}
 
 \begin{tikzpicture}[>=stealth]
-  \draw[->] (0,0) -- (\mitnetwidth,0);
+  \draw (0,0) -- (\mitnetwidth,0);
   \foreach \x in \mitxticks {
     \draw (\x,0) -- (\x, -0.1);
   }
@@ -60,7 +60,7 @@
 \section{CPU Times}
 
 \begin{tikzpicture}[>=stealth]
-  \draw[->] (0,0) -- (\mitnetwidth,0);
+  \draw (0,0) -- (\mitnetwidth,0);
   \foreach \x in \mitxticks {
     \draw (\x,0) -- (\x, -0.1);
   }
