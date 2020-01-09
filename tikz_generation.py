@@ -150,7 +150,7 @@ def time_rectangles(times, model_name, platform):
 
     # generate time rectangles
     for i, row in times.iterrows():
-        gpu_time = row['gpu_time']
+        tf_time = row['tf_time']
         enclave_time = row['combined_enclave_time']
         native_time = row['native_time']
         split = int(row['layers_in_enclave'])
@@ -159,16 +159,15 @@ def time_rectangles(times, model_name, platform):
                 split-1, constant_dict['node_distance'], constant_dict['space_between'], rectangle_width*3/2)
         right_0 = left_0 + ("+%f" % rectangle_width)
         right_1 = left_0 + ("+%f" % (2*rectangle_width))
-        right_2 = left_0 + ("+%f" % (3*rectangle_width))
         
         with np.errstate(all='raise'):
             try:
-                gpu_north = _calc_log_coord(gpu_time)*Y_MAX
+                gpu_north = _calc_log_coord(tf_time)*Y_MAX
                 native_north = _calc_log_coord(native_time)*Y_MAX
                 enclave_north = _calc_log_coord(enclave_time)*Y_MAX
             except FloatingPointError as e:
                 print("ERROR: %s" % e, file=sys.stderr)
-                print("GPU time: %f, native time: %f, enclave time: %f" % (gpu_time, native_time, enclave_time), file=sys.stderr)
+                print("GPU time: %f, native time: %f, enclave time: %f" % (tf_time, native_time, enclave_time), file=sys.stderr)
         
         node = '\\draw[fill=color1] (%s, 0) rectangle (%s, %f);\n' % (left_0, right_0, gpu_north)
         node += '\\draw[fill=color4] (%s, 0) rectangle (%s, %f);\n' % (right_0, right_1, native_north)
