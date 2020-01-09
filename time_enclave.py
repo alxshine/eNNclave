@@ -10,13 +10,14 @@ import sys
 import os
 
 import interop.pymatutil as pymatutil
-import enclave_layer
+from enclave_layer import EnclaveLayer
+from utils import get_all_layers
 
 import build_enclave
-import mit67_prepare_data
+import mit_prepare_data
 
 def time_from_file(model_path, samples):
-    model = load_model(model_path, custom_objects={'EnclaveLayer': enclave_layer.EnclaveLayer})
+    model = load_model(model_path, custom_objects={'EnclaveLayer': EnclaveLayer})
     time_dict = time_enclave_prediction(model, samples)
     return time_dict
 
@@ -40,43 +41,63 @@ def _predict_samples(samples, num_classes, forward):
     
 def time_enclave_prediction(model, samples):
     # test if model has enclave part
-    has_enclave = any(["enclave" in l.name for l in model.layers])
+    all_layers = get_all_layers(model)
+    has_enclave = any([type(l) == EnclaveLayer.__class__ for l in all_layers])
 
     # split model into TF and enclave part
     for enclave_start,l in enumerate(model.layers):
         if "enclave" in l.name:
             break
 
-    tf_part = Sequential(model.layers[:enclave_start])
-    enclave_layer = model.layers[enclave_start]
-    num_classes = enclave_layer.num_classes
+    if has_enclave:
+        # measure tf, native, and enclave times
+        tf_part = Sequential(model.layers[:enclave_start])
+        enclave_layer = model.layers[enclave_start]
+        num_classes = enclave_layer.num_classes
 
-    before = time.time()
-    pymatutil.initialize()
-    after_setup = time.time()
+        before = time.time()
+        pymatutil.initialize()
+        after_setup = time.time()
 
-    # predict dataset
-    tf_prediction = tf_part(samples)
-    after_tf = time.time()
+        # predict dataset
+        tf_prediction = tf_part(samples)
+        after_tf = time.time()
 
-    tf_prediction = tf_prediction.numpy()
+        tf_prediction = tf_prediction.numpy()
 
-    # final_prediction = enclave_part(tf_prediction)
-    enclave_results = _predict_samples(tf_prediction, num_classes, pymatutil.enclave_forward)
+        # final_prediction = enclave_part(tf_prediction)
+        enclave_results = _predict_samples(tf_prediction, num_classes, pymatutil.enclave_forward)
+            
+        after_enclave = time.time()
+
+        pymatutil.teardown()
+        after_teardown = time.time()
+
+        before_native = time.time()
+        native_results = _predict_samples(tf_prediction, num_classes, pymatutil.native_forward)
+        after_native = time.time()
+
+        enclave_label = np.argmax(enclave_results, axis=1)
+        enclave_label = int(enclave_label[0]) # numpy does some type stuff we have to fix
+        native_label = np.argmax(native_results, axis=1)
+        native_label = int(native_label[0])
+    else:
+        # there is no enclave
+        tf_part = model
         
-    after_enclave = time.time()
+        before = time.time()
+        tf_prediction = tf_part(samples)
+        after_tf = time.time()
 
-    pymatutil.teardown()
-    after_teardown = time.time()
+        # set everything so it doesn't muddy the measurement
+        after_setup = before
+        after_enclave = after_tf
+        after_teardown = after_tf
+        before_native = after_tf
+        after_native = after_tf
 
-    before_native = time.time()
-    native_results = _predict_samples(tf_prediction, num_classes, pymatutil.native_forward)
-    after_native = time.time()
-
-    enclave_label = np.argmax(enclave_results, axis=1)
-    enclave_label = int(enclave_label[0]) # numpy does some type stuff we have to fix
-    native_label = np.argmax(native_results, axis=1)
-    native_label = int(native_label[0])
+        enclave_label = -1
+        native_label = -1
 
     print('\n')
     print('Enclave label: %d' % enclave_label)
@@ -127,7 +148,7 @@ if __name__ == '__main__':
     layers_in_enclave = int(sys.argv[2])
 
     np.random.seed(1337)
-    x_test, _ = mit67_prepare_data.load_test_set()
+    x_test, _ = mit_prepare_data.load_test_set()
     #  sample_index = np.random.randint(x_test.shape[0])
     sample_index = 42
     samples = x_test[sample_index:sample_index+1]
@@ -138,7 +159,7 @@ if __name__ == '__main__':
     print("\n\n")
     print(json.dumps(time_dict, indent=2))
 
-    output_file = 'timing_logs/mit67_times.csv'
+    output_file = 'timing_logs/mit_times.csv'
     print("Saving to file {}".format(output_file))
     file_existed = os.path.isfile(output_file)
     with open(output_file, 'a+') as f:

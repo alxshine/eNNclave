@@ -34,18 +34,19 @@ def _get_constant_dict(model_name):
 def _texify_number(num):
     "uses a-j instead of 0-9 to work with tex"
     ret = ''
-    num_digits = int(np.ceil(np.log10(num)))
 
-    # TODO: ugly hacks for edge cases that I don't want to deal with right now
-    if num_digits == 0:
+    if num == 0:
         return 'a'
-    if num == 10:
-        return 'ba'
     
-    for i in range(num_digits):
+    #  for i in range(num_digits):
+    while num > 0:
         int_val = ord('a') + (num % 10)
         ret += chr(int_val)
         num //= 10
+        
+        #  if num == 0:
+            #  ret += 'a'
+
     return ret[::-1]
 
 def _build_log_scale(smallest_exponent, largest_exponent):
