@@ -28,7 +28,7 @@ The few different results are most likely due to rounding differences on differe
 Please note that differences do not necessarily mean errors.
 We have observed cases where the original result was a misclassification, but the enclave variant was not.
 
-**** TODO Rigorously measure and classify differences between TF, native and enclave
+**** TODO Rigorously measure and classify label differences between TF, native and enclave
 
 *** Model Training
 As I lack the required expertise in the area of neural net design, I tried to use existing models where I could.
