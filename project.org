@@ -6,40 +6,38 @@ We hope to make this as robust against model stealing as online oracles.
 RBO, CPA, ASC
 
 ** Datasets
-Currently only image recognition tasks are used for testing.
-The tasks are MNIST using a small CNN, and MIT67 using a pretrained VGG16 network as feature extractor.
-The VGG16 model has its weights fixed during retraining.
+Image recognition tasks as well as text classification tasks are used for testing.
+The image recognition tasks are MNIST using a small CNN, and MIT67 using a pretrained VGG16 network as feature extractor.
+I fixed the weights for the VGG16 feature extractor during training of the final classification 
+For the text classfication we used IMDB review sentiment classification using MLPs, and Rotten Tomatoes review sentiment classification using CNNs on sequences.
+The code for these is taken from [[https://github.com/google/eng-edu/tree/master/ml/guides/text_classification][here]].
+This choice of datasets gives us reasonably large CNNs for multiple tasks and media types, as well as smaller models for a task of both kinds.
+
 All datasets are stored in ~data~.
 
-I am in the process of "onboarding" text recognition tasks, namely IMDB review sentiment classification using MLPs, and Rotten Tomatoes review sentiment classification using CNNs on sequences.
-The code for these is taken from [[https://github.com/google/eng-edu/tree/master/ml/guides/text_classification][here]].
-
-This gives us classification using CNNs on two different media types.
+*** TODO Add dataset links
 
 ** Current Status
-As of now moving large models (VGG16) into the enclave works correctly, but with massive slowdown.
-Some results:
-#+BEGIN_SRC text
-Taking 10 images from MIT67 test_set
-Predicting with TF model
-Prediction took 0.582809 seconds
-TF model accuracy: 0.6
-Predicting with Enclave model
-Prediction took 972.469672 seconds
-10 of 10 labels are equal, slowdown factor: 1668.591
-#+END_SRC
-And for MNIST:
-#+BEGIN_SRC text
-Taking 100 images from MNIST test_set
-Predicting with TF model
-Prediction took 0.059973 seconds
-TF model accuracy: 0.9
-Predicting with Enclave model
-Prediction took 3.748415 seconds
-100 of 100 labels are equal, slowdown factor: 62.502
-#+END_SRC
+The technical part of this research project is mostly done, and only few cleanup jobs remain.
+My current focus will be on the writeup, and finding a clear narrative for my reasoning.
 
-The slowdown is incurred due to the inefficient way memory is accessed during convolution, and also because memory has to be paged constantly.
+*** Enclave Implementation
+Implementing all TF operations present in the used models is finished.
+The results are (mostly) consistent with the original TF models, which indicates a correct implementation and thus meaningful timing measurements.
+The few different results are most likely due to rounding differences on different hardware platforms, and algorithmic choices (different order of operations).
+Please note that differences do not necessarily mean errors.
+We have observed cases where the original result was a misclassification, but the enclave variant was not.
+
+**** TODO Rigorously measure and classify differences between TF, native and enclave
+
+*** Model Training
+As I lack the required expertise in the area of neural net design, I tried to use existing models where I could.
+The model for MNIST is taken from [[https://keras.io/examples/mnist_cnn/][this Keras example]].
+I could not find an architecture using VGG16 as a feature extractor, and for some reason (probably due to a bug somewhere) using any version of ResNet does not yield better results than random choice.
+This is true for any model using a [[https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization?version=stable][BatchNormalization layer]], which lead me to the conclusion that this is an implementation error.
+Due to this I trained a model using VGG16 as a feature extractor until it gave reasonably good results (between 55% and 60% validation accuracy for 67 classes).
+Both models for text classification are taken from [[https://github.com/google/eng-edu/tree/master/ml/guides/text_classification][this]] machine learning tutorial by Google.
+For our tests the models do not have to perform close to the state of the art, only well enough that we can rule out the possibility of trivial weights with confidence, as these could impact our performance measurements in unforeseen ways.
 
 ** Timing measurements
 All code is compiled for SGX in HW_PRERERELEASE mode
@@ -242,6 +240,7 @@ The enclave part of the network is actually run twice, once in native C and once
 This allows me to separate the performance penalty incurred by my code and from moving to the CPU from the penalty incurred by executing inside the enclave.
 We called the difference between the native C and enclave execution times *enclave penalty*.
 
+**** MIT67
 [[fig:cpu_ftimes]] shows the measured times for executing TF on the CPU, and [[fig:gpu_times]] shows the times with TF running on GPU.
 Beneath the x-axis are the layers of the model.
 All layers to the right of a timing bar are run in native/enclave code, while all layers to the left are run using normal TF operations.
