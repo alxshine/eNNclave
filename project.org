@@ -256,6 +256,11 @@ The rightmost bar is the time it takes to run the entire model in TF alone.
 #+NAME:   fig:gpu_times
 [[./tex/images/graphic_gpu.png]]
 
+**** TODO Measure MNIST execution time
+
+**** TODO Measure IMDB execution time
+
+**** TODO Measure Rotten Tomatoes execution time
 ** Related Work
 We have different areas of related work that are relevant to this project.
 The most directly relevant area is model stealing attacks and adversarial robustness.
