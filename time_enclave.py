@@ -108,14 +108,14 @@ def time_enclave_prediction(model, samples):
 
 
     enclave_setup_time = after_setup - before
-    gpu_time = after_tf - after_setup
+    tf_time = after_tf - after_setup
     enclave_time = after_enclave - after_tf
     teardown_time = after_teardown - after_enclave
     native_time = after_native - before_native
 
     time_dict = {
         'enclave_setup_time': enclave_setup_time,
-        'gpu_time': gpu_time,
+        'tf_time': tf_time,
         'enclave_time': enclave_time,
         'teardown_time': teardown_time,
         'combined_enclave_time': enclave_time+enclave_setup_time+teardown_time,

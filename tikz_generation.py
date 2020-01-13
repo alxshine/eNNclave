@@ -154,7 +154,7 @@ def time_rectangles(times, model_name, platform):
         tf_time = row['tf_time']
         enclave_time = row['combined_enclave_time']
         native_time = row['native_time']
-        split = int(row['layers_in_enclave'])
+        split = int(row.name)
         
         left_0 = '%s - %s - %d*%s - %s/2 - %f' % (constant_dict['net_width'], constant_dict['layer_height'],
                 split-1, constant_dict['node_distance'], constant_dict['space_between'], rectangle_width/2)
@@ -193,6 +193,7 @@ if __name__ == "__main__":
     if args.time_files:
         for f in args.time_files:
             times = pd.read_csv(f)
+            times = times.groupby(['layers_in_enclave']).mean()
             basename = path.basename(f)
             without_extension,_ = path.splitext(basename)
             parts = without_extension.split('_')

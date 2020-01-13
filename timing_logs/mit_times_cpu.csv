@@ -1,4 +1,4 @@
-enclave_setup_time,gpu_time,enclave_time,teardown_time,combined_enclave_time,native_time,enclave_label,native_label,layers_in_enclave
+enclave_setup_time,tf_time,enclave_time,teardown_time,combined_enclave_time,native_time,enclave_label,native_label,layers_in_enclave
 0.0,0.11267900466918945,0.0,0.0,0.0,0.0,-1,-1,0
 0.0,0.08674216270446777,0.0,0.0,0.0,0.0,-1,-1,0
 0.0,0.08700752258300781,0.0,0.0,0.0,0.0,-1,-1,0

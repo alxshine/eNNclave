@@ -39,6 +39,8 @@ Due to this I trained a model using VGG16 as a feature extractor until it gave r
 Both models for text classification are taken from [[https://github.com/google/eng-edu/tree/master/ml/guides/text_classification][this]] machine learning tutorial by Google.
 For our tests the models do not have to perform close to the state of the art, only well enough that we can rule out the possibility of trivial weights with confidence, as these could impact our performance measurements in unforeseen ways.
 
+**** TODO Implement Flatten layer
+
 ** Timing measurements
 All code is compiled for SGX in HW_PRERERELEASE mode
 
