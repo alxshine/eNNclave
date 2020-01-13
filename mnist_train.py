@@ -40,12 +40,10 @@ test_ds = test_ds.batch(BATCH_SIZE)
 
 model = Sequential([
     layers.Input(INPUT_SHAPE),
-    layers.MaxPooling2D(1),
     layers.Conv2D(32, 3, activation='relu', padding='same'),
-    layers.MaxPooling2D(2),
     layers.Conv2D(64, 3, activation='relu', padding='same'),
     layers.MaxPooling2D(2),
-    layers.GlobalAveragePooling2D(),
+    layers.Flatten(),
     layers.Dropout(DROPOUT_RATIO),
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
