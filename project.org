@@ -241,7 +241,7 @@ This allows me to separate the performance penalty incurred by my code and from 
 We called the difference between the native C and enclave execution times *enclave penalty*.
 
 **** MIT67
-[[fig:cpu_ftimes]] shows the measured times for executing TF on the CPU, and [[fig:gpu_times]] shows the times with TF running on GPU.
+[[fig:cpu_times]] shows the measured times for executing TF on the CPU, and [[fig:gpu_times]] shows the times with TF running on GPU.
 Beneath the x-axis are the layers of the model.
 All layers to the right of a timing bar are run in native/enclave code, while all layers to the left are run using normal TF operations.
 The rightmost bar is the time it takes to run the entire model in TF alone.
@@ -259,6 +259,7 @@ The rightmost bar is the time it takes to run the entire model in TF alone.
 **** TODO Measure IMDB execution time
 
 **** TODO Measure Rotten Tomatoes execution time
+
 ** Related Work
 We have different areas of related work that are relevant to this project.
 The most directly relevant area is model stealing attacks and adversarial robustness.
