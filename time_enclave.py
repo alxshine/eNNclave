@@ -42,14 +42,15 @@ def _predict_samples(samples, num_classes, forward):
 def time_enclave_prediction(model, samples):
     # test if model has enclave part
     all_layers = get_all_layers(model)
-    has_enclave = any([type(l) == EnclaveLayer.__class__ for l in all_layers])
-
-    # split model into TF and enclave part
-    for enclave_start,l in enumerate(model.layers):
-        if "enclave" in l.name:
-            break
+    has_enclave = any([l.name == 'enclave_layer' for l in all_layers])
 
     if has_enclave:
+        print("\n\nMeasuring enclave\n\n")
+        # split model into TF and enclave part
+        for enclave_start,l in enumerate(model.layers):
+            if "enclave" in l.name:
+                break
+
         # measure tf, native, and enclave times
         tf_part = Sequential(model.layers[:enclave_start])
         enclave_layer = model.layers[enclave_start]
@@ -81,7 +82,9 @@ def time_enclave_prediction(model, samples):
         enclave_label = int(enclave_label[0]) # numpy does some type stuff we have to fix
         native_label = np.argmax(native_results, axis=1)
         native_label = int(native_label[0])
+
     else:
+        print("\n\nNOT Measuring enclave\n\n")
         # there is no enclave
         tf_part = model
         
