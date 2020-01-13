@@ -46,7 +46,7 @@ pymatutil.initialize()
 enclave_predictions = enclave_model.predict(test_images)
 pymatutil.teardown()
 enclave_after = time.time()
-enclave_labels = np.argmax(enclave_predictions, axis=1)
+enclave_labels = np.argmax(enclave_predictions, axis=1) 
 enclave_time = enclave_after - enclave_before
 print("Prediction took {:05f} seconds".format(enclave_time))
 

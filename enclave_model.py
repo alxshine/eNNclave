@@ -98,7 +98,7 @@ class Enclave(Sequential):
                     "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (bias_name, bias_name))
                 
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
-                             layers.MaxPooling1D,layers.MaxPooling2D]:
+                             layers.MaxPooling1D,layers.MaxPooling2D, layers.Flatten]:
                 # these layers are either not used during inference or have no parameters
                 continue
             else:
@@ -262,7 +262,7 @@ class Enclave(Sequential):
             new_size = np.prod(layer.output_shape[1:])
             s = max_pooling_2d_template % (inputs, h, w, c, pool_size, tmp_buffer_template % tmp_index)
 
-        elif type(layer) in [layers.Dropout]:
+        elif type(layer) in [layers.Dropout, layers.Flatten]:
             # these layers are inactive during inference, so they can be skipped
             s = "//Layer {} skipped\n".format(layer.name)
             return s, False
