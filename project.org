@@ -13,9 +13,11 @@ For the text classfication we used IMDB review sentiment classification using ML
 The code for these is taken from [[https://github.com/google/eng-edu/tree/master/ml/guides/text_classification][here]].
 This choice of datasets gives us reasonably large CNNs for multiple tasks and media types, as well as smaller models for a task of both kinds.
 
-All datasets are stored in ~data~.
-
-*** TODO Add dataset links
+The links for the datasets are as follows:
+- [[http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz][IMDB sentiment analysis]]
+- [[https://www.kaggle.com/c/3810/download/train.tsv.zip][Rotten Tomatoes sentiment analysis]]
+- MNIST is taken from [[https://blog.tensorflow.org/2019/02/introducing-tensorflow-datasets.html][tensorflow_datasets]]
+- [[https://web.mit.edu/torralba/www/indoor.html][MIT67 Indoor scene recognition]]
 
 ** Current Status
 The technical part of this research project is mostly done, and only few cleanup jobs remain.
