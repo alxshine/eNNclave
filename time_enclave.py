@@ -16,6 +16,7 @@ import utils
 
 import build_enclave
 import mit_prepare_data
+import rotten_tomatoes_prepare_data
 
 def time_from_file(model_path, samples):
     model = load_model(model_path, custom_objects={'EnclaveLayer': EnclaveLayer})
@@ -159,6 +160,8 @@ if __name__ == '__main__':
         test_ds = tfds.load('mnist', split=tfds.Split.TEST, as_supervised=True)
         test_ds = test_ds.map(utils.preprocess_mnist)
         x_test = np.array([x.numpy() for x,_ in test_ds])
+    elif dataset == 'rotten':
+        _, _, x_test, _, _ = rotten_tomatoes_prepare_data.load_rotten_tomatoes('./data')
     else:
         raise ValueError("Unknown dataset " + dataset)
 

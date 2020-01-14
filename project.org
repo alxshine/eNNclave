@@ -254,11 +254,13 @@ The rightmost bar is the time it takes to run the entire model in TF alone.
 #+NAME:   fig:gpu_times
 [[./tex/images/graphic_gpu.png]]
 
-**** TODO Measure MNIST execution time
+**** DONE Measure MNIST execution time
+     CLOSED: [2020-01-14 Tue 13:27]
 
 **** TODO Measure IMDB execution time
 
-**** TODO Measure Rotten Tomatoes execution time
+**** DONE Measure Rotten Tomatoes execution time
+     CLOSED: [2020-01-14 Tue 13:30]
 
 ** Related Work
 We have different areas of related work that are relevant to this project.
