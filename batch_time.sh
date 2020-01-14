@@ -28,18 +28,18 @@ make
 # generate pure tf time
 for i in $(seq $runs_per_index)
 do
-  python time_enclave.py models/${model_path}.h5 0
+  python time_enclave.py ${model_path}.h5 0
   exit_on_error
 done
 
 for cut in $(seq $num_cuts)
 do
-  python build_enclave.py models/${model_path}.h5 $cut
+  python build_enclave.py ${model_path}.h5 $cut
   exit_on_error
   
   for i in $(seq $runs_per_index)
   do
-    python time_enclave.py models/${model_path}_enclave.h5 $cut
+    python time_enclave.py ${model_path}_enclave.h5 $cut
     exit_on_error
     # echo $i
   done

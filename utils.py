@@ -32,7 +32,7 @@ def preprocess_lfw(x, y):
 def preprocess_faces(x, y):
     return preprocess(x, y, 224)
 
-def mpreprocess_mnist(x, y):
+def preprocess_mnist(x, y):
     x = tf.cast(x, tf.float32)
     x = (x/127.5) - 1
     return x, y
