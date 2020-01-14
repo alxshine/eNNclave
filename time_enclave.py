@@ -17,6 +17,7 @@ import utils
 import build_enclave
 import mit_prepare_data
 import rotten_tomatoes_prepare_data
+import imdb_prepare_data
 
 def time_from_file(model_path, samples):
     model = load_model(model_path, custom_objects={'EnclaveLayer': EnclaveLayer})
@@ -162,6 +163,8 @@ if __name__ == '__main__':
         x_test = np.array([x.numpy() for x,_ in test_ds])
     elif dataset == 'rotten':
         _, _, x_test, _, _ = rotten_tomatoes_prepare_data.load_rotten_tomatoes('./data')
+    elif dataset == 'imdb':
+        _, _, x_test, y_test = imdb_prepare_data.load_imdb('./data')
     else:
         raise ValueError("Unknown dataset " + dataset)
 
