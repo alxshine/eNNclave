@@ -1,6 +1,6 @@
 from tensorflow.keras.models import load_model
 
-from utils import get_all_layers
+from utils import get_all_layers, get_dataset_from_model_path
 from enclave_layer import EnclaveLayer
 from enclave_model import Enclave
 
@@ -203,9 +203,7 @@ if __name__ == "__main__":
 
     if args.model_files:
         for f in args.model_files:
-            basename = path.basename(f)
-            without_extension,_ = path.splitext(basename)
-            model_name = without_extension.split('_')[0]
+            dataset = get_dataset_from_model_path(f)
             model = load_model(f, custom_objects={'EnclaveLayer': EnclaveLayer, 'Enclave': Enclave})
             print(net_summary(model, model_name))
 

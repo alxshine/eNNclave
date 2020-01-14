@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os.path as path
 
 def get_all_layers(model):
     """ Get all layers of model, including ones inside a nested model """
@@ -31,7 +32,7 @@ def preprocess_lfw(x, y):
 def preprocess_faces(x, y):
     return preprocess(x, y, 224)
 
-def preprocess_mnist(x, y):
+def mpreprocess_mnist(x, y):
     x = tf.cast(x, tf.float32)
     x = (x/127.5) - 1
     return x, y
@@ -102,3 +103,9 @@ def get_num_words_per_sample(sample_texts):
     """
     num_words = [len(s.split()) for s in sample_texts]
     return np.median(num_words)
+
+def get_dataset_from_model_path(model_path):
+    basename = path.basename(model_path)
+    without_extension, _ = path.splitext(basename)
+    dataset = without_extension.split('_')[0]
+    return dataset

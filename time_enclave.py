@@ -1,6 +1,7 @@
 from tensorflow.keras.models import load_model, Sequential
 from tensorflow.keras.backend import clear_session
 import tensorflow as tf
+import tensorflow_datasets as tfds
 
 import numpy as np
 import time
@@ -11,7 +12,7 @@ import os
 
 import interop.pymatutil as pymatutil
 from enclave_layer import EnclaveLayer
-from utils import get_all_layers
+import utils
 
 import build_enclave
 import mit_prepare_data
@@ -41,7 +42,7 @@ def _predict_samples(samples, num_classes, forward):
     
 def time_enclave_prediction(model, samples):
     # test if model has enclave part
-    all_layers = get_all_layers(model)
+    all_layers = utils.get_all_layers(model)
     has_enclave = any([l.name == 'enclave_layer' for l in all_layers])
 
     if has_enclave:
@@ -149,10 +150,18 @@ if __name__ == '__main__':
 
     model_path = sys.argv[1]
     layers_in_enclave = int(sys.argv[2])
+    dataset = utils.get_dataset_from_model_path(model_path)
 
     np.random.seed(1337)
-    x_test, _ = mit_prepare_data.load_test_set()
-    #  sample_index = np.random.randint(x_test.shape[0])
+    if dataset == 'mit':
+        x_test, _ = mit_prepare_data.load_test_set()
+    elif dataset == 'mnist':
+        test_ds = tfds.load('mnist', split=tfds.Split.TEST, as_supervised=True)
+        test_ds = test_ds.map(utils.preprocess_mnist)
+        x_test = np.array([x.numpy() for x,_ in test_ds])
+    else:
+        raise ValueError("Unknown dataset " + dataset)
+
     sample_index = 42
     samples = x_test[sample_index:sample_index+1]
     
@@ -162,7 +171,7 @@ if __name__ == '__main__':
     print("\n\n")
     print(json.dumps(time_dict, indent=2))
 
-    output_file = 'timing_logs/mit_times.csv'
+    output_file = 'timing_logs/%s_times.csv' % dataset
     print("Saving to file {}".format(output_file))
     file_existed = os.path.isfile(output_file)
     with open(output_file, 'a+') as f:
