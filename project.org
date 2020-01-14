@@ -257,7 +257,8 @@ The rightmost bar is the time it takes to run the entire model in TF alone.
 **** DONE Measure MNIST execution time
      CLOSED: [2020-01-14 Tue 13:27]
 
-**** TODO Measure IMDB execution time
+**** DONE Measure IMDB execution time
+     CLOSED: [2020-01-14 Tue 14:51]
 
 **** DONE Measure Rotten Tomatoes execution time
      CLOSED: [2020-01-14 Tue 13:30]
