@@ -2,10 +2,13 @@
 Running some parts or all of a CNN inside the trusted enclave to reduce leakage and protect against model stealing.
 We hope to make this as robust against model stealing as online oracles.
 
-** People
-RBO, CPA, ASC
+** Introduction
 
-** Datasets
+** Background
+
+** Implementation
+
+** Experimental Setup
 Image recognition tasks as well as text classification tasks are used for testing.
 The image recognition tasks are MNIST using a small CNN, and MIT67 using a pretrained VGG16 network as feature extractor.
 I fixed the weights for the VGG16 feature extractor during training of the final classification 
@@ -19,6 +22,11 @@ The links for the datasets are as follows:
 - MNIST is taken from [[https://blog.tensorflow.org/2019/02/introducing-tensorflow-datasets.html][tensorflow_datasets]]
 - [[https://web.mit.edu/torralba/www/indoor.html][MIT67 Indoor scene recognition]]
 
+** Experiment Results
+
+** Discussion
+
+* Old Stuff
 ** Current Status
 The technical part of this research project is mostly done, and only few cleanup jobs remain.
 My current focus will be on the writeup, and finding a clear narrative for my reasoning.
@@ -300,6 +308,7 @@ The basic idea is very relevant however.
 By having a customer send a hash of the data they wish to run inference on to the provider, who then signs the hash (after being paid) and sends the signature back, we can monetize access to the model by query.
 The model can then verify the signature using the public testing key of the provider.
 Only if the signature is valid will it run inference.
+
 * README
 
 ** Setting up a testing environment
