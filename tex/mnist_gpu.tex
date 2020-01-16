@@ -1,0 +1,51 @@
+\documentclass[preview]{standalone}
+
+% load macros
+\input{preamble}
+\input{macros/mit}
+
+\begin{document}
+\begin{tikzpicture}[>=stealth]
+  \draw (0,0) -- (\mitnetwidth,0);
+  \foreach \x in \mitxticks {
+    \draw (\x,0) -- (\x, -0.1);
+  }
+
+  \draw[->] (0,0) -- (0,\ymax+0.1);
+  \foreach \y in \yticks {
+    \draw (-0.1,\y) -- (0.1,\y);
+  }
+  \ylabels{-.5}
+  
+  \mitnetsummary{-0.2}
+
+  \mitcpusplita
+  \mitcpusplitb
+  \mitcpusplitc
+  \mitcpusplitd
+  \mitcpusplite
+  \mitcpusplitf
+  \mitcpusplitg
+  \mitcpusplith
+  \mitcpuspliti
+  \mitcpusplitj
+  \mitcpusplitba
+  \mitcpusplitbb
+  \mitcpusplitbc
+  \mitcpusplitbd
+  \mitcpusplitbe
+  \mitcpusplitbf
+  \mitcpusplitbg
+  \mitcpusplitbh
+  \mitcpusplitbi
+  \mitcpusplitbj
+  \mitcpusplitca
+  \mitcpusplitcb
+  \mitcpusplitcc
+  \mitcpusplitcd
+  \mitcpusplitce
+
+  \legend{9cm}{6.3cm}
+
+\end{tikzpicture}
+\end{document}
