@@ -1,46 +1,134 @@
 
 # Table of Contents
 
-1.  [NN SGX](#org689d77a)
-    1.  [People](#org87d321c)
-    2.  [Datasets](#org84331a5)
-        1.  [Add dataset links](#org15996c2)
-    3.  [Current Status](#org450843a)
-        1.  [Enclave Implementation](#org569c2fc)
-        2.  [Model Training](#org1184e48)
-    4.  [Timing measurements](#orgf807416)
-        1.  [First Attempt](#org9dea7d6)
-        2.  [Second Attempt](#orgfe948cd)
-    5.  [Related Work](#org9493915)
-2.  [README](#orgfeadc6b)
-    1.  [Setting up a testing environment](#org061f2a7)
-    2.  [Training a model](#orgae159e6)
-    3.  [Extracting the enclave](#orgd03c6b7)
-    4.  [Compiling the enclave](#org7028072)
-    5.  [Running the enclave](#orge5b7caf)
-        1.  [Setting up `LD_LIBRARY_PATH`](#orgbe300de)
-        2.  [Evaluating models](#org780de32)
-    6.  [Under the hood](#orga13fb46)
+1.  [NN SGX](#org4f2fcbd)
+        1.  [Actual values still to come](#org749dbe0)
+    1.  [Introduction](#orgb737948)
+        1.  [Fix terminology (provider, customer, model, etc.)](#org7506fd5)
+        2.  [Try to find a MLaaS provider where you "buy" the finished model](#org9fcf9c3)
+        3.  [Find out if our code is actually encrypted, and if the weights are secure](#org5aceaea)
+    2.  [Background](#org9a74e5d)
+    3.  [Related Work](#org2e414d8)
+    4.  [Implementation](#orgae2cdd4)
+    5.  [Experimental Setup](#orgd010d57)
+    6.  [Experiment Results](#org2840a82)
+    7.  [Discussion](#org8d69eeb)
+    8.  [Conclusion](#org974aa77)
+2.  [Old Stuff](#org39620f2)
+    1.  [Current Status](#org8183cd2)
+        1.  [Enclave Implementation](#orgf0ea8b7)
+        2.  [Model Training](#orgd6a3e8d)
+    2.  [Timing measurements](#org4869afd)
+        1.  [First Attempt](#org5006246)
+        2.  [Second Attempt](#org3b6ac20)
+    3.  [Related Work](#orgc692116)
+3.  [README](#org9ae9a17)
+    1.  [Setting up a testing environment](#org020b9de)
+    2.  [Training a model](#org5e4360b)
+    3.  [Extracting the enclave](#orge64f57b)
+    4.  [Compiling the enclave](#orge941dbc)
+    5.  [Running the enclave](#org1ae8e41)
+        1.  [Setting up `LD_LIBRARY_PATH`](#orgee1b6b5)
+        2.  [Evaluating models](#org54cc738)
+    6.  [Under the hood](#org7401457)
 
 
-<a id="org689d77a"></a>
+<a id="org4f2fcbd"></a>
 
 # NN SGX
 
-Running some parts or all of a CNN inside the trusted enclave to reduce leakage and protect against model stealing.
-We hope to make this as robust against model stealing as online oracles.
+In order to perform inference with a given machine learning model, the weights and architecture must be known.
+Allowing a third party to query a model, while keeping it secret, requires providing the model as an online oracle to them.
+While this allows keeping the model parameters private and thus continuing to monetize the model queries, it requires providing the infrastructure and computational power required to perform the inferences.
+
+Our goal is to leverage the data confidentiality that Trusted Execution Environments (TEEs) promise to turn these online oracles into offline oracles, freeing the model creator from having to provide the infrastructure required for inference.
+While the model creator benefits from the model parameters staying private, the model user can now also keep their inference data private, as they no longer have to provide them to the model creator for their inference.
+Thus all involved parties gain privacy from such a model.
+
+We provide a proof of concept implementation for certain Tensorflow operations, and provide a mechanism to cut the last \($n$\) layers and run them inside an Intel SGX enclave.
+We then evaluated the performance impact of different cuts for four different neural net models.
+This gives us an approximation for the impact caused by moving parts of the model to the CPU, and the additional impact introduced by the overhead of TEE execution.
 
 
-<a id="org87d321c"></a>
+<a id="org749dbe0"></a>
 
-## People
-
-RBO, CPA, ASC
+### TODO Actual values still to come
 
 
-<a id="org84331a5"></a>
+<a id="orgb737948"></a>
 
-## Datasets
+## Introduction
+
+
+<a id="org7506fd5"></a>
+
+### TODO Fix terminology (provider, customer, model, etc.)
+
+Training a machine learning model requires large amounts of data, domain knowledge, and significant computation power.
+Organizations wishing to use the predictive powers of these models often lack the knowledge and hardware required to train these models, and outsource parts of the task using Machine Learning as a Service (MLaaS) providers, who provide automated tools to generate ML models for certain types of tasks.
+
+MLaaS providers usually monetize their models per query or per time frame.
+Both strategies require them to keep the model parameters - and to some extent the architecture - secret.
+A common strategy is to offer access to the finished model only as an online oracle which customers can query with their data, and which responds with the inference result.
+Providing such an oracle requires the provider to continually reserve the needed computational power required for inference on the customer's model.
+It also requires the customer to keep sending data to the provider at inference time, which can be undesirable and potentially illegal depending on the domain.
+As such, the online oracle model required for continuous monetization is undesirable for both provider and customer.
+
+
+<a id="org9fcf9c3"></a>
+
+### TODO Try to find a MLaaS provider where you "buy" the finished model
+
+Our approach transforms the online oracle into an offline oracle by leveraging the data confidentiality promised by trusted execution environments (TEEs).
+We provide a (naive) implementation of different Tensorflow (TF) operations in C, as well as a tool to automatically generate the calls to these operations from an existing TF model.
+Our tool also extracts the weights from the model and makes them usable and protecting them inside the enclave.
+We also provide an enclave wrapper which integrates seamlessly into TF, making our enclave models drop-in replacements for regular TF models.
+
+
+<a id="org5aceaea"></a>
+
+### TODO Find out if our code is actually encrypted, and if the weights are secure
+
+While this approach still requires customers to share their training data with MLaaS providers, it allows us to leverage the higher performance of GPUs and optimized implementations of TF operators during training.
+Training a full model inside the enclave in order to provide data confidentiality during training time has been done \(\cite{ohrimenko16enclave}\), but was not the goal for our research.
+As evidenced by Section [Results](#org152bc03) the performance impact of running a model inside the enclave can be quite large, especially for large convolutional neural nets (CNNs) as are commonly used in current image recognition tasks.
+While these performance impacts could be acceptable during inference, depending on the application scenario, they seem to us be prohibitive during training, which caused us to use regular TF on the GPU for training.
+
+The rest of this paper is organized as follows:
+Section [Background](#orgba846db) gives some background on the computations required for inference, as well as on TEEs in general, and Intel SGX in particular.
+Section [Related Work](#org5bca1cd) summarizes work we found that either covers model privacy, machine learning in TEEs, as well as attacks on data privacy.
+Section [Implementation](#org656f3db) gives an overview of what we built and the general flow from the original TF model to a model running partly inside a TEE.
+Section [Experimental Setup](#org48a2e12) details the models, hardware, measurements we used for evaluation.
+The results of our experiments are then shown and evaluated in Section [Experiment Results](#org152bc03).
+We offer a discussion of our results and in Section [Discussion](#orgf85b63c), and a conclusion together with what we see as valuable future work in Section [Conclusion](#orgbc362fa).
+
+
+<a id="org9a74e5d"></a>
+
+## Background
+
+<a id="orgba846db"></a>
+
+
+<a id="org2e414d8"></a>
+
+## Related Work
+
+<a id="org5bca1cd"></a>
+
+
+<a id="orgae2cdd4"></a>
+
+## Implementation
+
+<a id="org656f3db"></a>
+
+
+<a id="orgd010d57"></a>
+
+## Experimental Setup
+
+<a id="org48a2e12"></a>
 
 Image recognition tasks as well as text classification tasks are used for testing.
 The image recognition tasks are MNIST using a small CNN, and MIT67 using a pretrained VGG16 network as feature extractor.
@@ -49,15 +137,43 @@ For the text classfication we used IMDB review sentiment classification using ML
 The code for these is taken from [here](https://github.com/google/eng-edu/tree/master/ml/guides/text_classification).
 This choice of datasets gives us reasonably large CNNs for multiple tasks and media types, as well as smaller models for a task of both kinds.
 
-All datasets are stored in `data`.
+The links for the datasets are as follows:
+
+-   [IMDB sentiment analysis](http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz)
+-   [Rotten Tomatoes sentiment analysis](https://www.kaggle.com/c/3810/download/train.tsv.zip)
+-   MNIST is taken from [tensorflow<sub>datasets</sub>](https://blog.tensorflow.org/2019/02/introducing-tensorflow-datasets.html)
+-   [MIT67 Indoor scene recognition](https://web.mit.edu/torralba/www/indoor.html)
 
 
-<a id="org15996c2"></a>
+<a id="org2840a82"></a>
 
-### TODO Add dataset links
+## Experiment Results
+
+<a id="org152bc03"></a>
+
+We do have some results
 
 
-<a id="org450843a"></a>
+<a id="org8d69eeb"></a>
+
+## Discussion
+
+<a id="orgf85b63c"></a>
+
+
+<a id="org974aa77"></a>
+
+## Conclusion
+
+<a id="orgbc362fa"></a>
+
+
+<a id="org39620f2"></a>
+
+# Old Stuff
+
+
+<a id="org8183cd2"></a>
 
 ## Current Status
 
@@ -65,7 +181,7 @@ The technical part of this research project is mostly done, and only few cleanup
 My current focus will be on the writeup, and finding a clear narrative for my reasoning.
 
 
-<a id="org569c2fc"></a>
+<a id="orgf0ea8b7"></a>
 
 ### Enclave Implementation
 
@@ -78,7 +194,7 @@ We have observed cases where the original result was a misclassification, but th
 1.  TODO Rigorously measure and classify label differences between TF, native and enclave
 
 
-<a id="org1184e48"></a>
+<a id="orgd6a3e8d"></a>
 
 ### Model Training
 
@@ -91,14 +207,14 @@ Both models for text classification are taken from [this](https://github.com/goo
 For our tests the models do not have to perform close to the state of the art, only well enough that we can rule out the possibility of trivial weights with confidence, as these could impact our performance measurements in unforeseen ways.
 
 
-<a id="orgf807416"></a>
+<a id="org4869afd"></a>
 
 ## Timing measurements
 
 All code is compiled for SGX in HW<sub>PRERERELEASE</sub> mode
 
 
-<a id="org9dea7d6"></a>
+<a id="org5006246"></a>
 
 ### First Attempt
 
@@ -1227,7 +1343,7 @@ All code is compiled for SGX in HW<sub>PRERERELEASE</sub> mode
         </table>
 
 
-<a id="orgfe948cd"></a>
+<a id="org3b6ac20"></a>
 
 ### Second Attempt
 
@@ -1250,7 +1366,7 @@ We called the difference between the native C and enclave execution times **encl
 
 1.  MIT67
 
-    [24](#orgb43ece2) shows the measured times for executing TF on the CPU, and [25](#org967859d) shows the times with TF running on GPU.
+    [42](#org7a50ff6) shows the measured times for executing TF on the CPU, and [43](#org1f11197) shows the times with TF running on GPU.
     Beneath the x-axis are the layers of the model.
     All layers to the right of a timing bar are run in native/enclave code, while all layers to the left are run using normal TF operations.
     The rightmost bar is the time it takes to run the entire model in TF alone.
@@ -1259,14 +1375,14 @@ We called the difference between the native C and enclave execution times **encl
     
     ![img](./tex/images/graphic_gpu.png "GPU execution times")
 
-2.  TODO Measure MNIST execution time
+2.  DONE Measure MNIST execution time
 
-3.  TODO Measure IMDB execution time
+3.  DONE Measure IMDB execution time
 
-4.  TODO Measure Rotten Tomatoes execution time
+4.  DONE Measure Rotten Tomatoes execution time
 
 
-<a id="org9493915"></a>
+<a id="orgc692116"></a>
 
 ## Related Work
 
@@ -1306,12 +1422,12 @@ The model can then verify the signature using the public testing key of the prov
 Only if the signature is valid will it run inference.
 
 
-<a id="orgfeadc6b"></a>
+<a id="org9ae9a17"></a>
 
 # README
 
 
-<a id="org061f2a7"></a>
+<a id="org020b9de"></a>
 
 ## Setting up a testing environment
 
@@ -1322,7 +1438,7 @@ Our test machines run Ubuntu Server 18.04, and I provide a setup script for the 
 The python requirements are all in [requirements.txt](requirements.txt).
 
 
-<a id="orgae159e6"></a>
+<a id="org5e4360b"></a>
 
 ## Training a model
 
@@ -1334,7 +1450,7 @@ Our training scripts expect the extracted data to be in `data/mit67`, with both 
 The model can then be trained using the `mit67_train.py` script.
 
 
-<a id="orgd03c6b7"></a>
+<a id="orge64f57b"></a>
 
 ## Extracting the enclave
 
@@ -1348,7 +1464,7 @@ Inside the `.bin` files are the layer weights which will be compiled into the en
 The `forward.cpp` file contains the forward function of the enclave.
 
 
-<a id="org7028072"></a>
+<a id="orge941dbc"></a>
 
 ## Compiling the enclave
 
@@ -1358,12 +1474,12 @@ The decision which version to build is decided based on the `MODE` environment v
 All directories contain Makefiles, so running `make` in the project root will build all necessary subdirectories.
 
 
-<a id="orge5b7caf"></a>
+<a id="org1ae8e41"></a>
 
 ## Running the enclave
 
 
-<a id="orgbe300de"></a>
+<a id="orgee1b6b5"></a>
 
 ### Setting up `LD_LIBRARY_PATH`
 
@@ -1373,14 +1489,14 @@ To provide the location of the libraries, please run this command from the proje
     source setup/setup_ld_path.sh
 
 
-<a id="org780de32"></a>
+<a id="org54cc738"></a>
 
 ### Evaluating models
 
 TODO
 
 
-<a id="orga13fb46"></a>
+<a id="org7401457"></a>
 
 ## Under the hood
 

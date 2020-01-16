@@ -15,11 +15,52 @@ This gives us an approximation for the impact caused by moving parts of the mode
 
 ** Introduction
 
+*** TODO Fix terminology (provider, customer, model, etc.)
+
+Training a machine learning model requires large amounts of data, domain knowledge, and significant computation power.
+Organizations wishing to use the predictive powers of these models often lack the knowledge and hardware required to train these models, and outsource parts of the task using Machine Learning as a Service (MLaaS) providers, who provide automated tools to generate ML models for certain types of tasks.
+
+MLaaS providers usually monetize their models per query or per time frame.
+Both strategies require them to keep the model parameters - and to some extent the architecture - secret.
+A common strategy is to offer access to the finished model only as an online oracle which customers can query with their data, and which responds with the inference result.
+Providing such an oracle requires the provider to continually reserve the needed computational power required for inference on the customer's model.
+It also requires the customer to keep sending data to the provider at inference time, which can be undesirable and potentially illegal depending on the domain.
+As such, the online oracle model required for continuous monetization is undesirable for both provider and customer.
+
+*** TODO Try to find a MLaaS provider where you "buy" the finished model
+
+Our approach transforms the online oracle into an offline oracle by leveraging the data confidentiality promised by trusted execution environments (TEEs).
+We provide a (naive) implementation of different Tensorflow (TF) operations in C, as well as a tool to automatically generate the calls to these operations from an existing TF model.
+Our tool also extracts the weights from the model and makes them usable and protecting them inside the enclave.
+We also provide an enclave wrapper which integrates seamlessly into TF, making our enclave models drop-in replacements for regular TF models.
+
+*** TODO Find out if our code is actually encrypted, and if the weights are secure
+
+While this approach still requires customers to share their training data with MLaaS providers, it allows us to leverage the higher performance of GPUs and optimized implementations of TF operators during training.
+Training a full model inside the enclave in order to provide data confidentiality during training time has been done \(\cite{ohrimenko16enclave}\), but was not the goal for our research.
+As evidenced by Section [[sec:results][Results]] the performance impact of running a model inside the enclave can be quite large, especially for large convolutional neural nets (CNNs) as are commonly used in current image recognition tasks.
+While these performance impacts could be acceptable during inference, depending on the application scenario, they seem to us be prohibitive during training, which caused us to use regular TF on the GPU for training.
+
+The rest of this paper is organized as follows:
+Section [[sec:background][Background]] gives some background on the computations required for inference, as well as on TEEs in general, and Intel SGX in particular.
+Section [[sec:related][Related Work]] summarizes work we found that either covers model privacy, machine learning in TEEs, as well as attacks on data privacy.
+Section [[sec:implementation][Implementation]] gives an overview of what we built and the general flow from the original TF model to a model running partly inside a TEE.
+Section [[sec:setup][Experimental Setup]] details the models, hardware, measurements we used for evaluation.
+The results of our experiments are then shown and evaluated in Section [[sec:results][Experiment Results]].
+We offer a discussion of our results and in Section [[sec:discussion][Discussion]], and a conclusion together with what we see as valuable future work in Section [[sec:conclusion][Conclusion]].
+
 ** Background
+<<sec:background>>
+
+** Related Work
+<<sec:related>>
 
 ** Implementation
+<<sec:implementation>>
 
 ** Experimental Setup
+<<sec:setup>>
+
 Image recognition tasks as well as text classification tasks are used for testing.
 The image recognition tasks are MNIST using a small CNN, and MIT67 using a pretrained VGG16 network as feature extractor.
 I fixed the weights for the VGG16 feature extractor during training of the final classification 
@@ -34,8 +75,15 @@ The links for the datasets are as follows:
 - [[https://web.mit.edu/torralba/www/indoor.html][MIT67 Indoor scene recognition]]
 
 ** Experiment Results
+<<sec:results>>
+
+We do have some results
 
 ** Discussion
+<<sec:discussion>>
+
+** Conclusion
+<<sec:conclusion>>
 
 * Old Stuff
 ** Current Status
