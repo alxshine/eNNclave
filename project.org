@@ -52,8 +52,51 @@ We offer a discussion of our results and in Section [[sec:discussion][Discussion
 ** Background
 <<sec:background>>
 
+This section is meant to illustrate the mathematical operations that happen during the forward pass of a neural net, as well as the higher level processes when executing code inside a TEE.
+
+*** Neural Net Math
+
+*** Trusted Execution environments
+
+*** Intel SGX
+**** TODO Look into signing process of Intel SGX
+
 ** Related Work
 <<sec:related>>
+We have different areas of related work that are relevant to this project.
+The most directly relevant area is model stealing attacks and adversarial robustness.
+In model stealing an attacker tries to build a replicant model that rivals the prediction accuracy of the stolen model, with hopefully lower cost than using the original model.
+[[file:related_work/tramer16stealing.pdf][Tramer et al.]] use a model-dependent dataset augmentation algorithm to find a reasonably low number of queries required for extracting the model.
+The number they arrive at for NNs is ~100*k~, where ~k~ is the number of parameters.
+Our model (even with the weights in the feature extractor fixed) still have ~18,000,000 trainable parameters, which pushes this attack (as it is) outside the realm of feasability in my opinion.
+
+Another relevant area of research is adversarial attacks.
+[[file:related_work/papernot17practical.pdf][Papernot et al.]] have presented a so-called black-box transfer attack, in which an attacker builds a local replicant model and builds adversarial examples on the gradients of that model.
+This requires far less queries than are required for model stealing, but the replicant model does not have to be accurace.
+Its only requirement is that its gradients are sufficiently aligned with the target model to build functional adversarial examples.
+
+Our implementation affects data privacy, as it allows users to keep the data they wish to predict on private.
+It also allows for the creation of offline black box oracles, which are used e.g. in [[file:related_work/shokri17membership.pdf][set membership attacks]].
+As it currently stands, we do not return confidence values, only the resulting label.
+This makes the attack presented by Shokri et al. not better than chance, as evidenced by their own results.
+
+In the context of data privacy [[file:related_work/ohrimenko16enclave.pdf][Ohrimenko et al.]] have also previously combined machine learning with trusted enclaves.
+The difference between their approach and ours is that they trained the model inside the enclave, which allows parties to also keep their training data private.
+Their focus is on ensuring that no inference on the training data can be made using timing side channels, and they disregard performance.
+Our focus is instead on the performance impact of such an approach.
+
+[[file:related_work/tramer19slalom.pdf][Tramer et al.]] provide a mechanism to use the enclave as a controller for running NNs on the GPU.
+Every layer is verified inside the Enclave, to give a statistical guarantee for integrity.
+They also utilize an additive stream cipher which is (as they claim, I don't know enough of the math behind it to verify) invariant to the computations taking place in the DNN.
+This gives them data privacy, while running the model on the provider's hardware.
+
+The enclave alone does not provide a mechanism for rate limiting, and thus not for monetization.
+[[file:related_work/kaptchuk2019state.pdf][Kaptchuk et al.]] utilize signatures coming from a server for this.
+Their main contribution is putting the signatures in a public ledger, which might be sexy, but not necessary for our use-case.
+The basic idea is very relevant however.
+By having a customer send a hash of the data they wish to run inference on to the provider, who then signs the hash (after being paid) and sends the signature back, we can monetize access to the model by query.
+The model can then verify the signature using the public testing key of the provider.
+Only if the signature is valid will it run inference.
 
 ** Implementation
 <<sec:implementation>>
@@ -331,42 +374,6 @@ The rightmost bar is the time it takes to run the entire model in TF alone.
 
 **** DONE Measure Rotten Tomatoes execution time
      CLOSED: [2020-01-14 Tue 13:30]
-
-** Related Work
-We have different areas of related work that are relevant to this project.
-The most directly relevant area is model stealing attacks and adversarial robustness.
-In model stealing an attacker tries to build a replicant model that rivals the prediction accuracy of the stolen model, with hopefully lower cost than using the original model.
-[[file:related_work/tramer16stealing.pdf][Tramer et al.]] use a model-dependent dataset augmentation algorithm to find a reasonably low number of queries required for extracting the model.
-The number they arrive at for NNs is ~100*k~, where ~k~ is the number of parameters.
-Our model (even with the weights in the feature extractor fixed) still have ~18,000,000 trainable parameters, which pushes this attack (as it is) outside the realm of feasability in my opinion.
-
-Another relevant area of research is adversarial attacks.
-[[file:related_work/papernot17practical.pdf][Papernot et al.]] have presented a so-called black-box transfer attack, in which an attacker builds a local replicant model and builds adversarial examples on the gradients of that model.
-This requires far less queries than are required for model stealing, but the replicant model does not have to be accurace.
-Its only requirement is that its gradients are sufficiently aligned with the target model to build functional adversarial examples.
-
-Our implementation affects data privacy, as it allows users to keep the data they wish to predict on private.
-It also allows for the creation of offline black box oracles, which are used e.g. in [[file:related_work/shokri17membership.pdf][set membership attacks]].
-As it currently stands, we do not return confidence values, only the resulting label.
-This makes the attack presented by Shokri et al. not better than chance, as evidenced by their own results.
-
-In the context of data privacy [[file:related_work/ohrimenko16enclave.pdf][Ohrimenko et al.]] have also previously combined machine learning with trusted enclaves.
-The difference between their approach and ours is that they trained the model inside the enclave, which allows parties to also keep their training data private.
-Their focus is on ensuring that no inference on the training data can be made using timing side channels, and they disregard performance.
-Our focus is instead on the performance impact of such an approach.
-
-[[file:related_work/tramer19slalom.pdf][Tramer et al.]] provide a mechanism to use the enclave as a controller for running NNs on the GPU.
-Every layer is verified inside the Enclave, to give a statistical guarantee for integrity.
-They also utilize an additive stream cipher which is (as they claim, I don't know enough of the math behind it to verify) invariant to the computations taking place in the DNN.
-This gives them data privacy, while running the model on the provider's hardware.
-
-The enclave alone does not provide a mechanism for rate limiting, and thus not for monetization.
-[[file:related_work/kaptchuk2019state.pdf][Kaptchuk et al.]] utilize signatures coming from a server for this.
-Their main contribution is putting the signatures in a public ledger, which might be sexy, but not necessary for our use-case.
-The basic idea is very relevant however.
-By having a customer send a hash of the data they wish to run inference on to the provider, who then signs the hash (after being paid) and sends the signature back, we can monetize access to the model by query.
-The model can then verify the signature using the public testing key of the provider.
-Only if the signature is valid will it run inference.
 
 * README
 
