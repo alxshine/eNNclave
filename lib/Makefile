@@ -12,8 +12,11 @@ enclave:
 	@printf "\n\nMaking library in sgx mode\n\n\n"
 	@$(MAKE) -C enclave
 
+test: test_matutil.c native enclave
+	gcc $< -I$(INC) -L$(LIB) -L$(CURDIR) -lnative -lenclave -o test
+
 .PHONY: clean native enclave
 clean:
-	rm -rf *.o test_matutil *.so
+	rm -rf *.o test_matutil *.so test
 	make -C native clean
 	make -C enclave clean
