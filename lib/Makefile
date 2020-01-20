@@ -13,7 +13,7 @@ enclave:
 	@$(MAKE) -C enclave
 
 test: test_matutil.c native enclave
-	gcc $< -I$(INC) -L$(LIB) -L$(CURDIR) -lnative -lenclave -o test
+	gcc -g $< -I$(INC) -L$(LIB) -L$(CURDIR) -lnative -lenclave -o test
 
 .PHONY: clean native enclave
 clean:
