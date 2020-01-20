@@ -3,3 +3,4 @@
 testitest
 *.so
 *.o
+compile_commands.json

@@ -38,16 +38,16 @@ app/enclave_u.h: edger8r
 app/enclave_u.c: app/enclave_u.h
 
 app/enclave_u.o: app/enclave_u.c
-	@$(CC) $(enclave_includes) -fPIC $^ -c -o $@ $(link_flags)
+	$(CC) $(enclave_includes) -fPIC $^ -c -o $@ $(link_flags)
 	
 app/%.o: app/%.cpp
-	@$(CXX) $(app_includes) $^ -c -o $@
+	$(CXX) $(app_includes) $^ -c -o $@
 
 # Enclave stuff
 enclave/enclave_t.h: edger8r
 
 enclave/enclave_t.o: enclave/enclave_t.c
-	@$(CC) $(enclave_includes) -fPIC $^ -c -o $@ $(enclave_link_flags)
+	$(CC) $(enclave_includes) -fPIC $^ -c -o $@ $(enclave_link_flags)
 
 $(enclave_name): enclave/enclave_t.o enclave/enclave.cpp
 	$(CXX) $(enclave_includes) $^ -o $@ $(enclave_link_flags)
