@@ -5,6 +5,7 @@ LIB=${ROOT}/lib
 app_name:= testitest
 enclave_name:= enclave.so
 signed_enclave_name= enclave.signed.so
+wrapper_name:= libenclave.so
 
 C_FLAGS = -fPIC -g -DSGX_DEBUG_FLAG=1
 
@@ -28,11 +29,16 @@ enclave_includes =-I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/i
 app_includes =-I$(SGX_SDK)/include -I$(INC)
 link_flags =-L$(SGX_LIBRARY_PATH) -lsgx_urts -lpthread -l:libsgx_capable.a
 
-all: $(app_name) $(signed_enclave_name)
+all: $(app_name) $(wrapper_name) $(signed_enclave_name)
 
 # generate code files
 edger8r: enclave/enclave.edl
 	@sgx_edger8r --trusted --untrusted --trusted-dir enclave/ --untrusted-dir app/ --search-path enclave/ enclave/enclave.edl
+
+# Wrapper stuf
+$(wrapper_name): app/enclave_u.o app/wrapper.o app/utils.o
+	$(CXX) $(app_includes) $(C_FLAGS) -shared $^ -o $@ $(link_flags)
+	ln -sf enclave/$@ ../
 
 # App stuff
 $(app_name): app/enclave_u.o app/app.o app/utils.o
