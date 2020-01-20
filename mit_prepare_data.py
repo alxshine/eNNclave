@@ -5,7 +5,7 @@ import json
 import numpy as np
 
 def load_test_set(data_dir='data', test_file='TestImages.txt'):
-    full_path = os.path.join(data_dir, 'mit67')
+    full_path = os.path.join(data_dir, 'mit')
 
     try:
         print("Trying to load previously generated data and labels")
