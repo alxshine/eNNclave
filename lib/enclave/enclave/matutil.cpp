@@ -1,7 +1,7 @@
 #include "matutil.hpp"
 #include "state.hpp"
 #include "forward.hpp"
-#include "Enclave.h"
+#include "enclave.h"
 
 int matutil_initialize(void) { return 0; }
 

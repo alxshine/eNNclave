@@ -1,0 +1,12 @@
+enclave {
+    trusted {
+      public void test();
+      public int forward([in, count=s] float *m, int s, [out] int *label);
+    };
+
+    untrusted {
+        void ocall_print_string([in, string] const char *str);
+        void ocall_perror_string([in, string] const char *str);
+    };
+
+};

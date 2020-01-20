@@ -1,5 +1,5 @@
-#ifndef _APP_H_
-#define _APP_H_
+#ifndef _WRAPPER_H_
+#define _WRAPPER_H_
 
 #include <assert.h>
 #include <stdio.h>
@@ -23,16 +23,16 @@
 # define TOKEN_FILENAME   "enclave.token"
 # define ENCLAVE_FILENAME "enclave.signed.so"
 
-extern sgx_enclave_id_t global_eid;    /* global enclave id */
+extern sgx_enclave_id_t enclave_id;
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-  void test();
+  void test_enclave();
   
 #if defined(__cplusplus)
 }
 #endif
 
-#endif /* !_APP_H_ */
+#endif
