@@ -1,6 +1,6 @@
 #include "enclave.h"
 #include "enclave_t.h"
-#include "matutil.hpp"
+#include "matutil.h"
 
 #include <stdio.h>
 #include <stdarg.h>

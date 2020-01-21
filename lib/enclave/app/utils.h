@@ -32,8 +32,6 @@
 #ifndef utils_h
 #define utils_h
 
-#include <iostream>
-
 #include "sgx_urts.h"
 
 typedef struct _sgx_errlist_t {

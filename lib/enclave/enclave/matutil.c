@@ -5,7 +5,7 @@
 #include <math.h>
 
 #include "enclave_t.h"
-#include "matutil.hpp"
+#include "matutil.h"
 #include "enclave.h"
 
 void matutil_get_new_dimensions(int r1, int c1, int r2, int c2, int *rr,

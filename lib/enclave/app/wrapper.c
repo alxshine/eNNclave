@@ -1,25 +1,22 @@
-#include <iostream>
+#include <stdio.h>
 
-#include "enclave_nn.hpp"
+#include "enclave_nn.h"
 #include "enclave_u.h"
 #include "utils.h"
 #include "sgx_urts.h"
-
-using namespace std;
 
 sgx_enclave_id_t enclave_id;
 const char *enclave_filename = "enclave.signed.so";
 
 void ocall_stdout_string(const char *str){
-    cout << str;
+    printf("%s", str);
 }
 
 void ocall_stderr_string(const char *str){
-    cerr << str;
+    fprintf(stderr, "%s", str);
 }
 
 int enclave_nn_start(){
-    cout << "initializing enclave" << endl;
     sgx_status_t ret = sgx_create_enclave(enclave_filename, SGX_DEBUG_FLAG, NULL, NULL, &enclave_id, NULL);
     if( ret != SGX_SUCCESS){
         print_error_message(ret);
@@ -29,7 +26,6 @@ int enclave_nn_start(){
 }
 
 int enclave_nn_end(){
-    cout << "destroying enclave" << endl;
     sgx_destroy_enclave(enclave_id);
 }
 

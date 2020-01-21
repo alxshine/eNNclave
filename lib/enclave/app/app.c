@@ -1,12 +1,9 @@
-#include <iostream>
-#include <fstream>
+#include <stdio.h>
 
 #include "app.h"
-#include "enclave_nn.hpp"
+#include "enclave_nn.h"
 #include "sgx_urts.h"
 #include "enclave_u.h"
-
-using namespace std;
 
 int main(void)
 {
@@ -41,8 +38,10 @@ int main(void)
         m[i] = i;
     int label = -1;
 
+    printf("Executing forward\n");
     if(enclave_nn_forward(m, size, &label))
         return 1;
+    printf("Done\n");
 
     // sgx_status_t ret = test(enclave_id);
     // if( ret != SGX_SUCCESS){
