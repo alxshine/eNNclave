@@ -8,14 +8,6 @@
 
 using namespace std;
 
-void ocall_stdout_string(const char *str){
-    cout << str;
-}
-
-void ocall_stderr_string(const char *str){
-    cerr << str;
-}
-
 int main(void)
 {
     // sgx_enclave_id_t enclave_id = 0;

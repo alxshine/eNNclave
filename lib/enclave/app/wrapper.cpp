@@ -10,6 +10,14 @@ using namespace std;
 sgx_enclave_id_t enclave_id;
 const char *enclave_filename = "enclave.signed.so";
 
+void ocall_stdout_string(const char *str){
+    cout << str;
+}
+
+void ocall_stderr_string(const char *str){
+    cerr << str;
+}
+
 int enclave_nn_start(){
     cout << "initializing enclave" << endl;
     sgx_status_t ret = sgx_create_enclave(enclave_filename, SGX_DEBUG_FLAG, NULL, NULL, &enclave_id, NULL);
