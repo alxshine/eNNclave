@@ -65,11 +65,14 @@ enclave/enclave_t.o: enclave/enclave_t.c
 $(signed_enclave_name): $(enclave_name)
 	sgx_sign sign -enclave $< -out $@ -key enclave/signing_key.pem -config enclave/config.xml
 
-$(enclave_name): enclave/enclave_t.o enclave/enclave.o enclave/matutil.o
+$(enclave_name): enclave/enclave_t.o enclave/enclave.o enclave/matutil.o enclave/forward.o
 	$(CXX) $(enclave_includes) $^ -o $@ $(enclave_link_flags)
 
+enclave/forward.o: enclave/forward.c
+	$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(enclave_link_flags)
+
 enclave/%.o: enclave/%.cpp
-	$(CXX) $(enclave_includes) $^ -c -o $@ $(enclave_link_flags)
+	$(CXX) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(enclave_link_flags)
 	
 .PHONY: clean
 clean:

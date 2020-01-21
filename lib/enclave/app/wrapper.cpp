@@ -22,11 +22,13 @@ int enclave_nn_start(){
 
 int enclave_nn_end(){
     cout << "destroying enclave" << endl;
+    sgx_destroy_enclave(enclave_id);
 }
 
 int enclave_nn_forward(float *m, int s, int *label){
-    cout << "forward" << endl;
-    sgx_status_t ret = test(enclave_id);
+    // sgx_status_t ret = test(enclave_id);
+    int return_value;
+    sgx_status_t ret = forward(enclave_id, &return_value, m, s, label);
     if(ret != SGX_SUCCESS){
         print_error_message(ret);
         return 1;
