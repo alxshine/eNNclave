@@ -4,9 +4,7 @@
 
 #include <math.h>
 
-#include "forward.hpp"
 #include "matutil.hpp"
-#include "state.hpp"
 
 int matutil_initialize(void) { return 0; }
 
