@@ -11,6 +11,8 @@ native:
 enclave:
 	@printf "\n\nMaking library in sgx mode\n\n\n"
 	@$(MAKE) -C enclave
+	@ln -sf lib/enclave.so ../
+	@ln -sf lib/enclave.signed.so ../
 
 test: test_matutil.c native enclave
 	gcc -g $< -I$(INC) -L$(LIB) -L$(CURDIR) -lnative -lenclave -o test

@@ -5,8 +5,8 @@
 #include <python3.6m/Python.h>
 #endif
 
-#include "enclave_nn.hpp"
-#include "native_nn.hpp"
+#include "enclave_nn.h"
+#include "native_nn.h"
 
 static PyObject *pymatutil_test_bytes(PyObject *self, PyObject *args) {
   // return range(10) to test return value interoperability
