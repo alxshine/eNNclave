@@ -5,8 +5,8 @@
 #include <python3.6m/Python.h>
 #endif
 
-#include "enclave.hpp"
-#include "native.hpp"
+#include "enclave_nn.hpp"
+#include "native_nn.hpp"
 
 static PyObject *pymatutil_test_bytes(PyObject *self, PyObject *args) {
   // return range(10) to test return value interoperability
@@ -28,7 +28,7 @@ static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   int label;
-  int sts = enclave_forward(m, s, &label);
+  int sts = enclave_nn_forward(m, s, &label);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error in enclave");
     return NULL; // TODO: do some error handling
@@ -56,12 +56,12 @@ static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
 }
 
 static PyObject *pymatutil_initialize(PyObject *self, PyObject *args){
-  enclave_initialize();
+  enclave_nn_start();
   return Py_None;
 }
 
 static PyObject *pymatutil_teardown(PyObject *self, PyObject *args){
-  enclave_teardown();
+  enclave_nn_end();
   return Py_None;
 }
 
