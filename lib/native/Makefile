@@ -5,7 +5,7 @@ LIB=${ROOT}/lib
 weight_binaries:= $(wildcard *.bin)
 weight_objects:=$(patsubst %.bin,%.o,$(weight_binaries))
 
-all: matutil.cpp forward.c state.c native_nn.cpp $(weight_objects)
+all: matutil.c forward.c state.c native_nn.c $(weight_objects)
 	$(CC) -g -shared -fPIC -I${INC} $^ -o libnative.so
 	ln -sf native/libnative.so ../
 
