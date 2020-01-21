@@ -1,17 +1,35 @@
 #include <iostream>
 
-#include "enclave.hpp"
+#include "enclave_nn.hpp"
+#include "enclave_u.h"
+#include "utils.h"
+#include "sgx_urts.h"
 
 using namespace std;
 
-int enclave_initialize(){
+sgx_enclave_id_t enclave_id;
+const char *enclave_filename = "enclave.signed.so";
+
+int enclave_nn_start(){
     cout << "initializing enclave" << endl;
+    sgx_status_t ret = sgx_create_enclave(enclave_filename, SGX_DEBUG_FLAG, NULL, NULL, &enclave_id, NULL);
+    if( ret != SGX_SUCCESS){
+        print_error_message(ret);
+        return 1;
+    }
+    return 0;
 }
 
-int enclave_teardown(){
+int enclave_nn_end(){
     cout << "destroying enclave" << endl;
 }
 
-int enclave_forward(float *m, int s, int *label){
+int enclave_nn_forward(float *m, int s, int *label){
     cout << "forward" << endl;
+    sgx_status_t ret = test(enclave_id);
+    if(ret != SGX_SUCCESS){
+        print_error_message(ret);
+        return 1;
+    }
+    return 0;
 };

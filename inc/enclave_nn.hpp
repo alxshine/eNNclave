@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-  int enclave_initialize();
-  int enclave_teardown();
-  int enclave_forward(float *m, int s, int *label);
+  int enclave_nn_start();
+  int enclave_nn_end();
+  int enclave_nn_forward(float *m, int s, int *label);
 
 #if defined(__cplusplus)
 }

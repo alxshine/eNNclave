@@ -29,7 +29,7 @@ enclave_includes =-I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/i
 app_includes =-I$(SGX_SDK)/include -I$(INC)
 link_flags =-L$(SGX_LIBRARY_PATH) -lsgx_urts -lpthread -l:libsgx_capable.a
 
-all: $(app_name) $(wrapper_name) $(signed_enclave_name)
+all: $(wrapper_name) $(app_name) $(signed_enclave_name)
 
 # generate code files
 edger8r: enclave/enclave.edl
@@ -42,7 +42,7 @@ $(wrapper_name): app/enclave_u.o app/wrapper.o app/utils.o
 
 # App stuff
 $(app_name): app/enclave_u.o app/app.o app/utils.o
-	$(CXX) $(app_includes) $(C_FLAGS) $^ -o $@ $(link_flags)
+	$(CXX) $(app_includes) $(C_FLAGS) $^ -o $@ $(link_flags) -L$(CURDIR) -lenclave
 
 app/enclave_u.h: edger8r
 
