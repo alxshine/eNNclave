@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include "forward.hpp"
-#include "native.hpp"
 #include "matutil.hpp"
 #include "state.hpp"
 
