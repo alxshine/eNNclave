@@ -10,9 +10,9 @@ models
 **.gdb_history
 logs
 sbatch_launch.sh
-**/state.cpp
-**/state.hpp
-**/forward.cpp
+**/state.c
+**/state.h
+**/forward.c
 **/*.bin
 **/*.npy
 /hists/

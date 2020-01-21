@@ -2,12 +2,11 @@ preamble_template = """
 #include <stdlib.h>
 #include <math.h>
 
-#include "state.hpp"
-#include "forward.hpp"
+#include "forward.h"
 
 #include "matutil.hpp"
-#include "enclave.hpp"
-#include "native.hpp"
+#include "enclave_nn.hpp"
+#include "native_nn.hpp"
 
 int forward(float *m, int, int *label) {
   int sts;

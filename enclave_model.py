@@ -12,8 +12,8 @@ class Enclave(Sequential):
 
     def generate_state(self, to_file_base='state', target_dir=''):
         file_template = os.path.join(target_dir, to_file_base) + "%s"
-        header_file = open(file_template % ".hpp", "w+")
-        cpp_file = open(file_template % ".cpp", 'w+')
+        header_file = open(file_template % ".h", "w+")
+        implementation_file= open(file_template % ".c", 'w+')
         bin_file_template = os.path.join(target_dir, '%s.bin')
 
         header_file.write("#ifndef STATE_H\n")
@@ -35,17 +35,17 @@ class Enclave(Sequential):
                     with open(bin_file_template % weight_name, 'wb+') as f:
                         f.write(w.astype(np.float32).tobytes())
 
-                    cpp_file.write(
+                    implementation_file.write(
                         "extern const char _binary_%s_bin_start;\n" % (weight_name))
-                    cpp_file.write(
+                    implementation_file.write(
                         "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (weight_name, weight_name))
-                    cpp_file.write("int %s_h = %d;\n" % (weight_name, w.shape[0]))
-                    cpp_file.write("int %s_w = %d;\n" % (weight_name, w.shape[1]))
+                    implementation_file.write("int %s_h = %d;\n" % (weight_name, w.shape[0]))
+                    implementation_file.write("int %s_w = %d;\n" % (weight_name, w.shape[1]))
                     if len(w.shape) > 2:
-                        cpp_file.write("int %s_c = %d;\n" % (weight_name, w.shape[2]))
+                        implementation_file.write("int %s_c = %d;\n" % (weight_name, w.shape[2]))
                     if len(w.shape) > 3:
-                        cpp_file.write("int %s_f = %d;\n" % (weight_name, w.shape[3]))
-                    cpp_file.write("\n")
+                        implementation_file.write("int %s_f = %d;\n" % (weight_name, w.shape[3]))
+                    implementation_file.write("\n")
 
                 if len(parameters) > 1:
                     b = parameters[1]
@@ -58,11 +58,11 @@ class Enclave(Sequential):
                     with open(bin_file_template % bias_name, 'wb+') as bf:
                         bf.write(b.astype(np.float32).tobytes())
 
-                    cpp_file.write(
+                    implementation_file.write(
                         "extern const char _binary_%s_bin_start;\n" % bias_name)
-                    cpp_file.write(
+                    implementation_file.write(
                         "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (bias_name, bias_name))
-                    cpp_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
+                    implementation_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
 
             elif type(l) in [layers.SeparableConv1D]:
                 depth_kernels, point_kernels, biases = l.get_weights()
@@ -84,17 +84,17 @@ class Enclave(Sequential):
                     bf.write(biases.astype(np.float32).tobytes())
 
                 #create nicer handles
-                cpp_file.write(
+                implementation_file.write(
                     "extern const char _binary_%s_bin_start;\n" % dk_name)
-                cpp_file.write(
+                implementation_file.write(
                     "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (dk_name, dk_name))
-                cpp_file.write(
+                implementation_file.write(
                     "extern const char _binary_%s_bin_start;\n" % pk_name)
-                cpp_file.write(
+                implementation_file.write(
                     "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (pk_name, pk_name))
-                cpp_file.write(
+                implementation_file.write(
                     "extern const char _binary_%s_bin_start;\n" % bias_name)
-                cpp_file.write(
+                implementation_file.write(
                     "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (bias_name, bias_name))
                 
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
@@ -107,9 +107,9 @@ class Enclave(Sequential):
 
         header_file.write("#endif\n")
         header_file.close()
-        cpp_file.close()
+        implementation_file.close()
 
-    def generate_forward(self, to_file='forward.cpp', target_dir=''):
+    def generate_forward(self, to_file='forward.c', target_dir=''):
         target_file = os.path.join(target_dir, to_file)
         forward_file = open(target_file, 'w+')
 

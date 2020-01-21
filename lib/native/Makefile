@@ -14,6 +14,6 @@ all: matutil.cpp forward.cpp state.cpp native_nn.cpp $(weight_objects)
 
 .PHONY:
 clean:
-	rm -rf *.so *.o *.bin forward.cpp state.cpp
-	cp ../dummy_forward.cpp forward.cpp
-	cp ../dummy_state.cpp state.cpp
+	rm -rf *.so *.o *.bin forward.c state.c
+	cp ../dummy_forward.c forward.c
+	cp ../dummy_state.c state.c
