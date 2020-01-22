@@ -85,5 +85,5 @@ enclave/%.o: enclave/%.c
 .PHONY: clean
 clean:
 	rm -rf *.so testitest */*.o app/*_u.* enclave/*_t.* enclave/forward.c* enclave/state*
-	cp ../dummy_forward.c enclave/forward.c
+	cp ../enclave_dummy_forward.c enclave/forward.c
 	cp ../dummy_state.c enclave/state.c

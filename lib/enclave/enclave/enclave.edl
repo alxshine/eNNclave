@@ -1,7 +1,7 @@
 enclave {
     trusted {
         public void test();
-		public int forward([in, count=s] float *m, int s, [out] int *label);
+		public int enclave_f([in, count=s] float *m, int s, [out] int *label);
     };
 
     untrusted {

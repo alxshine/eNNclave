@@ -31,8 +31,9 @@ int enclave_nn_end(){
 
 int enclave_nn_forward(float *m, int s, int *label){
     // sgx_status_t ret = test(enclave_id);
+    printf("This is the enclave wrapper\n");
     int return_value;
-    sgx_status_t ret = forward(enclave_id, &return_value, m, s, label);
+    sgx_status_t ret = enclave_f(enclave_id, &return_value, m, s, label);
     if(ret != SGX_SUCCESS){
         print_error_message(ret);
         return 1;
