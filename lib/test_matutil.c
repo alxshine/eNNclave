@@ -2,12 +2,12 @@
 #include <math.h>
 
 /* #include "matutil.hpp" */
-// #include "native.hpp"
-#include "enclave.hpp"
+#include "native_nn.h"
+#include "enclave_nn.h"
 
 int main(void) {
-  /* matutil_initialize(); */
-  enclave_initialize();
+  // matutil_initialize();
+  enclave_nn_start();
   printf("Matutil initialized\n");
 
   /* int r1 = 2, c1 = 3; */
@@ -54,9 +54,8 @@ int main(void) {
   }
 
   int label = -1;
-  printf("forward\n");
-  enclave_forward(input, c, &label);
-  // native_forward(input, c, &label);
+  enclave_nn_forward(input, c, &label);
+  native_nn_forward(input, c, &label);
   printf("Output label: %d\n", label);
 
   /* printf("\n\nConvolution:\n"); */

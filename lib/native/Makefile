@@ -15,5 +15,5 @@ all: matutil.c forward.c state.c native_nn.c $(weight_objects)
 .PHONY:
 clean:
 	rm -rf *.so *.o *.bin forward.c state.c
-	cp ../dummy_forward.c forward.c
+	cp ../native_dummy_forward.c forward.c
 	cp ../dummy_state.c state.c

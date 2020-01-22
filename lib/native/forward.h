@@ -1,7 +1,7 @@
 #ifndef FORWARD_H
 #define FORWARD_H
 
-int forward(float *m, int s, int *label);
+int native_f(float *m, int s, int *label);
 int print_error(const char* fmt, ...);
 int print(const char* fmt, ...);
 
