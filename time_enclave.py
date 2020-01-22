@@ -28,6 +28,7 @@ def _predict_samples(samples, num_classes, forward):
     #  print("\n\nPredicting with " + str(forward))
     # do the work of the enclave layer by hand to make CPU timing easier
     result = np.zeros((samples.shape[0], num_classes))
+    print("Predicting")
     for i, x in enumerate(samples):
         label = forward(x.astype(np.float32).tobytes(), np.prod(x.shape))
         #  print('label: %d\n' % label)

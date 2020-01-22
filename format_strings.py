@@ -9,7 +9,7 @@ preamble_template = """
 #include "enclave_nn.h"
 #include "native_nn.h"
 
-int forward(float *m, int s, int *label) {
+int %s_f(float *m, int s, int *label) {
   int sts;
 
 """

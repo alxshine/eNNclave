@@ -109,14 +109,15 @@ class Enclave(Sequential):
         header_file.close()
         implementation_file.close()
 
-    def generate_forward(self, to_file='forward.c', target_dir=''):
+    def generate_forward(self, to_file='forward.c', target_dir='lib/enclave/enclave'):
         target_file = os.path.join(target_dir, to_file)
         forward_file = open(target_file, 'w+')
 
         # the first dim of input_shape is num_samples in batch, so skip that
         expected_c = self.layers[0].input_shape[1]
 
-        forward_file.write(preamble_template)
+        parent_dir = target_dir.split('/')[-1]
+        forward_file.write(preamble_template % parent_dir)
         # declare tmp buffers
         output_sizes = [np.prod(l.output_shape[1:]) for l in self.layers]
         output_sizes.sort(reverse = True)

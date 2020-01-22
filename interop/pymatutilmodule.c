@@ -28,6 +28,7 @@ static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   int label;
+  printf("Enclave NN forward\n");
   int sts = enclave_nn_forward(m, s, &label);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error in enclave");
@@ -46,7 +47,8 @@ static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   int label;
-  int sts = native_forward(m, s, &label);
+  printf("Native NN forward\n");
+  int sts = native_nn_forward(m, s, &label);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error during native forward");
     return NULL; // TODO: do some error handling
