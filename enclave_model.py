@@ -5,12 +5,33 @@ from format_strings import *
 import numpy as np
 import os
 
+import utils
+
 
 class Enclave(Sequential):
     def __init__(self, layers=None, name='Enclave'):
         super().__init__(layers=layers, name=name)
 
-    def generate_state(self, to_file_base='state', target_dir=''):
+    def generate_config(self, target_dir='lib/enclave/enclave/'):
+        all_layers = utils.get_all_layers(self)
+        output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
+        output_sizes.sort(reverse = True)
+        # get max tmp_buffer size
+        max_size = output_sizes[0]
+        total_tmp_size = 2*max_size*4
+        # align to 4kB
+        num_heap_blocks = int(np.ceil(total_tmp_size / 0x1000))
+        num_heap_blocks += 400 # for tolerance
+        heap_size = num_heap_blocks * 0x1000
+
+        print("Max required heap size: %s MB" % (heap_size/1024/1024))
+        config_path = os.path.join(target_dir, 'config.xml')
+        config = config_template % (hex(heap_size), hex(heap_size))
+
+        with open(config_path, 'w+') as config_file:
+            config_file.write(config)
+
+    def generate_state(self, to_file_base='state', target_dir='lib/enclave/enclave/'):
         file_template = os.path.join(target_dir, to_file_base) + "%s"
         header_file = open(file_template % ".h", "w+")
         implementation_file= open(file_template % ".c", 'w+')

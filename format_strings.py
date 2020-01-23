@@ -57,3 +57,19 @@ global_average_pooling_2d_template = "  matutil_global_average_pooling_2d(%s, %d
 max_pooling_1d_template = "  matutil_max_pooling_1d(%s, %d, %d, %d, %s);\n"
 max_pooling_2d_template = "  matutil_max_pooling_2d(%s, %d, %d, %d, %d, %s);\n"
 unknown_layer_template = "  //No call method generated for layer %s of type %s\n"
+
+config_template = """
+<EnclaveConfiguration>
+  <ProdID>0</ProdID>
+  <ISVSVN>0</ISVSVN>
+  <StackMaxSize>0x40000</StackMaxSize>
+  <HeapInitSize>%s</HeapInitSize>
+  <HeapMaxSize>%s</HeapMaxSize>
+  <TCSNum>10</TCSNum>
+  <TCSPolicy>1</TCSPolicy>
+  <!-- Recommend changing 'DisableDebug' to 1 to make the enclave undebuggable for enclave release -->
+  <DisableDebug>0</DisableDebug>
+  <MiscSelect>0</MiscSelect>
+  <MiscMask>0xFFFFFFFF</MiscMask>
+</EnclaveConfiguration>
+"""
