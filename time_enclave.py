@@ -61,9 +61,6 @@ def time_enclave_prediction(model, samples):
         num_classes = enclave_layer.num_classes
 
         before = time.time()
-        pymatutil.initialize()
-        after_setup = time.time()
-
         # predict dataset
         tf_prediction = tf_part(samples)
         after_tf = time.time()
@@ -71,6 +68,11 @@ def time_enclave_prediction(model, samples):
         tf_prediction = tf_prediction.numpy()
 
         # final_prediction = enclave_part(tf_prediction)
+        # breakpoint()
+        before_setup = time.time()
+        pymatutil.initialize()
+        after_setup = time.time()
+
         enclave_results = _predict_samples(tf_prediction, num_classes, pymatutil.enclave_forward)
             
         after_enclave = time.time()
@@ -111,9 +113,9 @@ def time_enclave_prediction(model, samples):
     print('Native label: %d' % native_label)
 
 
-    enclave_setup_time = after_setup - before
-    tf_time = after_tf - after_setup
-    enclave_time = after_enclave - after_tf
+    tf_time = after_tf - before
+    enclave_setup_time = after_setup - before_setup
+    enclave_time = after_enclave - after_setup
     teardown_time = after_teardown - after_enclave
     native_time = after_native - before_native
 

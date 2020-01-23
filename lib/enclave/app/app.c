@@ -41,7 +41,7 @@ int main(void)
     printf("Executing forward\n");
     if(enclave_nn_forward(m, size, &label))
         return 1;
-    printf("Done\n");
+    printf("Done, label is: %d\n", label);
 
     // sgx_status_t ret = test(enclave_id);
     // if( ret != SGX_SUCCESS){
