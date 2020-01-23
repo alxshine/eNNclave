@@ -21,7 +21,7 @@ class Enclave(Sequential):
         total_tmp_size = 2*max_size*4
         # align to 4kB
         num_heap_blocks = int(np.ceil(total_tmp_size / 0x1000))
-        num_heap_blocks += 400 # for tolerance
+        num_heap_blocks += 1000 # for tolerance
         heap_size = num_heap_blocks * 0x1000
 
         print("Max required heap size: %s MB" % (heap_size/1024/1024))
