@@ -14,12 +14,19 @@ TRTS=sgx_trts
 CRYPTO=sgx_tcrypto
 SERVICE=sgx_tservice
 STDLIB=sgx_tstdc
-# STDCXX=sgx_tcxx
+TCMALLOC=sgx_tcmalloc
+STDCXX=sgx_tcxx
 
 enclave_link_flags := $(app_link_flags) \
 -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) \
--Wl,--whole-archive -l$(TRTS) -l$(CRYPTO) -l$(SERVICE) -Wl,--no-whole-archive \
--Wl,--start-group -l$(STDLIB) -Wl,--end-group \
+-Wl,--whole-archive \
+-l$(TRTS) \
+-l$(CRYPTO) \
+-l$(SERVICE) \
+-Wl,--no-whole-archive \
+-Wl,--start-group \
+-l$(STDLIB) \
+-Wl,--end-group \
 -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 -Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
 -Wl,--defsym,__ImageBase=0 -Wl,--gc-sections   \
