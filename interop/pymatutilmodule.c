@@ -27,7 +27,7 @@ static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
     return NULL;
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
-  int label;
+  int label = -1;
   printf("Enclave NN forward\n");
   int sts = enclave_nn_forward(m, s, &label);
   if (sts){
