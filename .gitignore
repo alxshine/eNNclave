@@ -12,6 +12,7 @@ logs
 sbatch_launch.sh
 **/state.c
 **/state.h
+**/config.xml
 **/forward.c
 **/*.bin
 **/*.npy
