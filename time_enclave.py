@@ -99,6 +99,7 @@ def time_enclave_prediction(model, samples):
         after_tf = time.time()
 
         # set everything so it doesn't muddy the measurement
+        before_setup = before
         after_setup = before
         after_enclave = after_tf
         after_teardown = after_tf
