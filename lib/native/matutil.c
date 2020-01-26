@@ -258,3 +258,16 @@ int print(const char *fmt, ...) {
   fprintf(stdout, "%s", buf);
   return (int)strnlen(buf, BUFSIZ - 1) + 1;
 }
+
+FILE *open_parameters(){
+    FILE *param_file = fopen("parameters.bin", "r");
+    return param_file;
+}
+
+int load_parameters(float *target_buffer, int num_elements, FILE *f){
+    return fread(target_buffer, sizeof(float), num_elements, f);
+}
+
+void close_parameters(FILE *parameter_file){
+    fclose(parameter_file);
+}
