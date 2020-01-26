@@ -40,6 +40,8 @@ class Enclave(Sequential):
         header_file = open(file_template % ".h", "w+")
         implementation_file= open(file_template % ".c", 'w+')
         bin_file_template = os.path.join(target_dir, '%s.bin')
+        bin_file = os.path.join(target_dir, 'parameters.bin')
+        bf = open(bin_file, 'w+b')
 
         header_file.write("#ifndef STATE_H\n")
         header_file.write("#define STATE_H\n\n")
@@ -59,6 +61,7 @@ class Enclave(Sequential):
 
                     with open(bin_file_template % weight_name, 'wb+') as f:
                         f.write(w.astype(np.float32).tobytes())
+                    bf.write(w.astype(np.float32).tobytes())
 
                     implementation_file.write(
                         "extern const char _binary_%s_bin_start;\n" % (weight_name))
@@ -80,8 +83,9 @@ class Enclave(Sequential):
                     header_file.write("extern " + lhs_string + ";\n")
                     header_file.write("extern int %s_c;\n\n" % bias_name)
 
-                    with open(bin_file_template % bias_name, 'wb+') as bf:
-                        bf.write(b.astype(np.float32).tobytes())
+                    with open(bin_file_template % bias_name, 'wb+') as bias_file:
+                        bias_file.write(b.astype(np.float32).tobytes())
+                    bf.write(b.astype(np.float32).tobytes())
 
                     implementation_file.write(
                         "extern const char _binary_%s_bin_start;\n" % bias_name)
@@ -105,8 +109,11 @@ class Enclave(Sequential):
                     df.write(depth_kernels.astype(np.float32).tobytes())
                 with open(bin_file_template % pk_name, 'wb+') as pf:
                     pf.write(point_kernels.astype(np.float32).tobytes())
-                with open(bin_file_template % bias_name, 'wb+') as bf:
-                    bf.write(biases.astype(np.float32).tobytes())
+                with open(bin_file_template % bias_name, 'wb+') as bias_file:
+                    bias_file.write(biases.astype(np.float32).tobytes())
+                bf.write(depth_kernels.astype(np.float32).tobytes())
+                bf.write(point_kernels.astype(np.float32).tobytes())
+                bf.write(biases.astype(np.float32).tobytes())
 
                 #create nicer handles
                 implementation_file.write(
@@ -133,6 +140,7 @@ class Enclave(Sequential):
         header_file.write("#endif\n")
         header_file.close()
         implementation_file.close()
+        bf.close()
 
     def generate_forward(self, to_file='forward.c', target_dir='lib/enclave/enclave'):
         target_file = os.path.join(target_dir, to_file)
