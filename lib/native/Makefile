@@ -16,4 +16,4 @@ all: matutil.c forward.c native_nn.c
 clean:
 	rm -rf *.so *.o *.bin forward.c state.c
 	cp ../native_dummy_forward.c forward.c
-	cp ../dummy_state.c state.c
+
