@@ -19,7 +19,7 @@ int %s_f(float *m, int s, int *label) {
     }
 """
 postamble = """
-    close_parameters();
+    close_parameters(param_file);
     return 0;
 }
 """
