@@ -38,11 +38,11 @@ def build_enclave(model_file, n, conn=None):
     enclave.build(input_shape=enclave_input_shape)
 
     # build cpp and bin files for enclave
-    enclave.generate_state(target_dir='lib/enclave/enclave')
+    enclave.generate_state()
     enclave.generate_forward(target_dir='lib/enclave/enclave')
     enclave.generate_config(target_dir='lib/enclave/enclave/')
     # same for regular C
-    enclave.generate_state(target_dir='lib/native')
+    enclave.generate_state()
     enclave.generate_forward(target_dir='lib/native')
 
     # build replacement layer for original model

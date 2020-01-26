@@ -2,7 +2,7 @@ ROOT=${HOME}/Projects/nn-sgx
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
-all: native enclave
+all: native
 
 native:
 	@printf "\n\nMaking library in native mode\n\n\n"

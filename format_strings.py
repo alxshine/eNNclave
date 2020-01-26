@@ -1,32 +1,53 @@
 preamble_template = """
 #include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "forward.h"
-#include "state.h"
 
 #include "matutil.h"
 #include "enclave_nn.h"
 #include "native_nn.h"
 
 int %s_f(float *m, int s, int *label) {
-  int sts;
+    int sts;
 
+    FILE *param_file = fopen("parameters.bin", "r");
+    if (param_file == NULL){
+        print_error("\\n\\nENCLAVE ERROR:Could not open parameter.bin\\n\\n\\n");
+        return 1;
+    }
 """
 postamble = """
   return 0;
 }
 """
 
+tmp_buffer_template = "tmp%d"
+buffer_declaration_template = """
+    float *tmp0 = (float*) malloc(%d*sizeof(float));
+    if(tmp0 == NULL){
+        print_error("\\n\\nENCLAVE ERROR:Could not allocate tmp0 of size %d\\n\\n\\n");
+        return 1;
+    }
 
-tmp_buffer_template = 'tmp%d'
-tmp_buffer_declaration_template = "  float *tmp%d = (float*) malloc(%d*sizeof(float));\n"
-declaration_error_handling_template = """  if(tmp%d == NULL){
-  print_error("\\n\\nENCLAVE ERROR:Could not allocate buffer of size %d\\n\\n\\n");
-  return 1;
-  }
+    float *tmp1 = (float*) malloc(%d*sizeof(float));
+    if(tmp1 == NULL){
+        print_error("\\n\\nENCLAVE ERROR:Could not allocate tmp1 of size %d\\n\\n\\n");
+        return 1;
+    }
+
+    float *params = (float*) malloc(%d*sizeof(float));
+    if(params == NULL){
+        print_error("\\n\\nENCLAVE ERROR:Could not allocate params of size %d\\n\\n\\n");
+        return 1;
+    }
 """
-tmp_buffer_release_template = "  free(tmp%d);\n"
+release_template = """
+    free(tmp0);
+    free(tmp1);
+    free(params);
+"""
 
 weight_name_template = "weights%d"
 depth_kernel_template = "depth_kernels%d"
@@ -36,6 +57,8 @@ bias_name_template = "biases%d"
 error_handling_template = """  if ((sts = %s))
     return sts;
 """
+load_template = "   fread(params, sizeof(float), %d, param_file);\n"
+parameter_offset_template = 'params+%d'
 add_template = "matutil_add(%s, %d, %d, %s, %d, %d, %s)"
 mult_template = "matutil_multiply(%s, %d, %d, %s, %d, %d, %s)"
 sep_conv1_template = "  matutil_sep_conv1(%s, %d, %d, %d, %s, %s, %d, %s, %s);\n"

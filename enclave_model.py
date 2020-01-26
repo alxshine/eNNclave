@@ -35,16 +35,9 @@ class Enclave(Sequential):
         with open(config_path, 'w+') as config_file:
             config_file.write(config)
 
-    def generate_state(self, to_file_base='state', target_dir='lib/enclave/enclave/'):
-        file_template = os.path.join(target_dir, to_file_base) + "%s"
-        header_file = open(file_template % ".h", "w+")
-        implementation_file= open(file_template % ".c", 'w+')
-        bin_file_template = os.path.join(target_dir, '%s.bin')
-        bin_file = os.path.join(target_dir, 'parameters.bin')
+    def generate_state(self):
+        bin_file = 'parameters.bin'
         bf = open(bin_file, 'w+b')
-
-        header_file.write("#ifndef STATE_H\n")
-        header_file.write("#define STATE_H\n\n")
 
         for i, l in enumerate(self.layers):
             if type(l) in [layers.Dense, layers.Conv2D]:
@@ -52,83 +45,19 @@ class Enclave(Sequential):
 
                 if len(parameters) > 0:
                     w = parameters[0]
-
-                    weight_name = weight_name_template % i
-                    lhs_string = "float *%s" % (weight_name)
-                    header_file.write("extern " + lhs_string + ";\n")
-                    header_file.write("extern int %s_r;\n" % weight_name)
-                    header_file.write("extern int %s_c;\n\n" % weight_name)
-
-                    with open(bin_file_template % weight_name, 'wb+') as f:
-                        f.write(w.astype(np.float32).tobytes())
                     bf.write(w.astype(np.float32).tobytes())
-
-                    implementation_file.write(
-                        "extern const char _binary_%s_bin_start;\n" % (weight_name))
-                    implementation_file.write(
-                        "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (weight_name, weight_name))
-                    implementation_file.write("int %s_h = %d;\n" % (weight_name, w.shape[0]))
-                    implementation_file.write("int %s_w = %d;\n" % (weight_name, w.shape[1]))
-                    if len(w.shape) > 2:
-                        implementation_file.write("int %s_c = %d;\n" % (weight_name, w.shape[2]))
-                    if len(w.shape) > 3:
-                        implementation_file.write("int %s_f = %d;\n" % (weight_name, w.shape[3]))
-                    implementation_file.write("\n")
 
                 if len(parameters) > 1:
                     b = parameters[1]
-                    bias_name = bias_name_template % i
-                    
-                    lhs_string = "float *%s" % (bias_name)
-                    header_file.write("extern " + lhs_string + ";\n")
-                    header_file.write("extern int %s_c;\n\n" % bias_name)
-
-                    with open(bin_file_template % bias_name, 'wb+') as bias_file:
-                        bias_file.write(b.astype(np.float32).tobytes())
                     bf.write(b.astype(np.float32).tobytes())
-
-                    implementation_file.write(
-                        "extern const char _binary_%s_bin_start;\n" % bias_name)
-                    implementation_file.write(
-                        "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (bias_name, bias_name))
-                    implementation_file.write("int b%d_c = %d;\n\n" % (i, b.shape[0]))
 
             elif type(l) in [layers.SeparableConv1D]:
                 depth_kernels, point_kernels, biases = l.get_weights()
-                dk_name = depth_kernel_template % i
-                pk_name = point_kernel_template % i
-                bias_name = bias_name_template % i
 
-                #declare all arrays
-                header_file.write("extern float *%s;\n" % dk_name)
-                header_file.write("extern float *%s;\n" % pk_name)
-                header_file.write("extern float *%s;\n" % bias_name)
-
-                #create binary files
-                with open(bin_file_template % dk_name, 'wb+') as df:
-                    df.write(depth_kernels.astype(np.float32).tobytes())
-                with open(bin_file_template % pk_name, 'wb+') as pf:
-                    pf.write(point_kernels.astype(np.float32).tobytes())
-                with open(bin_file_template % bias_name, 'wb+') as bias_file:
-                    bias_file.write(biases.astype(np.float32).tobytes())
                 bf.write(depth_kernels.astype(np.float32).tobytes())
                 bf.write(point_kernels.astype(np.float32).tobytes())
                 bf.write(biases.astype(np.float32).tobytes())
 
-                #create nicer handles
-                implementation_file.write(
-                    "extern const char _binary_%s_bin_start;\n" % dk_name)
-                implementation_file.write(
-                    "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (dk_name, dk_name))
-                implementation_file.write(
-                    "extern const char _binary_%s_bin_start;\n" % pk_name)
-                implementation_file.write(
-                    "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (pk_name, pk_name))
-                implementation_file.write(
-                    "extern const char _binary_%s_bin_start;\n" % bias_name)
-                implementation_file.write(
-                    "const float *%s = (const float*) &_binary_%s_bin_start;\n" % (bias_name, bias_name))
-                
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
                              layers.MaxPooling1D,layers.MaxPooling2D, layers.Flatten]:
                 # these layers are either not used during inference or have no parameters
@@ -137,14 +66,12 @@ class Enclave(Sequential):
                 raise NotImplementedError(
                     "Unknown layer type {}".format(type(l)))
 
-        header_file.write("#endif\n")
-        header_file.close()
-        implementation_file.close()
         bf.close()
 
     def generate_forward(self, to_file='forward.c', target_dir='lib/enclave/enclave'):
         target_file = os.path.join(target_dir, to_file)
         forward_file = open(target_file, 'w+')
+        all_layers = utils.get_all_layers(self)
 
         # the first dim of input_shape is num_samples in batch, so skip that
         expected_c = self.layers[0].input_shape[1]
@@ -152,14 +79,14 @@ class Enclave(Sequential):
         parent_dir = target_dir.split('/')[-1]
         forward_file.write(preamble_template % parent_dir)
         # declare tmp buffers
-        output_sizes = [np.prod(l.output_shape[1:]) for l in self.layers]
+        output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
         output_sizes.sort(reverse = True)
-        # TODO: check for even and odd layers to get optimal allocation size
-        forward_file.write(tmp_buffer_declaration_template % (0, output_sizes[0]))
-        forward_file.write(declaration_error_handling_template % (0, output_sizes[0]))
-        forward_file.write(tmp_buffer_declaration_template % (1, output_sizes[0]))
-        forward_file.write(declaration_error_handling_template % (1, output_sizes[0]))
-            
+
+        # get required size for weight buffer
+        param_numbers = [np.sum([np.prod(w.shape) for w in l.get_weights()]) for l in all_layers]
+        max_size = max(param_numbers)
+        forward_file.write(buffer_declaration_template % (output_sizes[0], output_sizes[0], output_sizes[1], output_sizes[1], max_size, max_size))
+
         tmp_index = 0
         inputs = 'm'
         for i, l in enumerate(self.layers):
@@ -173,8 +100,7 @@ class Enclave(Sequential):
                 tmp_index = 1-tmp_index
 
         #free tmp buffers
-        forward_file.write(tmp_buffer_release_template % 0)
-        forward_file.write(tmp_buffer_release_template % 1)
+        forward_file.write(release_template)
         forward_file.write(postamble)
         forward_file.close()
 
@@ -193,23 +119,26 @@ class Enclave(Sequential):
         """
 
         added_ops = True
+        s = ''
         if type(layer) in [layers.Dense]:
             # the output of the dense layer will be a
             # row vector with ncols(w) elements
             tmp_name = tmp_buffer_template % tmp_index
             parameters = layer.get_weights()
+            num_params = [np.prod(p.shape) for p in parameters]
+            s += load_template % np.sum(num_params)
             w = parameters[0]
 
-            weight_name = weight_name_template % i
+            weight_name = parameter_offset_template % 0
             mult = mult_template % (
                 inputs, 1, w.shape[0], weight_name, w.shape[0], w.shape[1],
                 tmp_name)
-            s = error_handling_template % mult
+            s += error_handling_template % mult
 
             if len(parameters) > 1:
                 # add bias
                 b = parameters[1]
-                bias_name = bias_name_template % i
+                bias_name = parameter_offset_template % num_params[0]
                 add = add_template % (
                     tmp_name, 1, w.shape[1], bias_name, 1, b.shape[0],
                     tmp_name)
