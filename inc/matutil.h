@@ -35,10 +35,6 @@ extern "C" {
 
     void matutil_dump_matrix3(float *m, int h, int w, int c);
 
-    void *open_parameters();
-    int load_parameters(float *target_buffer, int num_elements, void *f);
-    void close_parameters(void *parameter_file);
-
 #if defined(__cplusplus)
 }
 #endif

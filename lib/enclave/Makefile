@@ -77,7 +77,7 @@ $(signed_enclave_name): $(enclave_name)
 	sgx_sign sign -enclave $< -out $@ -key enclave/signing_key.pem -config enclave/config.xml
 	@ln -sf enclave/enclave.signed.so ../
 
-$(enclave_name): enclave/enclave_t.o enclave/enclave.o enclave/matutil.o enclave/forward.o
+$(enclave_name): enclave/enclave_t.o enclave/enclave.o enclave/matutil.o enclave/forward.o enclave/parameters.o
 	$(CC) $(enclave_includes) $^ -o $@ $(enclave_link_flags)
 	@ln -sf enclave/enclave.so ../
 
@@ -85,14 +85,11 @@ enclave/%_bin.o: enclave/%.bin
 	@echo $^
 	@(cd enclave && ld -r -b binary $(notdir $<) -o $(notdir $@))
 
-enclave/forward.o: enclave/forward.c
-	$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(enclave_link_flags)
-
 enclave/%.o: enclave/%.c
 	$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(enclave_link_flags)
 
 # generate parameters
-parameters: $(app_name)
+parameters: $(app_name) $(enclave_name) $(wrapper_name)
 	@echo "Encrypting parameters"
 	@rm -f ../../encrypted_params.aes.bin
 	@./$(app_name) && mv ./encrypted_params.aes.bin ../../

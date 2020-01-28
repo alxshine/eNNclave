@@ -6,20 +6,17 @@ preamble_template = """
 #include "forward.h"
 
 #include "matutil.h"
+#include "parameters.h"
 #include "enclave_nn.h"
 #include "native_nn.h"
 
 int %s_f(float *m, int s, int *label) {
     int sts;
 
-    FILE *param_file = open_parameters();
-    if (param_file == NULL){
-        print_error("\\n\\nENCLAVE ERROR:Could not open parameter.bin\\n\\n\\n");
-        return -1;
-    }
+    open_parameters();
 """
 postamble = """
-    close_parameters(param_file);
+    close_parameters();
     return 0;
 }
 """
@@ -58,7 +55,7 @@ bias_name_template = "biases%d"
 error_handling_template = """  if ((sts = %s))
     return sts;
 """
-load_template = "   load_parameters(params, %d, param_file);\n"
+load_template = "   load_parameters(params, %d);\n"
 parameter_offset_template = 'params+%d'
 add_template = "matutil_add(%s, %d, %d, %s, %d, %d, %s)"
 mult_template = "matutil_multiply(%s, %d, %d, %s, %d, %d, %s)"
