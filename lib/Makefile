@@ -7,6 +7,7 @@ all: native
 native:
 	@printf "\n\nMaking library in native mode\n\n\n"
 	@$(MAKE) -C native
+	@$(MAKE) -C enclave
 
 enclave:
 	@printf "\n\nMaking library in sgx mode\n\n\n"

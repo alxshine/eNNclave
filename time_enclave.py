@@ -68,13 +68,11 @@ def time_enclave_prediction(model, samples):
         tf_prediction = tf_prediction.numpy()
 
         # final_prediction = enclave_part(tf_prediction)
-        # breakpoint()
         before_setup = time.time()
         pymatutil.initialize()
         after_setup = time.time()
 
         enclave_results = _predict_samples(tf_prediction, num_classes, pymatutil.enclave_forward)
-            
         after_enclave = time.time()
 
         pymatutil.teardown()

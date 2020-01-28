@@ -7,7 +7,7 @@
 
 int main(void) {
   // matutil_initialize();
-  enclave_nn_start();
+  // enclave_nn_start();
   printf("Matutil initialized\n");
 
   /* int r1 = 2, c1 = 3; */
@@ -54,7 +54,7 @@ int main(void) {
   }
 
   int label = -1;
-  enclave_nn_forward(input, c, &label);
+  // enclave_nn_forward(input, c, &label);
   native_nn_forward(input, c, &label);
   printf("Output label: %d\n", label);
 

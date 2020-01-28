@@ -5,7 +5,7 @@
 SGX_FILE *param_file;
 
 void open_parameters(){
-    void *param_file = sgx_fopen_auto_key("parameters.bin", "r");
+    param_file = sgx_fopen_auto_key("parameters.bin", "r");
 }
 
 int load_parameters(float *target_buffer, int num_elements){

@@ -5,7 +5,7 @@
 FILE *param_file;
 
 void open_parameters(){
-    void *param_file = fopen("parameters.bin", "r");
+    param_file = fopen("parameters.bin", "r");
 }
 
 int load_parameters(float *target_buffer, int num_elements){
