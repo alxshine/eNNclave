@@ -2,12 +2,11 @@ ROOT=${HOME}/Projects/nn-sgx
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
-all: native
+all: native enclave
 
 native:
 	@printf "\n\nMaking library in native mode\n\n\n"
 	@$(MAKE) -C native
-	@$(MAKE) -C enclave
 
 enclave:
 	@printf "\n\nMaking library in sgx mode\n\n\n"
