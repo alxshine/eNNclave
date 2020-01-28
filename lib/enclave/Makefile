@@ -23,9 +23,11 @@ enclave_link_flags := $(app_link_flags) \
 -l$(TRTS) \
 -l$(CRYPTO) \
 -l$(SERVICE) \
+-lsgx_tprotected_fs \
 -Wl,--no-whole-archive \
 -Wl,--start-group \
 -l$(STDLIB) \
+-l$(STDCXX) \
 -Wl,--end-group \
 -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
 -Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
@@ -34,7 +36,7 @@ enclave_link_flags := $(app_link_flags) \
 
 enclave_includes =-I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/libcxx -I$(INC)
 app_includes =-I$(SGX_SDK)/include -I$(INC)
-link_flags =-L$(SGX_LIBRARY_PATH) -lsgx_urts -lpthread -l:libsgx_capable.a
+link_flags =-L$(SGX_LIBRARY_PATH) -lsgx_urts -lpthread -l:libsgx_capable.a -lsgx_uprotected_fs
 
 binary_output_files = $(patsubst %.bin,%_bin.o,$(wildcard enclave/*.bin))
 
@@ -42,7 +44,7 @@ all: $(wrapper_name) $(app_name) $(signed_enclave_name)
 
 # generate code files
 edger8r: enclave/enclave.edl
-	@sgx_edger8r --trusted --untrusted --trusted-dir enclave/ --untrusted-dir app/ --search-path enclave/ enclave/enclave.edl
+	@sgx_edger8r --trusted --untrusted --trusted-dir enclave/ --untrusted-dir app/ --search-path enclave/ enclave/enclave.edl --search-path $(SGX_SDK)/include/
 
 # Wrapper stuf
 $(wrapper_name): app/enclave_u.o app/wrapper.o app/utils.o
@@ -75,7 +77,7 @@ $(signed_enclave_name): $(enclave_name)
 	sgx_sign sign -enclave $< -out $@ -key enclave/signing_key.pem -config enclave/config.xml
 	@ln -sf enclave/enclave.signed.so ../
 
-$(enclave_name): enclave/enclave_t.o enclave/enclave.o enclave/matutil.o enclave/forward.o enclave/state.o $(binary_output_files)
+$(enclave_name): enclave/enclave_t.o enclave/enclave.o enclave/matutil.o enclave/forward.o
 	$(CC) $(enclave_includes) $^ -o $@ $(enclave_link_flags)
 	@ln -sf enclave/enclave.so ../
 
@@ -93,4 +95,3 @@ enclave/%.o: enclave/%.c
 clean:
 	rm -rf *.so testitest */*.o app/*_u.* enclave/*_t.* enclave/forward.c* enclave/state* enclave/*.bin
 	cp ../enclave_dummy_forward.c enclave/forward.c
-	cp ../dummy_state.c enclave/state.c

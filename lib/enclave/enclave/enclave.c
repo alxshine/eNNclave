@@ -2,9 +2,13 @@
 #include "enclave_t.h"
 #include "matutil.h"
 
+#include "sgx_tprotected_fs.h"
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+
+SGX_FILE *encrypted_parameters = NULL;
 
 void test(){
     print("This is the enclave :)\n");
@@ -36,4 +40,23 @@ int print_error(const char* fmt, ...)
     va_end(ap);
     ocall_stdout_string(buf);
     return (int)strnlen(buf, BUFSIZ - 1) + 1;
+}
+
+void open_encrypted_parameters(){
+    encrypted_parameters = sgx_fopen_auto_key("encrypted_params.aes.bin", "wb+");
+    if(encrypted_parameters == NULL){
+        print_error("could not open encrypted parameters\n");
+    }
+}
+
+int encrypt_parameters(float *buffer, int num_elements){
+    int blocks_wrote = sgx_fwrite(buffer, sizeof(float), num_elements, encrypted_parameters);
+    if(blocks_wrote != num_elements){
+        print_error("Expected to write %d blocks, but wrote only %d\n", num_elements, blocks_wrote);
+        return -1;
+    }
+}
+
+void close_encrypted_parameters(){
+    sgx_fclose(encrypted_parameters);
 }

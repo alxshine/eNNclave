@@ -1,5 +1,7 @@
-#ifndef app/wrapper_h_INCLUDED
-#define app/wrapper_h_INCLUDED
+#ifndef wrapper_h
+#define wrapper_h
+
+#include "sgx_urts.h"
 
 extern sgx_enclave_id_t enclave_id;
 
@@ -10,9 +12,11 @@ extern "C" {
  void ocall_stdout_string(const char* str);
  void ocall_stderr_string(const char* str);
 
+ int encrypt_parameter_file(const char* path);
+
 #if defined(__cplusplus)
 }
 #endif
 
-#endif // app/wrapper_h_INCLUDED
+#endif // wrapper_h
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "app.h"
+#include "wrapper.h"
 #include "enclave_nn.h"
 #include "sgx_urts.h"
 #include "enclave_u.h"
@@ -32,23 +33,7 @@ int main(void)
     if(enclave_nn_start())
         return 1;
 
-    int size=20;
-    float m[size];
-    for(int i = 0; i<size; ++i)
-        m[i] = i;
-    int label = -1;
-
-    printf("Executing forward\n");
-    if(enclave_nn_forward(m, size, &label))
-        return 1;
-    printf("Done, label is: %d\n", label);
-
-    // sgx_status_t ret = test(enclave_id);
-    // if( ret != SGX_SUCCESS){
-    //     print_error_message(ret);
-    //     return 1;
-    // }
-
+    encrypt_parameter_file("../../parameters.bin");
 
     enclave_nn_end();
     // sgx_destroy_enclave(enclave_id);
