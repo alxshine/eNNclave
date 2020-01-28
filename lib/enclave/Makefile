@@ -2,7 +2,7 @@ ROOT=${HOME}/Projects/nn-sgx
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
-app_name:= testitest
+app_name:= encrypt_parameters
 enclave_name:= enclave.so
 signed_enclave_name= enclave.signed.so
 wrapper_name:= libenclave.so
@@ -40,7 +40,7 @@ link_flags =-L$(SGX_LIBRARY_PATH) -lsgx_urts -lpthread -l:libsgx_capable.a -lsgx
 
 binary_output_files = $(patsubst %.bin,%_bin.o,$(wildcard enclave/*.bin))
 
-all: $(wrapper_name) $(app_name) $(signed_enclave_name)
+all: $(wrapper_name) $(app_name) $(signed_enclave_name) parameters
 
 # generate code files
 edger8r: enclave/enclave.edl
@@ -90,8 +90,15 @@ enclave/forward.o: enclave/forward.c
 
 enclave/%.o: enclave/%.c
 	$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(enclave_link_flags)
+
+# generate parameters
+parameters: $(app_name)
+	@echo "Encrypting parameters"
+	@rm -f ../../encrypted_params.aes.bin
+	@./$(app_name) && mv ./encrypted_params.aes.bin ../../
 	
 .PHONY: clean
 clean:
 	rm -rf *.so testitest */*.o app/*_u.* enclave/*_t.* enclave/forward.c* enclave/state* enclave/*.bin
 	cp ../enclave_dummy_forward.c enclave/forward.c
+	rm -f ../../encrypted_params.aes.bin
