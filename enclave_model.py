@@ -85,7 +85,7 @@ class Enclave(Sequential):
         # get required size for weight buffer
         param_numbers = [np.sum([np.prod(w.shape) for w in l.get_weights()]) for l in all_layers]
         max_size = max(param_numbers)
-        forward_file.write(buffer_declaration_template % (output_sizes[0], output_sizes[0], output_sizes[1], output_sizes[1], max_size, max_size))
+        forward_file.write(buffer_declaration_template % (output_sizes[0], output_sizes[0], output_sizes[0], output_sizes[0], max_size, max_size))
 
         tmp_index = 0
         inputs = 'm'
@@ -164,14 +164,21 @@ class Enclave(Sequential):
 
             _, steps, c = layer.input_shape
             f = layer.output_shape[-1]
+
             new_size = np.prod(layer.output_shape[1:])
             new_buffer = tmp_buffer_template % tmp_index
             ks = layer.kernel_size[0]
-            depth_kernels = depth_kernel_template % i
-            point_kernels = point_kernel_template % i
-            biases = bias_name_template % i
 
-            s = sep_conv1_template % (inputs, steps, c, f, depth_kernels, point_kernels, ks, biases, new_buffer)
+            # from matutil:
+            # num_depth = ks*c
+            # num_point = c*f
+            # num_bias = f
+            s += load_template % (ks*c+c*f+f)
+
+            depth_kernels = parameter_offset_template % 0
+            point_kernels = parameter_offset_template % (ks*c)
+            biases = parameter_offset_template % (ks*c+c*f)
+            s += sep_conv1_template % (inputs, steps, c, f, depth_kernels, point_kernels, ks, biases, new_buffer)
 
             if layer.activation.__name__ == 'relu':
                 # relu
@@ -191,10 +198,12 @@ class Enclave(Sequential):
             new_size = np.prod(layer.output_shape[1:])
             new_buffer = tmp_buffer_template % tmp_index
             kh, kw = layer.kernel_size
-            kernels = weight_name_template % i
-            biases = bias_name_template % i
-            
-            s = conv2_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
+
+            s += load_template % (kw*kh*c*f + f) 
+            kernels = parameter_offset_template % 0
+            biases = parameter_offset_template % (kw*kh*c*f)
+
+            s += conv2_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
 
             if layer.activation.__name__ == 'relu':
                 # relu
