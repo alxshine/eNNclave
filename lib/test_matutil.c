@@ -7,7 +7,7 @@
 
 int main(void) {
   // matutil_initialize();
-  // enclave_nn_start();
+  enclave_nn_start();
   printf("Matutil initialized\n");
 
   /* int r1 = 2, c1 = 3; */
@@ -53,10 +53,12 @@ int main(void) {
     input[i] = i;
   }
 
-  int label = -1;
-  // enclave_nn_forward(input, c, &label);
-  native_nn_forward(input, c, &label);
-  printf("Output label: %d\n", label);
+  int native_label = -1;
+  int enclave_label = -1;
+  enclave_nn_forward(input, c, &enclave_label);
+  native_nn_forward(input, c, &native_label);
+  printf("Enclave label: %d\n", enclave_label);
+  printf("Native label: %d\n", native_label);
 
   /* printf("\n\nConvolution:\n"); */
   /* int conv_input_size = 18; */
@@ -111,7 +113,7 @@ int main(void) {
   /* printf("Outputs:\n"); */
   /* matutil_dump_matrix3(mp_results, 2,2,2); */
 
-  /* enclave_teardown(); */
+  // /* enclave_teardown(); */
   /* matutil_teardown(); */
   printf("Matutil torn down\n");
   return 0;

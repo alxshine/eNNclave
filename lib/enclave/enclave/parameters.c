@@ -5,7 +5,7 @@
 SGX_FILE *param_file;
 
 void open_parameters(){
-    param_file = sgx_fopen_auto_key("parameters.bin", "r");
+    param_file = sgx_fopen_auto_key("encrypted_params.aes.bin", "r");
 }
 
 int load_parameters(float *target_buffer, int num_elements){
