@@ -1,0 +1,155 @@
+\documentclass[aspectratio=169,nototalframenumber]{beamer}
+\usetheme[nosectiontitlepage]{uibk}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes}
+
+\usepackage{graphicx}
+\graphicspath{{fig/}}
+
+\input{macros/mit-new.tex}
+\input{preamble}
+
+\title{Enclave-NN}
+\author{Alexander Schl\"ogl}
+
+\begin{document}
+
+\uibktitlepage{}
+
+\begin{frame}[label=basics]
+    \frametitle{Introduction}
+
+    Neural Nets are universal approximators\cite{hornik1991approximation}.
+
+	\vspace{4ex}
+
+	\begin{block}{Technical Details}
+    	\begin{itemize}
+        	\item Forward pass is a series of algebraic operations
+        	\item Fully defined by their architecture and weights (parameters)
+    	\end{itemize}
+	\end{block}
+
+	We focus solely on inference phase, so NNs for us are static functions.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Problem Statement}
+
+	Monetization requires keeping parameters private.
+	\vspace{3ex}
+	\pause
+
+	\begin{block}{Online Oracles}
+    	\begin{itemize}
+        	\item allow continuous monetization
+        	\item require sharing of data for inference
+        	\item require provider's infrastructure
+    	\end{itemize}
+	\end{block}
+
+	\pause
+
+	\begin{alertblock}{Idea}
+    	Use Trusted Execution Environments (TEEs) to hide parameters during inference
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Approach}
+
+	\begin{figure}
+    	\begin{tikzpicture}
+        	\mitnetsummary{2}
+
+			\onslide<2->{
+    			\draw[draw=uibkgray,fill=uibkgray] (6,-.0) rectangle ++(.5,-.8);
+    			\draw[draw=uibkgray,fill=uibkgray] (5.75,-.8) -- ++(1,0) -- ++(-.5,-.4) -- cycle;
+
+            	\mitnetsummary{-2}
+			}
+
+			\onslide<2>{
+				\draw[text=uibkblue!100,draw=uibkblue,fill=uibkblue!30,fill opacity=0.7,line width=0.5mm] (9.96,-1.6) coordinate (teebox) rectangle (12.5, -4);
+                \draw node[text=uibkblue, anchor=north west] at (teebox) {\small TEE};
+            }
+			\onslide<3>{
+				\draw[text=uibkblue!100,draw=uibkblue,fill=uibkblue!30,fill opacity=0.7,line width=0.5mm] (7.465,-1.6) coordinate (teebox) rectangle (12.5, -4);
+                \draw node[text=uibkblue, anchor=north west] at (teebox) {\small TEE};
+            }
+			\onslide<4>{
+				\draw[text=uibkblue!100,draw=uibkblue,fill=uibkblue!30,fill opacity=0.7,line width=0.5mm] (-.06,-1.6) coordinate (teebox) rectangle (12.5, -4);
+                \draw node[text=uibkblue, anchor=north west] at (teebox) {\small TEE};
+            }
+		\end{tikzpicture}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Evaluation Method}
+
+	\begin{enumerate}
+		\item Split NN
+		\item Compile TEE and native code
+		\item Measure inference time on single input
+		\item Separate CPU impact from TEE impact
+	\end{enumerate}
+
+	\vspace{1cm}
+	Repeat for every layer in NN
+\end{frame}
+
+\begin{frame}
+    \frametitle{Results}
+
+\begin{tikzpicture}[>=stealth,yscale=0.8]
+  \draw (0,0) -- (\mitnetwidth,0);
+  \foreach \x in \mitxticks {
+    \draw (\x,0) -- (\x, -0.1);
+  }
+
+  \draw[->] (0,0) -- (0,\ymax+0.1);
+  \foreach \y in \yticks {
+    \draw (-0.1,\y) -- (0.1,\y);
+  }
+  \ylabels{-.5}
+  
+  \mitnetsummary{-0.2}
+
+  \mitnewsplita
+  \mitnewsplitb
+  \mitnewsplitc
+  \mitnewsplitd
+  \mitnewsplite
+  \mitnewsplitf
+  \mitnewsplitg
+  \mitnewsplith
+  \mitnewspliti
+  \mitnewsplitj
+  \mitnewsplitba
+  \mitnewsplitbb
+  \mitnewsplitbc
+  \mitnewsplitbd
+  \mitnewsplitbe
+  \mitnewsplitbf
+  \mitnewsplitbg
+  \mitnewsplitbh
+  \mitnewsplitbi
+  \mitnewsplitbj
+  \mitnewsplitca
+  \mitnewsplitcb
+  \mitnewsplitcc
+  \mitnewsplitcd
+  \mitnewsplitce
+
+  \legend{9cm}{6.3cm}
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Open Questions}
+\end{frame}
+
+\end{document}
