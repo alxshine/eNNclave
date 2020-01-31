@@ -20,7 +20,7 @@
 \begin{frame}[label=basics]
     \frametitle{Introduction}
 
-    Neural Nets are universal approximators\cite{hornik1991approximation}.
+    Neural Nets are universal approximators.
 
 	\vspace{4ex}
 
@@ -41,9 +41,10 @@
 	\vspace{3ex}
 	\pause
 
-	\begin{block}{Online Oracles}
+	\begin{block}{Current Method}
+    	Online Oracles
     	\begin{itemize}
-        	\item allow continuous monetization
+        	\item parameters never public
         	\item require sharing of data for inference
         	\item require provider's infrastructure
     	\end{itemize}
@@ -79,7 +80,7 @@
                 \draw node[text=uibkblue, anchor=north west] at (teebox) {\small TEE};
             }
 			\onslide<4>{
-				\draw[text=uibkblue!100,draw=uibkblue,fill=uibkblue!30,fill opacity=0.7,line width=0.5mm] (-.06,-1.6) coordinate (teebox) rectangle (12.5, -4);
+				\draw[text=uibkblue!100,draw=uibkblue,fill=uibkblue!30,fill opacity=0.7,line width=0.5mm] (0.46,-1.6) coordinate (teebox) rectangle (12.5, -4);
                 \draw node[text=uibkblue, anchor=north west] at (teebox) {\small TEE};
             }
 		\end{tikzpicture}
@@ -87,17 +88,42 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Evaluation Method}
+    \frametitle{Approach}
 
+	Move last $n$ layers into TEE, send protected model to user
+	\vfill
+	\begin{minipage}{0.44\textwidth}
+		\begin{block}{Advantages}
+			Less infrastructure required\par
+			Semi offline usage possible\par
+			Inference data can stay private\par
+		\end{block}
+	\end{minipage}%
+	\hfill%
+	\begin{minipage}{0.44\textwidth}
+		\begin{block}{Disadvantages}
+			Performance impact\par
+			Requires trust in manufacturer\par
+			Potentially larger attack surface\par
+		\end{block}
+	\end{minipage}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Evaluation Method}
+	How large is the performance impact?\par
+	\begin{block}{Procedure}
 	\begin{enumerate}
 		\item Split NN
 		\item Compile TEE and native code
 		\item Measure inference time on single input
 		\item Separate CPU impact from TEE impact
 	\end{enumerate}
+	\end{block}
 
 	\vspace{1cm}
-	Repeat for every layer in NN
+	Repeat for every possible split in NN
 \end{frame}
 
 \begin{frame}
@@ -117,31 +143,31 @@
   
   \mitnetsummary{-0.2}
 
-  \mitnewsplita
-  \mitnewsplitb
-  \mitnewsplitc
-  \mitnewsplitd
-  \mitnewsplite
-  \mitnewsplitf
-  \mitnewsplitg
-  \mitnewsplith
-  \mitnewspliti
-  \mitnewsplitj
-  \mitnewsplitba
-  \mitnewsplitbb
-  \mitnewsplitbc
-  \mitnewsplitbd
-  \mitnewsplitbe
-  \mitnewsplitbf
-  \mitnewsplitbg
-  \mitnewsplitbh
-  \mitnewsplitbi
-  \mitnewsplitbj
-  \mitnewsplitca
-  \mitnewsplitcb
-  \mitnewsplitcc
-  \mitnewsplitcd
-  \mitnewsplitce
+  \mitencryptedsplita
+  \mitencryptedsplitb
+  \mitencryptedsplitc
+  \mitencryptedsplitd
+  \mitencryptedsplite
+  \mitencryptedsplitf
+  \mitencryptedsplitg
+  \mitencryptedsplith
+  \mitencryptedspliti
+  \mitencryptedsplitj
+  \mitencryptedsplitba
+  \mitencryptedsplitbb
+  \mitencryptedsplitbc
+  \mitencryptedsplitbd
+  \mitencryptedsplitbe
+  \mitencryptedsplitbf
+  \mitencryptedsplitbg
+  \mitencryptedsplitbh
+  \mitencryptedsplitbi
+  \mitencryptedsplitbj
+  \mitencryptedsplitca
+  \mitencryptedsplitcb
+  \mitencryptedsplitcc
+  \mitencryptedsplitcd
+  \mitencryptedsplitce
 
   \legend{9cm}{6.3cm}
 
@@ -149,7 +175,23 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Open Questions}
+    \frametitle{Open Problems}
+
+	\begin{enumerate}
+		\item Architecture not hidden
+		\item No monetization prototype yet
+	\end{enumerate}
+\end{frame}
+
+\section{appendix}
+\begin{frame}
+    \frametitle{MNIST Results}
+\end{frame}
+\begin{frame}
+    \frametitle{IMDB Results}
+\end{frame}
+\begin{frame}
+    \frametitle{Rotten Tomatoes Results}
 \end{frame}
 
 \end{document}
