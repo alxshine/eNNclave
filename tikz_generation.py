@@ -89,18 +89,23 @@ def net_summary(model, model_name):
     x_ticks = '\\newcommand{\\%sxticks}{' % (model_name)
     
     layers = get_all_layers(model)
-    ret += '\n\\newcommand{\\%snetsummary}[1]{\n' % (model_name)  
-    for i,l in enumerate(layers):
+    ret += '\n\\newcommand{\\%snetsummary}[1]{\n' % (model_name)
+    i = 1
+    for l in layers:
+        if 'input' in l.name:
+            continue
+        
         cleaned_name = l.name.replace('_','\_')
         current_x = start_x + node_distance*i
         ret += "\\node[draw=black,minimum width=%fcm,minimum height=%fcm,rotate=-90, anchor=south west] at (%f,#1) {\\tiny %s};" \
             % (width, height, current_x, cleaned_name)
         ret += "\n"
 
-        if i > 0:
-            if i > 1:
-                x_ticks += ','
-            x_ticks += '%f' % (current_x - space_between/2)
+        if i > 1:
+            x_ticks += ','
+        x_ticks += '%f' % (current_x - space_between/2)
+
+        i += 1
 
     x_ticks += '}\n'
     ret += '}\n'
