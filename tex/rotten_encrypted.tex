@@ -1,0 +1,36 @@
+\documentclass[preview]{standalone}
+
+% load macros
+\input{preamble}
+\input{macros/rotten-tomatoes-encrypted.tex}
+
+\begin{document}
+\begin{tikzpicture}[>=stealth]
+  \draw (0,0) -- (\rottennetwidth,0);
+  \foreach \x in \rottenxticks {
+    \draw (\x,0) -- (\x, -0.1);
+  }
+
+  \draw[->] (0,0) -- (0,\rottenymax+0.1);
+  \foreach \y in \rottenyticks {
+    \draw (-0.1,\y) -- (0.1,\y);
+  }
+  \rottenylabels{-.5}
+  
+  \rottennetsummary{-0.2}
+
+  \rottenencryptedsplita
+  \rottenencryptedsplitb
+  \rottenencryptedsplitc
+  \rottenencryptedsplitd
+  \rottenencryptedsplite
+  \rottenencryptedsplitf
+  \rottenencryptedsplitg
+  \rottenencryptedsplith
+  \rottenencryptedspliti
+  \rottenencryptedsplitj
+
+  \legend{9cm}{6.3cm}
+
+\end{tikzpicture}
+\end{document}

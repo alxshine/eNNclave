@@ -1,0 +1,31 @@
+\documentclass[preview]{standalone}
+
+% load macros
+\input{preamble}
+\input{macros/imdb-encrypted.tex}
+
+\begin{document}
+\begin{tikzpicture}[>=stealth]
+  \draw (0,0) -- (\imdbnetwidth,0);
+  \foreach \x in \imdbxticks {
+    \draw (\x,0) -- (\x, -0.1);
+  }
+
+  \draw[->] (0,0) -- (0,\imdbymax+0.1);
+  \foreach \y in \imdbyticks {
+    \draw (-0.1,\y) -- (0.1,\y);
+  }
+  \imdbylabels{-.5}
+  
+  \imdbnetsummary{-0.2}
+
+  \imdbencryptedsplita
+  \imdbencryptedsplitb
+  \imdbencryptedsplitc
+  \imdbencryptedsplitd
+  \imdbencryptedsplite
+
+  \legend{9cm}{6.3cm}
+
+\end{tikzpicture}
+\end{document}

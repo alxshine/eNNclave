@@ -64,13 +64,10 @@ def _build_log_scale(smallest_exponent, largest_exponent):
 
     return y_ticks, y_labels
 
-def _calc_log_coord(lin_coord):
-    scale_bottom = -2.1 #y value to be at tikz 0
-    scale_top = 3.2 #y value to be at Y_MAX
-
-    scale_width = scale_top - scale_bottom
+def _calc_log_coord(lin_coord, y_min, y_max):
+    scale_width = (y_max+0.05) - (y_min-0.05)
     log_coord = np.log10(lin_coord)
-    return (log_coord-scale_bottom)/scale_width
+    return (log_coord-y_min)/scale_width
 
 def net_summary(model, model_name):
     start_x = 0
@@ -92,7 +89,7 @@ def net_summary(model, model_name):
     ret += '\n\\newcommand{\\%snetsummary}[1]{\n' % (model_name)
     i = 1
     for l in layers:
-        if 'input' in l.name:
+        if 'input' in l.name or 'embedding' in l.name:
             continue
         
         cleaned_name = l.name.replace('_','\_')
@@ -115,15 +112,15 @@ def net_summary(model, model_name):
 
     return ret
 
-def generate_y_axis(model_name):
-    y_ticks, y_labels = _build_log_scale(-1, 2)
+def generate_y_axis(model_name, y_min, y_max):
+    y_ticks, y_labels = _build_log_scale(y_min, y_max-1) # TODO: ugly workaround for scales
     ret = ''
     ret += '\\newcommand{\\%symax}{%f}\n' % (model_name, Y_MAX)
     ret += '\\newcommand{\\%syticks}{' % (model_name)
     with np.errstate(all='raise'):
         try:
             for i,y in enumerate(y_ticks):
-                coordinate = _calc_log_coord(y)
+                coordinate = _calc_log_coord(y, y_min, y_max)
             
                 if i > 0:
                     ret += ','
@@ -135,9 +132,9 @@ def generate_y_axis(model_name):
     ret += '}\n'
 
     # generate command for y labels
-    label_command = "\\newcommand{\\ylabels}[1]{\n"
+    label_command = "\\newcommand{\\%sylabels}[1]{\n" % model_name
     for lin_y, label_text in y_labels:
-        log_y = _calc_log_coord(lin_y)
+        log_y = _calc_log_coord(lin_y, y_min, y_max)
 
         current_label = "\\draw (#1, %f) node {\\tiny $%s$};\n" % (log_y * Y_MAX, label_text)
         label_command += current_label
@@ -148,7 +145,7 @@ def generate_y_axis(model_name):
     return ret
 
 
-def time_rectangles(times, model_name, platform):
+def time_rectangles(times, model_name, platform, y_min, y_max):
     rectangle_width = 0.3
     constant_dict = _get_constant_dict(model_name)
 
@@ -168,9 +165,9 @@ def time_rectangles(times, model_name, platform):
         
         with np.errstate(all='raise'):
             try:
-                tf_north = _calc_log_coord(tf_time)*Y_MAX
-                native_north = _calc_log_coord(tf_time + native_time)*Y_MAX
-                enclave_north = _calc_log_coord(tf_time + native_time + enclave_time)*Y_MAX
+                tf_north = _calc_log_coord(tf_time, y_min, y_max)*Y_MAX
+                native_north = _calc_log_coord(tf_time + native_time, y_min, y_max)*Y_MAX
+                enclave_north = _calc_log_coord(tf_time + native_time + enclave_time, y_min, y_max)*Y_MAX
             except FloatingPointError as e:
                 print("ERROR: %s" % e, file=sys.stderr)
                 print("GPU time: %f, native time: %f, enclave time: %f" % (tf_time, native_time, enclave_time), file=sys.stderr)
@@ -190,8 +187,8 @@ if __name__ == "__main__":
             help='a time file to load generate a graphic for')
     parser.add_argument('--model', dest='model_files', metavar='model_file', type=str, nargs='+',
             help='a model file to generate a summary for')
-    parser.add_argument('--y_axis', action='store_true',
-            help='generate macro for y axis ticks and labels')
+    parser.add_argument('--ymin', default=-1, type=int, help='Set Y minimum')
+    parser.add_argument('--ymax', default=3, type=int, help='Set Y maximum')
 
     args = parser.parse_args()
 
@@ -204,7 +201,7 @@ if __name__ == "__main__":
             parts = without_extension.split('_')
             device = parts[-1]
             model_name = parts[0]
-            print(time_rectangles(times, model_name, device))
+            print(time_rectangles(times, model_name, device, args.ymin, args.ymax))
 
     if args.model_files:
         for f in args.model_files:
@@ -212,5 +209,4 @@ if __name__ == "__main__":
             model = load_model(f, custom_objects={'EnclaveLayer': EnclaveLayer, 'Enclave': Enclave})
             print(net_summary(model, model_name))
 
-        if args.y_axis:
-            print(generate_y_axis(model_name))
+        print(generate_y_axis(model_name, args.ymin, args.ymax))

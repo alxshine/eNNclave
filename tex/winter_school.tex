@@ -197,6 +197,35 @@
 
 \begin{frame}
     \frametitle{Open Problem: Where to send it}
+
+    \begin{tikzpicture}
+        \node at (0,0) (enclave-nn) {\textbf{Enclave-NN}};
+
+        \draw (enclave-nn) -- (215:2.2) node[below,draw,rounded corners] (nn-accountability) {\small NN Accountability};
+
+        \draw (enclave-nn) -- (30:2.2) node[above,align=center,draw,rounded corners] (model-stealing) {\small Model Stealing \\ Adversarial Robustness};
+        \draw(model-stealing) -- ++(30:1.8) node[right] (stealing-tramer) {\small Tram\'er: Model Stealing};
+        \draw(model-stealing) -- ++(96:1.5) node[above] (adv-papernot) {\small Papernot: Black-Box Attacks};
+
+        \draw (enclave-nn) -- (-30:2.2) node[right,draw,rounded corners] (nn-enclave) {\small NNs in TEE};
+        \draw (nn-enclave) -- ++(60:1) node[above right,align=center] {\small Ohrimenko:\\ \small Oblivious Multi-Party ML};
+        \draw (nn-enclave) -- ++(300:0.8) node[below] {\small Kaptchuk: State to the Stateless};
+        \draw (nn-enclave) -- ++(-5:1.5) node[right] {\small Tramer: SLALOM};
+
+        \draw (enclave-nn) -- (144:2.2) node[above left,draw,rounded corners] (data-privacy) {\small Data Privacy};
+        \draw (data-privacy) -- ++(32:1.4) node[above,align=center] {\small Shokri:\\\small Privacy Preserving ML};
+        \draw (data-privacy) -- ++(135:1.8) node[above,align=center] {\small Shokri: Membership\\\small Inference};
+        \draw (data-privacy) -- ++(235:1.2) node[below] {\small Fredrikson: Model Inversion};
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Open Problems}
+
+    \begin{itemize}
+        \item How to split total work in submissions
+        \item Which community to submit work to
+    \end{itemize}
 \end{frame}
 
 % \section{appendix}
