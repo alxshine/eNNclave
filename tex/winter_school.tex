@@ -4,6 +4,11 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes}
 
+\usepackage{pifont}
+\newcommand{\done}{\textcolor{uibkblue}{\ding{52}}}
+\newcommand{\unsure}{\textcolor{uibkorange}{?\,}}
+\newcommand{\excluded}{\textcolor{red!88!black}{\ding{56}}}
+
 \usepackage{graphicx}
 \graphicspath{{fig/}}
 
@@ -175,23 +180,34 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Open Problems}
+    \frametitle{Open Problem: Where to stop}
 
-	\begin{enumerate}
-		\item Architecture not hidden
-		\item No monetization prototype yet
-	\end{enumerate}
+	\begin{itemize}
+    	\item[\done] Generate weights
+    	\item[\done] Generate code for forward pass
+    	\item[\done] Interoparability with TF
+    	\item[\done] Run forward pass in TEE
+    	\item[\done] Hide weights
+    	\item[\unsure] Hide architecture
+    	\item[\unsure] Monetization prototype
+    	\item[\unsure] Different TEE technologies
+    	\item[\excluded] Automate for more code (TEE compiler target)
+	\end{itemize}
 \end{frame}
 
-\section{appendix}
 \begin{frame}
-    \frametitle{MNIST Results}
+    \frametitle{Open Problem: Where to send it}
 \end{frame}
-\begin{frame}
-    \frametitle{IMDB Results}
-\end{frame}
-\begin{frame}
-    \frametitle{Rotten Tomatoes Results}
-\end{frame}
+
+% \section{appendix}
+% \begin{frame}
+%     \frametitle{MNIST Results}
+% \end{frame}
+% \begin{frame}
+%     \frametitle{IMDB Results}
+% \end{frame}
+% \begin{frame}
+%     \frametitle{Rotten Tomatoes Results}
+% \end{frame}
 
 \end{document}

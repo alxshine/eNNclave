@@ -115,11 +115,11 @@ def net_summary(model, model_name):
 
     return ret
 
-def generate_y_axis():
+def generate_y_axis(model_name):
     y_ticks, y_labels = _build_log_scale(-1, 2)
     ret = ''
-    ret += '\\newcommand{\\ymax}{%f}\n' % Y_MAX
-    ret += '\\newcommand{\\yticks}{'
+    ret += '\\newcommand{\\%symax}{%f}\n' % (model_name, Y_MAX)
+    ret += '\\newcommand{\\%syticks}{' % (model_name)
     with np.errstate(all='raise'):
         try:
             for i,y in enumerate(y_ticks):
@@ -212,5 +212,5 @@ if __name__ == "__main__":
             model = load_model(f, custom_objects={'EnclaveLayer': EnclaveLayer, 'Enclave': Enclave})
             print(net_summary(model, model_name))
 
-    if args.y_axis:
-        print(generate_y_axis())
+        if args.y_axis:
+            print(generate_y_axis(model_name))
