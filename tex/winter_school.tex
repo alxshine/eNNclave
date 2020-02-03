@@ -12,7 +12,10 @@
 \usepackage{graphicx}
 \graphicspath{{fig/}}
 
-\input{macros/mit-new.tex}
+\input{macros/mit-encrypted.tex}
+\input{macros/mnist-encrypted.tex}
+\input{macros/rotten-tomatoes-encrypted.tex}
+\input{macros/imdb-encrypted.tex}
 \input{preamble}
 
 \title{Enclave-NN}
@@ -228,15 +231,97 @@
     \end{itemize}
 \end{frame}
 
-% \section{appendix}
-% \begin{frame}
-%     \frametitle{MNIST Results}
-% \end{frame}
-% \begin{frame}
-%     \frametitle{IMDB Results}
-% \end{frame}
-% \begin{frame}
-%     \frametitle{Rotten Tomatoes Results}
-% \end{frame}
+\section{appendix}
+\begin{frame}
+    \frametitle{MNIST Results}
+    \begin{tikzpicture}[>=stealth,yscale=0.8]
+      \draw (0,0) -- (\mnistnetwidth,0);
+      \foreach \x in \mnistxticks {
+        \draw (\x,0) -- (\x, -0.1);
+      }
+
+      \draw[->] (0,0) -- (0,\mnistymax+0.1);
+      \foreach \y in \mnistyticks {
+        \draw (-0.1,\y) -- (0.1,\y);
+      }
+      \mnistylabels{-.5}
+      
+      \mnistnetsummary{-0.2}
+
+      \mnistencryptedsplita
+      \mnistencryptedsplitb
+      \mnistencryptedsplitc
+      \mnistencryptedsplitd
+      \mnistencryptedsplite
+      \mnistencryptedsplitf
+      \mnistencryptedsplitg
+      \mnistencryptedsplith
+      \mnistencryptedspliti
+
+      \legend{9cm}{6.3cm}
+
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+    \frametitle{IMDB Results}
+    % \begin{tikzpicture}[>=stealth]
+    \begin{tikzpicture}[>=stealth,yscale=0.8]
+      \draw (0,0) -- (\imdbnetwidth,0);
+      \foreach \x in \imdbxticks {
+        \draw (\x,0) -- (\x, -0.1);
+      }
+
+      \draw[->] (0,0) -- (0,\imdbymax+0.1);
+      \foreach \y in \imdbyticks {
+        \draw (-0.1,\y) -- (0.1,\y);
+      }
+      \imdbylabels{-.5}
+      
+      \imdbnetsummary{-0.2}
+
+      \imdbencryptedsplita
+      \imdbencryptedsplitb
+      \imdbencryptedsplitc
+      \imdbencryptedsplitd
+      \imdbencryptedsplite
+
+      \legend{9cm}{6.3cm}
+
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Rotten Tomatoes Results}
+    % \begin{tikzpicture}[>=stealth]
+    \begin{tikzpicture}[>=stealth,yscale=0.8]
+      \draw (0,0) -- (\rottennetwidth,0);
+      \foreach \x in \rottenxticks {
+        \draw (\x,0) -- (\x, -0.1);
+      }
+
+      \draw[->] (0,0) -- (0,\rottenymax+0.1);
+      \foreach \y in \rottenyticks {
+        \draw (-0.1,\y) -- (0.1,\y);
+      }
+      \rottenylabels{-.5}
+      
+      \rottennetsummary{-0.2}
+
+      \rottenencryptedsplita
+      \rottenencryptedsplitb
+      \rottenencryptedsplitc
+      \rottenencryptedsplitd
+      \rottenencryptedsplite
+      \rottenencryptedsplitf
+      \rottenencryptedsplitg
+      \rottenencryptedsplith
+      \rottenencryptedspliti
+      \rottenencryptedsplitj
+
+      \legend{9cm}{6.3cm}
+
+    \end{tikzpicture}
+\end{frame}
 
 \end{document}
