@@ -1,59 +1,43 @@
 #!/bin/bash
 
-sgx_dir=${HOME}/sgx
-driver_dir=$sgx_dir/installer/driver
-sdk_dir=$sgx_dir/installer/sdk
+mkdir -p ~/Tools
+sudo apt-get update
 
-driver_git="https://github.com/intel/linux-sgx-driver"
-sdk_git="https://github.com/intel/linux-sgx"
-
-#general required tools
-sudo apt-get install -y python3-pip build-essential git
-
-mkdir -p $sgx_dir
-
-#install linux-sgx-driver
-sudo apt-get install -y linux-headers-$(uname -r)
-
-git clone --single-branch --branch sgx2 $driver_git $driver_dir
-cd $driver_dir
+# install driver
+cd ~/Tools/
+sudo apt-get install linux-headers-$(uname -r)
+git clone git@github.com:intel/linux-sgx-driver.git
+cd linux-sgx-driver/
 make
-
-sudo mkdir -p "/lib/modules/"`uname -r`"/kernel/drivers/intel/sgx"    
-sudo cp isgx.ko "/lib/modules/"`uname -r`"/kernel/drivers/intel/sgx"    
-sudo sh -c "cat /etc/modules | grep -Fxq isgx || echo isgx >> /etc/modules"    
+ll
+sudo mkdir -p "/lib/modules/"`uname -r`"/kernel/drivers/intel/sgx"
+sudo cp isgx.ko "/lib/modules/"`uname -r`"/kernel/drivers/intel/sgx"
+sudo sh -c "cat /etc/modules | grep -Fxq isgx || echo isgx >> /etc/modules"
 sudo /sbin/depmod
 sudo /sbin/modprobe isgx
 
-#install SGX SDK and SGX PSW
-sudo apt-get install -y ocaml ocamlbuild automake autoconf libtool wget python libssl-dev
-sudo apt-get install -y libssl-dev libcurl4-openssl-dev protobuf-compiler libprotobuf-dev debhelper cmake
+# build SDK
+cd ~/Tools/
+sudo apt-get install build-essential ocaml ocamlbuild automake autoconf libtool wget python libssl-dev git
+sudo apt-get install libssl-dev libcurl4-openssl-dev protobuf-compiler libprotobuf-dev debhelper cmake reprepro
+git clone git@github.com:intel/linux-sgx.git
+cd linux-sgx
+./download_prebuilt.sh 
+make -j8 sdk DEBUG=1
+make -j8 sdk_install_pkg DEBUG=1
 
-git clone $sdk_git $sdk_dir
-cd $sdk_dir
-./download_prebuilt.sh
-make sdk_install_pkg
+# install SDK
+./linux/installer/bin/sgx* -prefix ~
 
-#install SGXSDK
-$sdk_dir/linux/installer/bin/sgx_linux_x64_sdk_*.bin -prefix ${sgx_dir}
-echo "source ${sgx_dir}/sgxsdk/environment" >> ${HOME}/.bashrc
-source ${sgx_dir}/sgxsdk/environment
+# build PSW
+make -j8 psw DEBUG=1
+make -j8 deb_psw_package DEBUG=1
+make -j8 deb_local_repo
 
-#install PSW
-cd $sdk_dir
-make deb_pkg
-cd ${sdk_dir}/linux/installer/deb
-sudo dpkg -i ./libsgx-urts_*.deb ./libsgx-enclave-common_*.deb ./libsgx-enclave-common-dev_*.deb
+# add local repo and install
+sudo sh -c 'echo "deb [trusted=yes arch=amd64] file:$HOME/Tools/linux-sgx/linux/installer/deb/sgx_debian_local_repo bionic main" >> /etc/apt/sources.list'
+suod apt-get update
+sudo apt-get install libsgx-launch libsgx-launch-dbgsym libsgx-urts libsgx-urts-dbgsym libsgx-epid libsgx-epid-dbgsym libsgx-quote-ex libsgx-quote-ex-dbgsym
 
-echo ""
-echo ""
-echo "SGX SUCCESSFULLY INSTALLED"
-echo "You will need to install the python requirements listed in requirements.txt"
-echo "Also, for the SGX SDK to work correctly, you need to run 'source ${sgx_dir}/sgxsdk/environment'"
-echo "A corresponding line has been added to your .bashrc file, so this will be done automatically for future terminals"
-echo ""
-echo "For the code in this repository to work correctly, please run 'source ./setup_ld_path.sh'"
-echo "Without this the program will not find the shared libraries generated during compilation"
-
-#setup pip3
-# pip3 install --user -r requirements.txt
+sudo systemctl enable aesmd
+sudo systemctl start aesmd
