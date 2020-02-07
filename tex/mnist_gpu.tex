@@ -2,7 +2,7 @@
 
 % load macros
 \input{preamble}
-\input{macros/mnist}
+\input{macros/mnist-gpu}
 
 \begin{document}
 \begin{tikzpicture}[>=stealth]
@@ -11,11 +11,11 @@
     \draw (\x,0) -- (\x, -0.1);
   }
 
-  \draw[->] (0,0) -- (0,\ymax+0.1);
-  \foreach \y in \yticks {
+  \draw[->] (0,0) -- (0,\mnistymax+0.1);
+  \foreach \y in \mnistyticks {
     \draw (-0.1,\y) -- (0.1,\y);
   }
-  \ylabels{-.5}
+  \mnistylabels{-.5}
   
   \mnistnetsummary{-0.2}
 
@@ -24,6 +24,10 @@
   \mnistgpusplitc
   \mnistgpusplitd
   \mnistgpusplite
+  \mnistgpusplitf
+  \mnistgpusplitg
+  \mnistgpusplith
+  \mnistgpuspliti
 
   \legend{9cm}{6.3cm}
 

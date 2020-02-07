@@ -1,7 +1,8 @@
-\documentclass[convert]{standalone}
+\documentclass[preview]{standalone}
 
+% load macros
 \input{preamble}
-\input{macros/mit}
+\input{macros/mit-cpu}
 
 \begin{document}
 \begin{tikzpicture}[>=stealth]
@@ -10,11 +11,11 @@
     \draw (\x,0) -- (\x, -0.1);
   }
 
-  \draw[->] (0,0) -- (0,\ymax+0.1);
-  \foreach \y in \yticks {
+  \draw[->] (0,0) -- (0,\mitymax+0.1);
+  \foreach \y in \mityticks {
     \draw (-0.1,\y) -- (0.1,\y);
   }
-  \ylabels{-.5}
+  \mitylabels{-.5}
   
   \mitnetsummary{-0.2}
 
@@ -45,5 +46,6 @@
   \mitcpusplitce
 
   \legend{9cm}{6.3cm}
+
 \end{tikzpicture}
 \end{document}
