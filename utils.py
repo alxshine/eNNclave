@@ -48,7 +48,8 @@ def preprocess_250(x, y):
 def generate_dataset(x, y, preprocess_function=preprocess_224,
                      batch_size=32, repeat=True, shuffle=True):
     ds = tf.data.Dataset.from_tensor_slices((x, y))
-    ds = ds.map(preprocess_function)
+    if preprocess_function is not None:
+        ds = ds.map(preprocess_function)
 
     if shuffle:
         ds = ds.shuffle(buffer_size=batch_size)

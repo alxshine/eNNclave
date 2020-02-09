@@ -19,9 +19,9 @@ x_train, y_train = mit_prepare_data.load_train_set()
 x_test, y_test = mit_prepare_data.load_test_set()
 
 # generate datasets
-train_ds = utils.generate_dataset(x_train, y_train)
+train_ds = utils.generate_dataset(x_train, y_train, preprocess_function=None)
 test_ds = utils.generate_dataset(
-    x_test, y_test, shuffle=False, repeat=False)
+    x_test, y_test, shuffle=False, repeat=False, preprocess_function=None)
 
 # build model
 MODEL_FILE = 'models/mit.h5'
@@ -33,14 +33,14 @@ STEPS_PER_EPOCH = 2
 
 extractor = apps.VGG16(include_top=False, weights='imagenet',
                   input_shape=((224, 224, 3)))
-extractor.trainable = False
+# extractor.trainable = False
 
 dense = Sequential([
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
-    layers.Dense(len(labels), activation='softmax')
+    layers.Dense(len(x_train), activation='softmax')
 ])
 
 model = Sequential([
