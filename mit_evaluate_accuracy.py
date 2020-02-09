@@ -2,10 +2,7 @@ from tensorflow.keras.models import load_model
 import tensorflow as tf
 import numpy as np
 
-from enclave_model import Enclave
-from enclave_layer import EnclaveLayer
 import utils
-import interop.pymatutil as pymatutil
 
 import mit_prepare_data
 
@@ -21,7 +18,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 model_file = sys.argv[1]
-model = load_model(model_file, custom_objects={'EnclaveLayer': EnclaveLayer})
+model = load_model(model_file)
 
 x_test, y_test = mit_prepare_data.load_test_set()
 
