@@ -22,8 +22,6 @@ model = load_model(model_file)
 
 x_test, y_test = mit_prepare_data.load_test_set()
 
-pymatutil.initialize()
-
 # predict dataset
 print("Predicting")
 before = time.time()
@@ -31,8 +29,6 @@ predictions = model.predict(x_test)
 after = time.time()
 predictions = np.argmax(predictions, axis=1)
 total_time = after - before
-
-pymatutil.initialize()
 
 accuracy = np.equal(predictions, y_test).sum()/len(y_test)
 print("Prediction took {:05f} seconds".format(total_time))
