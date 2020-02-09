@@ -8,7 +8,7 @@ def load_test_set(data_dir='data', test_file='TestImages.txt'):
     full_path = os.path.join(data_dir, 'mit')
 
     try:
-        print("Trying to load previously generated data and labels")
+        print("Trying to load previously generated test data")
         x_test = np.load(os.path.join(full_path, 'x_test.npy'))
         y_test = np.load(os.path.join(full_path, 'y_test.npy'))
         
@@ -43,7 +43,7 @@ def load_train_set(data_dir='data', train_file='TrainImages.txt'):
     full_path = os.path.join(data_dir, 'mit')
 
     try:
-        print("Trying to load previously generated data and labels")
+        print("Trying to load previously generated training data")
         x_train= np.load(os.path.join(full_path, 'x_train.npy'))
         y_train= np.load(os.path.join(full_path, 'y_train.npy'))
         
