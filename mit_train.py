@@ -13,32 +13,15 @@ import os
 import json
 
 import utils
+import mit_prepare_data
 
-# global config
-data_dir = 'data/mit'
-label_file = join(data_dir, 'class_labels.json')
-train_file = 'TrainImages.txt'
-test_file = 'TestImages.txt'
-
-# load label mapping
-with open(label_file, 'r') as f:
-    labels = json.load(f)
-
-
-# load images
-with open(join(data_dir, train_file), 'r') as f:
-    train_images = [join(data_dir, l.strip()) for l in f]
-with open(join(data_dir, test_file), 'r') as f:
-    test_images = [join(data_dir, l.strip()) for l in f.readlines()]
-
-# generate labels
-train_labels = [labels[s.split('/')[-2]] for s in train_images]
-test_labels = [labels[s.split('/')[-2]] for s in test_images]
+x_train, y_train = mit_prepare_data.load_train_set()
+x_test, y_test = mit_prepare_data.load_test_set()
 
 # generate datasets
-train_ds = utils.generate_dataset(train_images, train_labels)
+train_ds = utils.generate_dataset(x_train, y_train)
 test_ds = utils.generate_dataset(
-    test_images, test_labels, shuffle=False, repeat=False)
+    x_test, y_test, shuffle=False, repeat=False)
 
 # build model
 MODEL_FILE = 'models/mit.h5'
@@ -68,8 +51,8 @@ model = Sequential([
 print('Hypeparameters:')
 print('num_epochs: {}'.format(NUM_EPOCHS))
 print('hidden_neurons: {}'.format(HIDDEN_NEURONS))
-print('training set size: {}'.format(len(train_labels)))
-print('test set size: {}'.format(len(test_labels)))
+print('training set size: {}'.format(len(y_train)))
+print('test set size: {}'.format(len(y_test)))
 print()
 
 model.compile(optimizer='adam',
