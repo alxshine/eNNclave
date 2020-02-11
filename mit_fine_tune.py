@@ -1,6 +1,7 @@
 import tensorflow.keras.layers as layers
 import tensorflow.keras.applications as apps
 from tensorflow.keras.models import Sequential, load_model
+import tensorflow.keras.optimizers as optimizers
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 import tensorflow as tf
 
@@ -38,9 +39,10 @@ VALIDATION_STEPS = 3
 model = load_model(MODEL_FILE)
 
 extractor = model.get_layer('vgg16')
-# extractor.trainable = True
+extractor.trainable = True
 
-model.compile(optimizer='sgd',
+optimizer = optimizers.SGD(learning_rate=0.0001)
+model.compile(optimizer=optimizer,
               loss=sparse_categorical_crossentropy,
               metrics=['accuracy'])
 
@@ -59,7 +61,7 @@ history = model.fit(train_ds,
                     epochs=NUM_EPOCHS,
                     steps_per_epoch=STEPS_PER_EPOCH,
                     validation_data=test_ds,
-                    validation_steps=VALIDATION_STEPS
+                    # validation_steps=VALIDATION_STEPS
                     )
 
 loss1, accuracy1 = model.evaluate(test_ds)
