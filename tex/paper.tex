@@ -1,0 +1,193 @@
+% Created 2020-02-12 Wed 14:42
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 27.0.50 (Org mode 9.1.9)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\section{NN SGX}
+\label{sec:orgeaeff13}
+In order to perform inference with a given machine learning model, the weights and architecture must be known.
+Allowing a third party to query a model, while keeping it secret, requires providing the model as an online oracle to them.
+While this allows keeping the model parameters private and thus continuing to monetize the model queries, it requires providing the infrastructure and computational power required to perform the inferences.
+
+Our goal is to leverage the data confidentiality that Trusted Execution Environments (TEEs) promise to turn these online oracles into offline oracles, freeing the model creator from having to provide the infrastructure required for inference.
+While the model creator benefits from the model parameters staying private, the model user can now also keep their inference data private, as they no longer have to provide them to the model creator for their inference.
+Thus all involved parties gain privacy from such a model.
+
+We provide a proof of concept implementation for certain Tensorflow operations, and provide a mechanism to cut the last \($n$\) layers and run them inside an Intel SGX enclave.
+We then evaluated the performance impact of different cuts for four different neural net models.
+This gives us an approximation for the impact caused by moving parts of the model to the CPU, and the additional impact introduced by the overhead of TEE execution.
+
+\subsubsection{{\bfseries\sffamily TODO} Actual values still to come}
+\label{sec:orga449875}
+
+\subsection{Introduction}
+\label{sec:orgb5ec4c8}
+
+\subsubsection{{\bfseries\sffamily TODO} Fix terminology (provider, customer, model, etc.)}
+\label{sec:orgc3f8be6}
+
+Training a machine learning model requires large amounts of data, domain knowledge, and significant computation power.
+Organizations wishing to use the predictive powers of these models often lack the knowledge and hardware required to train these models, and outsource parts of the task using Machine Learning as a Service (MLaaS) providers, who provide automated tools to generate ML models for certain types of tasks.
+
+MLaaS providers usually monetize their models per query or per time frame.
+Both strategies require them to keep the model parameters - and to some extent the architecture - secret.
+A common strategy is to offer access to the finished model only as an online oracle which customers can query with their data, and which responds with the inference result.
+Providing such an oracle requires the provider to continually reserve the needed computational power required for inference on the customer's model.
+It also requires the customer to keep sending data to the provider at inference time, which can be undesirable and potentially illegal depending on the domain.
+As such, the online oracle model required for continuous monetization is undesirable for both provider and customer.
+
+\subsubsection{{\bfseries\sffamily TODO} Try to find a MLaaS provider where you "buy" the finished model}
+\label{sec:org9079b7a}
+
+Our approach transforms the online oracle into an offline oracle by leveraging the data confidentiality promised by trusted execution environments (TEEs).
+We provide a (naive) implementation of different Tensorflow (TF) operations in C, as well as a tool to automatically generate the calls to these operations from an existing TF model.
+Our tool also extracts the weights from the model and makes them usable and protecting them inside the enclave.
+We also provide an enclave wrapper which integrates seamlessly into TF, making our enclave models drop-in replacements for regular TF models.
+
+\subsubsection{{\bfseries\sffamily DONE} Find out if our code is actually encrypted, and if the weights are secure}
+\label{sec:org0c32c5e}
+While this approach still requires customers to share their training data with MLaaS providers, it allows us to leverage the higher performance of GPUs and optimized implementations of TF operators during training.
+Training a full model inside the enclave in order to provide data confidentiality during training time has been done \(\cite{ohrimenko16enclave}\), but was not the goal for our research.
+As evidenced by Section \hyperref[org53997ba]{Results} the performance impact of running a model inside the enclave can be quite large, especially for large convolutional neural nets (CNNs) as are commonly used in current image recognition tasks.
+While these performance impacts could be acceptable during inference, depending on the application scenario, they seem to us be prohibitive during training, which caused us to use regular TF on the GPU for training.
+
+The rest of this paper is organized as follows:
+Section \hyperref[orgee69e47]{Background} gives some background on the computations required for inference, as well as on TEEs in general, and Intel SGX in particular.
+Section \hyperref[org9a57082]{Related Work} summarizes work we found that either covers model privacy, machine learning in TEEs, as well as attacks on data privacy.
+Section \hyperref[org2e69037]{Implementation} gives an overview of what we built and the general flow from the original TF model to a model running partly inside a TEE.
+Section \hyperref[org038acad]{Experimental Setup} details the models, hardware, measurements we used for evaluation.
+The results of our experiments are then shown and evaluated in Section \hyperref[org53997ba]{Experiment Results}.
+We offer a discussion of our results and in Section \hyperref[orga541d40]{Discussion}, and a conclusion together with what we see as valuable future work in Section \hyperref[org62c5e91]{Conclusion}.
+
+\subsection{Background}
+\label{sec:orgf178e3d}
+\label{orgee69e47}
+
+This section is meant to illustrate the mathematical operations that happen during the forward pass of a neural net, as well as the higher level processes when executing code inside a TEE.
+
+\subsubsection{Neural Net Math}
+\label{sec:org25637c1}
+
+\subsubsection{Trusted Execution environments}
+\label{sec:orgc3f4848}
+
+\subsubsection{Intel SGX}
+\label{sec:org3988408}
+\begin{enumerate}
+\item {\bfseries\sffamily TODO} Look into signing process of Intel SGX
+\label{sec:orgce18453}
+\end{enumerate}
+
+\subsection{Related Work}
+\label{sec:org592c409}
+\label{org9a57082}
+We have different areas of related work that are relevant to this project.
+The most directly relevant area is model stealing attacks and adversarial robustness.
+In model stealing an attacker tries to build a replicant model that rivals the prediction accuracy of the stolen model, with hopefully lower cost than using the original model.
+\href{related\_work/tramer16stealing.pdf}{Tramer et al.} use a model-dependent dataset augmentation algorithm to find a reasonably low number of queries required for extracting the model.
+The number they arrive at for NNs is \texttt{100*k}, where \texttt{k} is the number of parameters.
+Our model (even with the weights in the feature extractor fixed) still have \textasciitilde{}18,000,000 trainable parameters, which pushes this attack (as it is) outside the realm of feasability in my opinion.
+
+Another relevant area of research is adversarial attacks.
+\href{related\_work/papernot17practical.pdf}{Papernot et al.} have presented a so-called black-box transfer attack, in which an attacker builds a local replicant model and builds adversarial examples on the gradients of that model.
+This requires far less queries than are required for model stealing, but the replicant model does not have to be accurace.
+Its only requirement is that its gradients are sufficiently aligned with the target model to build functional adversarial examples.
+
+Our implementation affects data privacy, as it allows users to keep the data they wish to predict on private.
+It also allows for the creation of offline black box oracles, which are used e.g. in \href{related\_work/shokri17membership.pdf}{set membership attacks}.
+As it currently stands, we do not return confidence values, only the resulting label.
+This makes the attack presented by Shokri et al. not better than chance, as evidenced by their own results.
+
+In the context of data privacy \href{related\_work/ohrimenko16enclave.pdf}{Ohrimenko et al.} have also previously combined machine learning with trusted enclaves.
+The difference between their approach and ours is that they trained the model inside the enclave, which allows parties to also keep their training data private.
+Their focus is on ensuring that no inference on the training data can be made using timing side channels, and they disregard performance.
+Our focus is instead on the performance impact of such an approach.
+
+\href{related\_work/tramer19slalom.pdf}{Tramer et al.} provide a mechanism to use the enclave as a controller for running NNs on the GPU.
+Every layer is verified inside the Enclave, to give a statistical guarantee for integrity.
+They also utilize an additive stream cipher which is (as they claim, I don't know enough of the math behind it to verify) invariant to the computations taking place in the DNN.
+This gives them data privacy, while running the model on the provider's hardware.
+
+The enclave alone does not provide a mechanism for rate limiting, and thus not for monetization.
+\href{related\_work/kaptchuk2019state.pdf}{Kaptchuk et al.} utilize signatures coming from a server for this.
+Their main contribution is putting the signatures in a public ledger, which might be sexy, but not necessary for our use-case.
+The basic idea is very relevant however.
+By having a customer send a hash of the data they wish to run inference on to the provider, who then signs the hash (after being paid) and sends the signature back, we can monetize access to the model by query.
+The model can then verify the signature using the public testing key of the provider.
+Only if the signature is valid will it run inference.
+
+\subsection{Implementation}
+\label{sec:orgf8d657f}
+\label{org2e69037}
+
+\subsection{Experimental Setup}
+\label{sec:org389eb24}
+\label{org038acad}
+
+Image recognition tasks as well as text classification tasks are used for testing.
+The image recognition tasks are MNIST using a small CNN, and MIT67 using a pretrained VGG16 network as feature extractor.
+I fixed the weights for the VGG16 feature extractor during training of the final classification 
+For the text classfication we used IMDB review sentiment classification using MLPs, and Rotten Tomatoes review sentiment classification using CNNs on sequences.
+The code for these is taken from \href{https://github.com/google/eng-edu/tree/master/ml/guides/text\_classification}{here}.
+This choice of datasets gives us reasonably large CNNs for multiple tasks and media types, as well as smaller models for a task of both kinds.
+
+The links for the datasets are as follows:
+\begin{itemize}
+\item \href{http://ai.stanford.edu/\~amaas/data/sentiment/aclImdb\_v1.tar.gz}{IMDB sentiment analysis}
+\item \href{https://www.kaggle.com/c/3810/download/train.tsv.zip}{Rotten Tomatoes sentiment analysis}
+\item MNIST is taken from \href{https://blog.tensorflow.org/2019/02/introducing-tensorflow-datasets.html}{tensorflow\(_{\text{datasets}}\)}
+\item \href{https://web.mit.edu/torralba/www/indoor.html}{MIT67 Indoor scene recognition}
+\end{itemize}
+
+\subsection{Experiment Results}
+\label{sec:org7b10e88}
+\label{org53997ba}
+
+We do have some results
+
+\subsubsection{Retraining performance}
+\label{sec:orgb7875f4}
+I did some experiments with fine tuning and freezing.
+Unfreezing the weights in the feature extractor during initial training is detrimental to performance, detroying any benefit that would be gained from using a pretrained feature extractor.
+However, training the fully connected layers for 500 epochs, unfreezing the weights in the feature extractor, and then training the whole model with a reduced learning rate yields an accuracy increase.
+In my tests I fine-tuned the weights using a stochastic gradient descent optimizer for 2000 epochs, once with fixed VGG weights and once while retraining the VGG weights as well.
+Starting accuracy for both variants was 53.507\%.
+Fine-tuning with VGG weights fixed plateaued at roughly 57.5\%, while fine-tuning all weights reached an accuracy of 64.5\%.
+
+This might be because the feature extractor has been trained on a general purpose dataset and is now being used on a specific scene recognition dataset.
+\href{related\_work/Zhou\%20et\%20al\_2014\_Learning\%20Deep\%20Features\%20for\%20Scene\%20Recognition\%20using\%20Places\%20Database.pdf}{Zhou et al.} have studied this problem and provide a different set of weights for the VGG feature extractor specific for scene recognition.
+I will try these weights in the future, but they have to be transformed from Caffe to TensorFlow.
+
+\subsection{Discussion}
+\label{sec:org9687719}
+\label{orga541d40}
+
+\subsection{Conclusion}
+\label{sec:orga976205}
+\label{org62c5e91}
+
+\end{document}

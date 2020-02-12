@@ -34,7 +34,8 @@ We provide a (naive) implementation of different Tensorflow (TF) operations in C
 Our tool also extracts the weights from the model and makes them usable and protecting them inside the enclave.
 We also provide an enclave wrapper which integrates seamlessly into TF, making our enclave models drop-in replacements for regular TF models.
 
-*** TODO Find out if our code is actually encrypted, and if the weights are secure
+*** DONE Find out if our code is actually encrypted, and if the weights are secure
+    CLOSED: [2020-02-12 Wed 13:25]
 
 While this approach still requires customers to share their training data with MLaaS providers, it allows us to leverage the higher performance of GPUs and optimized implementations of TF operators during training.
 Training a full model inside the enclave in order to provide data confidentiality during training time has been done \(\cite{ohrimenko16enclave}\), but was not the goal for our research.
@@ -121,6 +122,18 @@ The links for the datasets are as follows:
 <<sec:results>>
 
 We do have some results
+
+*** Retraining performance
+I did some experiments with fine tuning and freezing.
+Unfreezing the weights in the feature extractor during initial training is detrimental to performance, detroying any benefit that would be gained from using a pretrained feature extractor.
+However, training the fully connected layers for 500 epochs, unfreezing the weights in the feature extractor, and then training the whole model with a reduced learning rate yields an accuracy increase.
+In my tests I fine-tuned the weights using a stochastic gradient descent optimizer for 2000 epochs, once with fixed VGG weights and once while retraining the VGG weights as well.
+Starting accuracy for both variants was 53.507%.
+Fine-tuning with VGG weights fixed plateaued at roughly 57.5%, while fine-tuning all weights reached an accuracy of 64.5%.
+
+This might be because the feature extractor has been trained on a general purpose dataset and is now being used on a specific scene recognition dataset.
+[[file:related_work/Zhou%20et%20al_2014_Learning%20Deep%20Features%20for%20Scene%20Recognition%20using%20Places%20Database.pdf][Zhou et al.]] have studied this problem and provide a different set of weights for the VGG feature extractor specific for scene recognition.
+I will try these weights in the future, but they have to be transformed from Caffe to TensorFlow.
 
 ** Discussion
 <<sec:discussion>>
