@@ -104,6 +104,7 @@ def net_summary(model, model_name):
 
         i += 1
 
+    x_ticks += ',' + '%f' % (start_x + node_distance*i - space_between/2)
     x_ticks += '}\n'
     ret += '}\n'
 
