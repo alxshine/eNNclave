@@ -23,20 +23,6 @@
 
 \maketitle
 
-\begin{abstract}
-In order to perform inference with a given machine learning model, the weights and architecture must be known.
-Allowing a third party to query a model, while keeping it secret, requires providing the model as an online oracle to them.
-While this allows keeping the model parameters private and thus continuing to monetize the model queries, it requires providing the infrastructure and computational power required to perform the inferences.
-
-Our goal is to leverage the data confidentiality that Trusted Execution Environments (TEEs) promise to turn these online oracles into offline oracles, freeing the model creator from having to provide the infrastructure required for inference.
-While the model creator benefits from the model parameters staying private, the model user can now also keep their inference data private, as they no longer have to provide them to the model creator for their inference.
-Thus all involved parties gain privacy from such a model.
-
-We provide a proof of concept implementation for certain Tensorflow operations, and provide a mechanism to cut the last \($n$\) layers and run them inside an Intel SGX enclave.
-We then evaluated the performance impact of different cuts for four different neural net models.
-This gives us an approximation for the impact caused by moving parts of the model to the CPU, and the additional impact introduced by the overhead of TEE execution.
-\end{abstract}
-
 \section{Introduction}
 \label{sec:introduction}
 
@@ -157,13 +143,14 @@ Monetization can still happen per query or time based, just as before.
     \label{fig:offline-phishing}
 \end{figure}
 
-After a model is trained, it can be converted to run inside a trusted enclave.
+\paragraph{TODO: how much technical detail should I use here?}
+Before a model can be used inside the trusted enclave, it has to be converted.
+For this the weights are extracted from the original \tf{} model, and dumped into a binary file.
+In our experiments we encrypted the weights using the SGX sealing key of our processor, but for an actual application this would be done using a key that is known to the provider and can be later shared with the enclave running on the customer's machine.
 
-For this the weights are extracted from the original \tf{} model, and dumped into binary a binary file.
-
-\begin{figure}[h]
-
-\end{figure}
+The order of operations in the original model is also extracted, and turned into calls to functions implementing the standard \tf{} operations.
+All weights, together with the function calls in the forward pass, and the function libraries are compiled into shared libraries in native C and as a trusted enclave.
+These libraries can later be called from Python.
 
 \section{Experimental Setup}
 \label{sec:setup}
