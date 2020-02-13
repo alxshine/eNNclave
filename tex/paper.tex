@@ -7,12 +7,17 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
+\usepackage{tikz}
+
 \usepackage{hyperref}
 \usepackage{cleveref}
 \date{\today}
 \title{Enclave-NN}
 
 % TODO: Fix terminology (provider, customer, model, etc.)}
+
+\newcommand{\mail}{E-mail}
+\newcommand{\tf}{TensorFlow}
 
 \begin{document}
 
@@ -47,14 +52,14 @@ It also requires the customer to keep sending data to the provider at inference 
 As such, the online oracle model required for continuous monetization is undesirable for both provider and customer.
 
 Our approach transforms the online oracle into an offline oracle by leveraging the data confidentiality promised by trusted execution environments (TEEs).
-We provide a (naive) implementation of different Tensorflow (TF) operations in C, as well as a tool to automatically generate the calls to these operations from an existing TF model.
+We provide a (naive) implementation of different Tensorflow operations in C, as well as a tool to automatically generate the calls to these operations from an existing \tf{} model.
 Our tool also extracts the weights from the model and makes them usable and protecting them inside the enclave.
-We also provide an enclave wrapper which integrates seamlessly into TF, making our enclave models drop-in replacements for regular TF models.
+We also provide an enclave wrapper which integrates seamlessly into \tf{}, making our enclave models drop-in replacements for regular \tf{} models.
 
-While this approach still requires customers to share their training data with MLaaS providers, it allows us to leverage the higher performance of GPUs and optimized implementations of TF operators during training.
+While this approach still requires customers to share their training data with MLaaS providers, it allows us to leverage the higher performance of GPUs and optimized implementations of \tf{} operators during training.
 Training a full model inside the enclave in order to provide data confidentiality during training time has been done \cite{ohrimenko_oblivious_2016}, but was not the goal for our research.
 As evidenced by our results the performance impact of running a model inside the enclave can be quite large, especially for large convolutional neural nets (CNNs) as are commonly used in current image recognition tasks.
-While these performance impacts could be acceptable during inference, depending on the application scenario, they seem to us be prohibitive during training, which caused us to use regular TF on the GPU for training.
+While these performance impacts could be acceptable during inference, depending on the application scenario, they seem to us be prohibitive during training, which caused us to use regular \tf{} on the GPU for training.
 
 \section{Related Work}
 \label{sec:related}
@@ -96,22 +101,86 @@ Only if the signature is valid will it run inference.
 \section{Engineering (oder aehnliches)}
 \label{sec:engineering}
 
+One good example for a use case is a phishing detection system.
+\Cref{fig:online-phishing} shows the case of an ML based phishing detection service being used as an online oracle.
+This requires the customer to send \emph{all} their \mail{} data to the provider, raising potential privacy and legal issues.
+By using placing the classifier inside the trusted enclave, the provider can retain model confidentiality while allowing the customer to keep all their data private.
+Monetization can still happen per query or time based, just as before.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[>=stealth,xscale=0.7]
+        \draw (-4,0) node[draw, minimum width=2cm] (provider) {Provider};
+		\draw[dashed] (provider) -- ++(0,-4);
+
+        \draw (4,0) node[draw, minimum width=2cm] (customer) {Customer};
+		\draw[dashed] (customer) -- ++(0,-4);
+
+		\draw[->] (-8,-1) -- (-4,-1) node[above, midway] {phishing data};
+		\draw[->] (-4,-1) -- (-4,-2) node[left, midway] {train classifier};
+
+		\draw[->] (8,-2.2) -- (4,-2.2) node[above, midway] {\mail{}};
+		\draw[->] (4,-2.3) -- (-4,-2.3) node[above, midway] {payment};
+		\draw[->] (4,-2.8) -- (-4,-2.8) node[above, midway] {\textcolor{red}{\mail{}}};
+		\draw[->] (-4,-2.8) -- (-4,-3.3) node[left, midway] {classify};
+		\draw[->] (-4,-3.3) -- (4,-3.3) node[above, midway] {malicious/benign};
+		\draw[->] (4,-3.4) -- (8,-3.4) node[above, midway] {filtered \mail{}};
+    \end{tikzpicture}
+    \caption{Phishing detection service using an online oracle}
+    \label{fig:online-phishing}
+\end{figure}
+
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[>=stealth, xscale=0.7]
+        \draw (-4,0) node[draw, minimum width=2cm] (provider) {Provider};
+		\draw[dashed] (provider) -- ++(0,-4);
+
+        \draw (4,0) node[draw, minimum width=2cm] (customer) {Customer};
+		\draw[dashed] (customer) -- ++(0,-4);
+
+		\draw[->] (-8,-1) -- (-4,-1) node[above, midway] {phishing data};
+		\draw[->] (-4,-1) -- (-4,-2) node[left, midway] {train classifier};
+
+		\draw[->] (4,-2.2) -- (-4,-2.2) node[above, midway] {money};
+		\draw[->] (-4,-2.9) -- (4,-2.9) node[above, midway] {Enclave model};
+		\draw[->] (-4,-3.4) -- (4,-3.4) node[above, midway] {query tickets};
+
+		\draw[->] (8,-3.7) -- (4,-3.7) node[above, midway] {\mail{}};
+		\draw[->] (4,-3.7) -- (4,-4.4) node[left, midway] {classify};
+		\draw[->] (4,-4.4) -- (8,-4.4) node[above, midway] {filtered \mail{}};
+    \end{tikzpicture}
+    \caption{Phishing detection service using an offline oracle inside the enclave}
+    \label{fig:offline-phishing}
+\end{figure}
+
 \section{Experimental Setup}
 \label{sec:setup}
 
 Image recognition tasks as well as text classification tasks are used for testing.
 The image recognition tasks are MNIST~\cite{noauthor_mnist_nodate} using a small CNN, and MIT67~\cite{quattoni_recognizing_nodate} using a pretrained VGG16 network as feature extractor.
-I fixed the weights for the VGG16 feature extractor during training of the final classification.
+I fixed the weights for the VGG16 feature extractor during training of the fully connected layers.
 For the text classfication we used IMDB review sentiment classification~\cite{maas_learning_2011} using MLPs, and Rotten Tomatoes review sentiment classification~\cite{noauthor_sentiment_nodate} using CNNs on sequences.
 The code for these is taken from a Google Text classification tutorial~\cite{noauthor_googleeng-edu_nodate}.
-This choice of datasets gives us reasonably large CNNs for multiple tasks and media types, as well as smaller models for a task of both kinds.
+This choice of datasets provides us with CNNs with a reasonably high number of trainable parameters for multiple media types, as well as smaller models for each media type.
+
+For measuring the inference time we cut off the last $n$ layers and converted it to run inside the trusted enclave.
+The rest was run in vanilla \tf{}.
+We then ran inference on a single input, measuring the time it took for \tf{} to process the input.
+This measurement method means we include the setup time for \tf{}, which can be seconds if the inference is done on GPU.
+Using the \tf{} output as an input, we measured the time spent on computation inside the enclave, as well as the time it takes to set it up and tear it down.
+To separate the impact from running inside the enclave from the impact caused by our implementation and the CPU in general, we also ran the second part of inference in native C.
+The difference between native C and the trusted enclave is the extra "penalty" incurred by running the model inside a trusted enclave.
+
+The reported results are averaged over 5 runs.
 
 \section{Experiment Results}
 \label{sec:results}
 
 We do have some results
 
-\subsection{Retraining performance}
+\subsection{TODO: Retraining performance (Not in final paper)}
 
 I did some experiments with fine tuning and freezing.
 Unfreezing the weights in the feature extractor during initial training is detrimental to performance, detroying any benefit that would be gained from using a pretrained feature extractor.
@@ -122,7 +191,7 @@ Fine-tuning with VGG weights fixed plateaued at roughly 57.5\%, while fine-tunin
 
 This might be because the feature extractor has been trained on a general purpose dataset and is now being used on a specific scene recognition dataset.
 Zhou et al.~\cite{zhou_learning_2014} have studied this problem and provide a different set of weights for the VGG feature extractor specific for scene recognition.
-I will try these weights in the future, but they have to be transformed from Caffe to TensorFlow.
+I will try these weights in the future, but they have to be transformed from Caffe to \tf{}.
 
 \section{Discussion}
 \label{sec:discussion}
