@@ -45,14 +45,6 @@ model.compile(optimizer=optimizer,
               loss=sparse_categorical_crossentropy,
               metrics=['accuracy'])
 
-print('Hypeparameters:')
-print('num_epochs: {}'.format(NUM_EPOCHS))
-print('training set size: {}'.format(len(y_train)))
-print('test set size: {}'.format(len(y_test)))
-print()
-
-model.summary()
-
 x_train, y_train = mit_prepare_data.load_train_set()
 x_test, y_test = mit_prepare_data.load_test_set()
 
@@ -61,6 +53,14 @@ train_ds = utils.generate_dataset(x_train, y_train, preprocess_function=None)
 test_ds = utils.generate_dataset(
     x_test, y_test, shuffle=False, repeat=False, preprocess_function=None)
 
+
+print('Hypeparameters:')
+print('num_epochs: {}'.format(NUM_EPOCHS))
+print('training set size: {}'.format(len(y_train)))
+print('test set size: {}'.format(len(y_test)))
+print()
+
+model.summary()
 
 loss0, accuracy0 = model.evaluate(test_ds)
 print("Test set loss before warmstart fitting: %f, accuracy: %f" % (loss0, accuracy0))
