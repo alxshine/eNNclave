@@ -25,8 +25,8 @@ test_ds = utils.generate_dataset(
 
 # build model
 PLACES_MODEL_FILE = 'models/vgg16_places365.h5'
-MODEL_FILE = 'models/mit.h5'
-HIST_FILE = 'hist_mit.csv'
+MODEL_FILE = 'models/mit_places.h5'
+HIST_FILE = 'hist_mit_places.csv'
 HIDDEN_NEURONS = 2048
 DROPOUT_RATIO=0.4
 NUM_EPOCHS = 2000
@@ -34,7 +34,7 @@ STEPS_PER_EPOCH = 3
 
 print('Trying to load places model from %s' % PLACES_MODEL_FILE)
 full_model = load_model(PLACES_MODEL_FILE)
-extractor = Sequential(full_model.layers[:-9])
+extractor = full_model.layers[:-9]
 
 dense = Sequential([
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
@@ -45,7 +45,7 @@ dense = Sequential([
 ])
 
 model = Sequential()
-for l in extractor.layers:
+for l in extractor:
     l.trainable = False
     model.add(l)
 model.add(layers.MaxPooling2D(2))
