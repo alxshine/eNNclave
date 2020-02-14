@@ -15,6 +15,7 @@ test_ds = utils.generate_dataset(
 
 
 # build model
+FULL_MODEL_FILE = 'models/vgg16_places365.h5'
 MODEL_FILE = 'models/mit_places.h5'
 HIST_FILE = 'hist_mit_places.csv'
 HIDDEN_NEURONS = 2048
@@ -22,7 +23,8 @@ DROPOUT_RATIO=0.4
 NUM_EPOCHS = 2000
 STEPS_PER_EPOCH = 3
 
-full_model = load_model('models/vgg16_places365.h5')
+print('Trying to load places model from %s' % FULL_MODEL_FILE)
+full_model = load_model(FULL_MODEL_FILE)
 extractor = Sequential(full_model.layers[:-9])
 extractor.trainable = False
 
