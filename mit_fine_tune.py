@@ -37,8 +37,11 @@ UNFREEZE = False
 model = load_model(MODEL_FILE)
 
 if UNFREEZE:
+    print('Unfreezing weights!')
     for l in model.layers:
         l.trainable = True
+else:
+    print('Keeping weights frozen')
 
 optimizer = optimizers.SGD(learning_rate=0.0001)
 model.compile(optimizer=optimizer,
