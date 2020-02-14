@@ -9,7 +9,7 @@ models
 **__pycache__
 **.gdb_history
 logs
-sbatch_launch.sh
+sbatch_*.sh
 **/state.c
 **/state.h
 **/config.xml
