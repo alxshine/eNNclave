@@ -1,0 +1,28 @@
+\begin{tikzpicture}[>=stealth]
+  \draw (0,0) -- (\rottennetwidth,0);
+  \foreach \x in \rottenxticks {
+    \draw (\x,0) -- (\x, -0.1);
+  }
+
+  \draw[->] (0,0) -- (0,\rottenymax+0.1);
+  \foreach \y in \rottenyticks {
+    \draw (-0.1,\y) -- (0.1,\y);
+  }
+  \rottenylabels{-.5}
+  
+  \rottennetsummary{-0.2}
+
+  \rottencpusplita
+  \rottencpusplitb
+  \rottencpusplitc
+  \rottencpusplitd
+  \rottencpusplite
+  \rottencpusplitf
+  \rottencpusplitg
+  \rottencpusplith
+  \rottencpuspliti
+  \rottencpusplitj
+
+  \legend{2cm}{8.3cm}
+
+\end{tikzpicture}
