@@ -35,7 +35,6 @@ STEPS_PER_EPOCH = 3
 print('Trying to load places model from %s' % PLACES_MODEL_FILE)
 full_model = load_model(PLACES_MODEL_FILE)
 extractor = Sequential(full_model.layers[:-9])
-extractor.trainable = False
 
 dense = Sequential([
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
@@ -45,11 +44,14 @@ dense = Sequential([
     layers.Dense(67, activation='softmax')
 ])
 
-model = Sequential([
-    extractor,
-    layers.MaxPooling2D(2),
-    layers.Flatten(),
-    dense])
+model = Sequential()
+for l in extractor.layers:
+    l.trainable = False
+    model.add(l)
+model.add(layers.MaxPooling2D(2))
+model.add(layers.Flatten())
+for l in dense.layers:
+    model.add(l)
 
 print('Hypeparameters:')
 print('num_epochs: {}'.format(NUM_EPOCHS))
