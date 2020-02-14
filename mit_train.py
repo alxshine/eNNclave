@@ -1,6 +1,6 @@
 import tensorflow.keras.layers as layers
 import tensorflow.keras.applications as apps
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 import tensorflow as tf
 
@@ -31,9 +31,7 @@ DROPOUT_RATIO=0.4
 NUM_EPOCHS = 2000
 STEPS_PER_EPOCH = 3
 
-extractor = apps.VGG16(include_top=False, weights='imagenet',
-                  input_shape=((224, 224, 3)))
-extractor.trainable = False
+extractor = apps.VGG16(include_top=False, weights='imagenet', input_shape=(224,224,3))
 
 dense = Sequential([
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
@@ -43,12 +41,14 @@ dense = Sequential([
     layers.Dense(67, activation='softmax')
 ])
 
-model = Sequential([
-    extractor,
-    layers.MaxPooling2D(2),
-    layers.Flatten(),
-    # layers.GlobalAveragePooling2D(name='gap2d'),
-    dense])
+model = Sequential()
+for l in extractor.layers:
+    l.trainable = False
+    model.add(l)
+model.add(layers.MaxPooling2D(2))
+model.add(layers.Flatten())
+for l in dense.layers:
+    model.add(l)
 
 print('Hypeparameters:')
 print('num_epochs: {}'.format(NUM_EPOCHS))
