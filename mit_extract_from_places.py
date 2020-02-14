@@ -1,6 +1,16 @@
-import tensorflow as tf
-from tensorflow.keras.models import load_model, Sequential
 import tensorflow.keras.layers as layers
+import tensorflow.keras.applications as apps
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.losses import sparse_categorical_crossentropy
+import tensorflow as tf
+
+import pandas as pd
+
+tf.compat.v1.set_random_seed(1337)
+
+from os.path import join
+import os
+import json
 
 import utils
 import mit_prepare_data
@@ -13,18 +23,17 @@ train_ds = utils.generate_dataset(x_train, y_train, preprocess_function=None)
 test_ds = utils.generate_dataset(
     x_test, y_test, shuffle=False, repeat=False, preprocess_function=None)
 
-
 # build model
-FULL_MODEL_FILE = 'models/vgg16_places365.h5'
-MODEL_FILE = 'models/mit_places.h5'
-HIST_FILE = 'hist_mit_places.csv'
+PLACES_MODEL_FILE = 'models/vgg16_places365.h5'
+MODEL_FILE = 'models/mit.h5'
+HIST_FILE = 'hist_mit.csv'
 HIDDEN_NEURONS = 2048
 DROPOUT_RATIO=0.4
 NUM_EPOCHS = 2000
 STEPS_PER_EPOCH = 3
 
-print('Trying to load places model from %s' % FULL_MODEL_FILE)
-full_model = load_model(FULL_MODEL_FILE)
+print('Trying to load places model from %s' % PLACES_MODEL_FILE)
+full_model = load_model(PLACES_MODEL_FILE)
 extractor = Sequential(full_model.layers[:-9])
 extractor.trainable = False
 
@@ -33,14 +42,14 @@ dense = Sequential([
     layers.Dropout(DROPOUT_RATIO),
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
-    layers.Dense(x_train.shape[1], activation='softmax')
+    layers.Dense(67, activation='softmax')
 ])
 
-
-model = Sequential([extractor,
-                    layers.MaxPooling2D(2),
-                    layers.Flatten(),
-                    dense])
+model = Sequential([
+    extractor,
+    layers.MaxPooling2D(2),
+    layers.Flatten(),
+    dense])
 
 print('Hypeparameters:')
 print('num_epochs: {}'.format(NUM_EPOCHS))
@@ -50,9 +59,8 @@ print('test set size: {}'.format(len(y_test)))
 print()
 
 model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
+              loss=sparse_categorical_crossentropy,
               metrics=['accuracy'])
-
 
 history = model.fit(train_ds,
                     epochs=NUM_EPOCHS,
