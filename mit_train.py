@@ -40,7 +40,7 @@ dense = Sequential([
     layers.Dropout(DROPOUT_RATIO),
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
-    layers.Dense(x_train.shape[0], activation='softmax')
+    layers.Dense(x_train.shape[1], activation='softmax')
 ])
 
 model = Sequential([
