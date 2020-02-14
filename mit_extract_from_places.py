@@ -26,16 +26,19 @@ full_model = load_model('models/vgg16_places365.h5')
 extractor = Sequential(full_model.layers[:-9])
 extractor.trainable = False
 
-model = Sequential([extractor,
-                    layers.Dense(HIDDEN_NEURONS),
-                    layers.Dropout(DROPOUT_RATIO),
-                    layers.Dense(HIDDEN_NEURONS),
-                    layers.Dropout(DROPOUT_RATIO),
-                    layers.Dense(67)])
+dense = Sequential([
+    layers.Dense(HIDDEN_NEURONS, activation='relu'),
+    layers.Dropout(DROPOUT_RATIO),
+    layers.Dense(HIDDEN_NEURONS, activation='relu'),
+    layers.Dropout(DROPOUT_RATIO),
+    layers.Dense(x_train.shape[1], activation='softmax')
+])
 
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
+
+model = Sequential([extractor,
+                    layers.MaxPooling2D(2),
+                    layers.Flatten(),
+                    dense])
 
 print('Hypeparameters:')
 print('num_epochs: {}'.format(NUM_EPOCHS))
@@ -45,8 +48,9 @@ print('test set size: {}'.format(len(y_test)))
 print()
 
 model.compile(optimizer='adam',
-              loss=sparse_categorical_crossentropy,
+              loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
+
 
 history = model.fit(train_ds,
                     epochs=NUM_EPOCHS,
