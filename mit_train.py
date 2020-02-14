@@ -45,7 +45,9 @@ dense = Sequential([
 
 model = Sequential([
     extractor,
-    layers.GlobalAveragePooling2D(name='gap2d'),
+    layers.MaxPooling2D(2),
+    layers.Flatten(),
+    # layers.GlobalAveragePooling2D(name='gap2d'),
     dense])
 
 print('Hypeparameters:')
