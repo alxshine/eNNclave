@@ -28,19 +28,19 @@ MODEL_FILE = 'models/mit.h5'
 HIST_FILE = 'hist_mit.csv'
 HIDDEN_NEURONS = 2048
 DROPOUT_RATIO=0.4
-NUM_EPOCHS = 2000
+NUM_EPOCHS = 4000
 STEPS_PER_EPOCH = 3
 
 extractor = apps.VGG16(include_top=False, weights='imagenet',
                   input_shape=((224, 224, 3)))
-extractor.trainable = False
+# extractor.trainable = False
 
 dense = Sequential([
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
     layers.Dense(HIDDEN_NEURONS, activation='relu'),
     layers.Dropout(DROPOUT_RATIO),
-    layers.Dense(x_train.shape[1], activation='softmax')
+    layers.Dense(67, activation='softmax')
 ])
 
 model = Sequential([
