@@ -17,29 +17,28 @@ import json
 import utils
 import mit_prepare_data
 
-x_train, y_train = mit_prepare_data.load_train_set()
-x_test, y_test = mit_prepare_data.load_test_set()
-
-# generate datasets
-train_ds = utils.generate_dataset(x_train, y_train, preprocess_function=None)
-test_ds = utils.generate_dataset(
-    x_test, y_test, shuffle=False, repeat=False, preprocess_function=None)
-
+# build model
 if len(sys.argv) < 2:
     print('Usage: %s mit_model_file' % sys.argv[0])
+    sys.exit(1)
 
-# build model
+
+
 MODEL_FILE = sys.argv[1]
-TARGET_MODEL_FILE = 'models/mit_fine_tuned.h5'
-HIST_FILE = 'hist_mit_fine_tuning.csv'
+model_basename = os.path.basename(MODEL_FILE).split('.')[0]
+
+TARGET_MODEL_FILE = 'models/%s_tuned.h5' % model_basename
+HIST_FILE = 'hist_%s_tuning.csv' % model_basename
 NUM_EPOCHS = 200
 STEPS_PER_EPOCH = 3
 VALIDATION_STEPS = 3
+UNFREEZE = False
 
 model = load_model(MODEL_FILE)
 
-extractor = model.get_layer('vgg16')
-extractor.trainable = True
+if UNFREEZE:
+    for l in model.layers:
+        l.trainable = True
 
 optimizer = optimizers.SGD(learning_rate=0.0001)
 model.compile(optimizer=optimizer,
@@ -53,6 +52,15 @@ print('test set size: {}'.format(len(y_test)))
 print()
 
 model.summary()
+
+x_train, y_train = mit_prepare_data.load_train_set()
+x_test, y_test = mit_prepare_data.load_test_set()
+
+# generate datasets
+train_ds = utils.generate_dataset(x_train, y_train, preprocess_function=None)
+test_ds = utils.generate_dataset(
+    x_test, y_test, shuffle=False, repeat=False, preprocess_function=None)
+
 
 loss0, accuracy0 = model.evaluate(test_ds)
 print("Test set loss before warmstart fitting: %f, accuracy: %f" % (loss0, accuracy0))
