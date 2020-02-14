@@ -48,8 +48,9 @@ model = Sequential()
 for l in extractor:
     l.trainable = False
     model.add(l)
-model.add(layers.MaxPooling2D(2))
-model.add(layers.Flatten())
+# model.add(layers.MaxPooling2D(2))
+# model.add(layers.Flatten())
+model.add(layers.GlobalAveragePooling2D())
 for l in dense.layers:
     model.add(l)
 
