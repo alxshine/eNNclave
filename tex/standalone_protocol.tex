@@ -1,0 +1,19 @@
+\documentclass[preview]{standalone}
+
+\usepackage{tikz}
+\usepackage{subcaption}
+
+\input{config/definitions}
+
+\begin{document}
+    \begin{figure}[h]
+        \centering
+        \begin{subfigure}[t]{0.45\textwidth}
+            \input{macros/protocol-online}
+        \end{subfigure}
+        %
+        \begin{subfigure}[t]{0.45\textwidth}
+            \input{macros/protocol-offline}
+        \end{subfigure}
+    \end{figure}
+\end{document}
