@@ -1,0 +1,42 @@
+Imagenet Regular
+Trying to load previously generated test data
+Predicting
+Prediction took 9.304793 seconds
+TF model accuracy: 0.5671641791044776
+
+
+Imagenet Tuned Frozen
+Trying to load previously generated test data
+Predicting
+Prediction took 9.355247 seconds
+TF model accuracy: 0.5708955223880597
+
+
+Imagenet Tuned Unfrozen
+Trying to load previously generated test data
+Predicting
+Prediction took 9.357103 seconds
+TF model accuracy: 0.5970149253731343
+
+
+==================================
+
+Places Regular
+Trying to load previously generated test data
+Predicting
+Prediction took 10.014974 seconds
+TF model accuracy: 0.594776119402985
+
+
+Places Tuned Frozen
+Trying to load previously generated test data
+Predicting
+Prediction took 10.038066 seconds
+TF model accuracy: 0.6007462686567164
+
+
+Places Tuned Unfrozen
+Trying to load previously generated test data
+Predicting
+Prediction took 10.095152 seconds
+TF model accuracy: 0.6291044776119403
