@@ -1,3 +1,4 @@
+""" Based off of GoogleML training git at https://github.com/google/eng-edu """
 import os
 import random
 

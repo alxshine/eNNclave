@@ -1,4 +1,4 @@
-""" Taken from GoogleML training git at git https://github.com/google/eng-edu """
+""" Taken from GoogleML training git at https://github.com/google/eng-edu """
 
 """Module to train n-gram model.
 
