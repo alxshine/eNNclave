@@ -98,4 +98,5 @@ parameters: $(app_name) $(enclave_name) $(wrapper_name)
 clean:
 	rm -rf *.so testitest */*.o app/*_u.* enclave/*_t.* enclave/forward.c* enclave/state* enclave/*.bin
 	cp ../enclave_dummy_forward.c enclave/forward.c
+	cp ../enclave_dummy_config.xml enclave/config.xml
 	rm -f ../../encrypted_params.aes.bin
