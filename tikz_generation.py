@@ -159,8 +159,7 @@ def time_rectangles(times, model_name, platform, y_min, y_max):
         native_time = row['native_time']
         split = int(row.name)
         
-        left_0 = '%s - %s - %d*%s - %s/2 - %f' % (constant_dict['net_width'], constant_dict['layer_height'],
-                split-1, constant_dict['node_distance'], constant_dict['space_between'], rectangle_width/2)
+        left_0 = f"{split+1}*{constant_dict['node_distance']} - {constant_dict['space_between']}/2 - {rectangle_width/2}"
         right_0 = left_0 + ("+%f" % rectangle_width)
         right_1 = left_0 + ("+%f" % (2*rectangle_width))
         
