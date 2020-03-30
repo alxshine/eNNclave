@@ -15,22 +15,6 @@ import os.path as path
 # global config
 Y_MAX = 7
 
-def _get_constant_dict(model_name):
-    template_start_x = '\\%sstartx'
-    template_node_distance = '\\%snodedistance'
-    template_space_between = '\\%sspacebetween'
-    template_layer_height = '\\%slayerheight'
-    template_net_width = '\\%snetwidth'
-
-    return {
-            'start_x': template_start_x % model_name,
-            'node_distance': template_node_distance % model_name,
-            'space_between': template_space_between % model_name,
-            'layer_height': template_layer_height % model_name,
-            'net_width': template_net_width % model_name
-            }
-
-
 def _texify_number(num):
     "uses a-j instead of 0-9 to work with tex"
     ret = ''
@@ -69,26 +53,25 @@ def _calc_log_coord(lin_coord, y_min, y_max):
     log_coord = np.log10(lin_coord)
     return (log_coord-y_min)/scale_width
 
-def net_summary(model, model_name):
+def net_summary(model):
     start_x = 0
     width = 1.8
     height = 0.4
     node_distance = 0.5
     space_between = node_distance - height
-    constant_dict = _get_constant_dict(model_name)
 
     ret = ''
-    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['start_x'], start_x)
-    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['node_distance'], node_distance)
-    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['space_between'], space_between)
-    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['layer_height'], height)
+    ret += '\\newcommand{\\startx}{%f}\n' % (start_x)
+    ret += '\\newcommand{\\nodedistance}{%f}\n' % (node_distance)
+    ret += '\\newcommand{\\spacebetween}{%f}\n' % (space_between)
+    ret += '\\newcommand{\\layerheight}{%f}\n' % (height)
     
-    x_ticks = '\\newcommand{\\%sxticks}{' % (model_name)
+    x_ticks = '\\newcommand{\\xticks}{'
     
     layers = get_all_layers(model)
-    ret += '\n\\newcommand{\\%snetsummary}[1]{\n' % (model_name)
+    ret += '\n\\newcommand{\\netsummary}[1]{\n'
     i = 1
-    for l in layers:
+    for l in reversed(layers):
         if 'input' in l.name or 'embedding' in l.name:
             continue
         
@@ -109,15 +92,15 @@ def net_summary(model, model_name):
     ret += '}\n'
 
     ret += x_ticks
-    ret += '\\newcommand{%s}{%f}\n' % (constant_dict['net_width'], current_x + height)
+    ret += '\\newcommand{\\netwidth}{%f}\n' % (current_x + height)
 
     return ret
 
-def generate_y_axis(model_name, y_min, y_max):
+def generate_y_axis(y_min, y_max):
     y_ticks, y_labels = _build_log_scale(y_min, y_max-1) # TODO: ugly workaround for scales
     ret = ''
-    ret += '\\newcommand{\\%symax}{%f}\n' % (model_name, Y_MAX)
-    ret += '\\newcommand{\\%syticks}{' % (model_name)
+    ret += '\\newcommand{\\ymax}{%f}\n' % Y_MAX
+    ret += '\\newcommand{\\yticks}{'
     with np.errstate(all='raise'):
         try:
             for i,y in enumerate(y_ticks):
@@ -133,7 +116,7 @@ def generate_y_axis(model_name, y_min, y_max):
     ret += '}\n'
 
     # generate command for y labels
-    label_command = "\\newcommand{\\%sylabels}[1]{\n" % model_name
+    label_command = "\\newcommand{\\ylabels}[1]{\n"
     for lin_y, label_text in y_labels:
         log_y = _calc_log_coord(lin_y, y_min, y_max)
 
@@ -146,9 +129,8 @@ def generate_y_axis(model_name, y_min, y_max):
     return ret
 
 
-def time_rectangles(times, model_name, platform, y_min, y_max):
+def time_rectangles(times, platform, y_min, y_max):
     rectangle_width = 0.3
-    constant_dict = _get_constant_dict(model_name)
 
     ret = ''
 
@@ -159,7 +141,7 @@ def time_rectangles(times, model_name, platform, y_min, y_max):
         native_time = row['native_time']
         split = int(row.name)
         
-        left_0 = f"{split+1}*{constant_dict['node_distance']} - {constant_dict['space_between']}/2 - {rectangle_width/2}"
+        left_0 = f"{split+1}*\\nodedistance - \\spacebetween/2 - {rectangle_width/2}"
         right_0 = left_0 + ("+%f" % rectangle_width)
         right_1 = left_0 + ("+%f" % (2*rectangle_width))
         
@@ -176,7 +158,7 @@ def time_rectangles(times, model_name, platform, y_min, y_max):
         node += '\\draw[fill=color4] (%s, %s) rectangle (%s, %f);\n' % (left_0, tf_north, right_0, native_north)
         node += '\\draw[preaction={fill,color7}, pattern=north east lines] (%s, %s) rectangle (%s, %f);\n' % (left_0, native_north, right_0, enclave_north)
 
-        ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (model_name+platform, _texify_number(split), node)
+        ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (platform, _texify_number(split), node)
 
         
     return ret
@@ -200,13 +182,12 @@ if __name__ == "__main__":
             without_extension,_ = path.splitext(basename)
             parts = without_extension.split('_')
             device = parts[-1]
-            model_name = parts[0]
-            print(time_rectangles(times, model_name, device, args.ymin, args.ymax))
+            print(time_rectangles(times, device, args.ymin, args.ymax))
 
     if args.model_files:
         for f in args.model_files:
             dataset = get_dataset_from_model_path(f)
             model = load_model(f, custom_objects={'EnclaveLayer': EnclaveLayer, 'Enclave': Enclave})
-            print(net_summary(model, model_name))
+            print(net_summary(model))
 
-        print(generate_y_axis(model_name, args.ymin, args.ymax))
+        print(generate_y_axis(args.ymin, args.ymax))
