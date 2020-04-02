@@ -156,7 +156,7 @@ def time_rectangles(times, platform, y_min, y_max):
         
         node = '\\draw[fill=color1] (%s, 0) rectangle (%s, %f);\n' % (left_0, right_0, tf_north)
         node += '\\draw[fill=color4] (%s, %s) rectangle (%s, %f);\n' % (left_0, tf_north, right_0, native_north)
-        node += '\\draw[preaction={fill,color7}, pattern=north east lines] (%s, %s) rectangle (%s, %f);\n' % (left_0, native_north, right_0, enclave_north)
+        node += '\\draw[fill=color7] (%s, %s) rectangle (%s, %f);\n' % (left_0, native_north, right_0, enclave_north)
 
         ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (platform, _texify_number(split), node)
 
