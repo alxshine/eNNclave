@@ -1,9 +1,11 @@
 import json
+import os
 
-JSON_FILE = '/data/datasets/Books.json'
-CSV_FILE = '/data/datasets/books.csv'
+DATA_DIR = '/data/datasets/amazon'
+JSON_FILE = 'Books.json'
+CSV_FILE = 'books.csv'
 
-with open(JSON_FILE, 'r') as input_file, open(CSV_FILE, 'w+') as output_file:
+with open(os.path.join(DATA_DIR, JSON_FILE), 'r') as input_file, open(os.path.join(DATA_DIR, CSV_FILE), 'w+') as output_file:
     output_file.write('rating,text\n')
 
     for line in input_file:
