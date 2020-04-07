@@ -13,10 +13,9 @@ import plotille
 SEED = 1337
 
 DATA_DIR = '/data/datasets/amazon'
-JSON_FILE = 'Books.json'
-CSV_FILE = 'books.csv'
+PICKLE_FILE = 'reduced.pkl'
 
-NUM_SAMPLES = 20000
+NUM_SAMPLES = 2000000
 SEQUENCE_LENGTH = 500
 NUM_WORDS = 10000
 TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
@@ -25,28 +24,7 @@ DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 300
 EPOCHS = 300
 
-ratings = []
-texts = []
-
-with open(os.path.join(DATA_DIR, JSON_FILE), 'r') as input_file, open(os.path.join(DATA_DIR, CSV_FILE), 'w+') as output_file:
-    output_file.write('rating,text\n')
-
-    for i in range(NUM_SAMPLES):
-        line = input_file.readline()
-        json_dict = json.loads(line)
-        rating = json_dict['overall']
-        try:
-            text = json_dict['reviewText'].replace('"','')
-
-            ratings.append(rating)
-            texts.append(text)
-        except KeyError:
-            continue
-
-data = pd.DataFrame(list(zip(ratings,texts)), columns=['rating', 'text'])
-
-# shuffle data with fixed seed
-data.sample(frac=1, random_state=SEED)
+data = pd.read_pickle(os.path.join(DATA_DIR, PICKLE_FILE))
 
 split_index = int(0.8*len(data.index))
 train_data = data[:split_index]['text']
