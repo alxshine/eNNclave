@@ -37,6 +37,7 @@ try:
 except IOError:
     print("Not found, generating...")
     data = pd.read_pickle(os.path.join(DATA_DIR, PICKLE_FILE))
+    data = data.sample(frac=1, replace=False, random_state = SEED)
 
     split_index = int(0.8*len(data.index))
     train_data = data[:split_index]['text']
