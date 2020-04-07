@@ -24,7 +24,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 300
-EPOCHS = 300
+EPOCHS = 20
 
 try:
     # load numpy matrices
@@ -42,11 +42,9 @@ except IOError:
     split_index = int(0.8*len(data.index))
     train_data = data[:split_index]['text']
     y_train = np.array(data[:split_index]['rating'])
-    y_train -= 1 # move from [1,5] to [0,4]
 
     test_data = data[split_index:]['text']
     y_test = np.array(data[split_index:]['rating'])
-    y_test -= 1
 
     tokenizer = pre_text.Tokenizer(NUM_WORDS)
     tokenizer.fit_on_texts(train_data)
@@ -65,11 +63,11 @@ except IOError:
 print("DONE")
 
 model = Sequential()
-model.add(layers.Embedding(NUM_WORDS, 64, input_length=SEQUENCE_LENGTH))
-model.add(layers.SeparableConv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
-model.add(layers.MaxPooling1D(pool_size=2))
-model.add(layers.SeparableConv1D(filters=64, kernel_size=3, padding='same', activation='relu'))
-model.add(layers.MaxPooling1D(pool_size=2))
+model.add(layers.Embedding(NUM_WORDS, 32, input_length=SEQUENCE_LENGTH))
+#  model.add(layers.SeparableConv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
+#  model.add(layers.MaxPooling1D(pool_size=2))
+#  model.add(layers.SeparableConv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
+#  model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.Flatten())
 
 model.add(layers.Dropout(DROPOUT_RATE))
@@ -89,10 +87,10 @@ hist = model.fit(
         y_train,
         epochs = EPOCHS,
         shuffle=True,
-        batch_size = 128,
-        verbose = 1,
-        validation_data = (x_train, y_train),
-        validation_steps = 10,
+        batch_size = 256,
+        verbose = 2,
+        validation_data = (x_test, y_test),
+        validation_steps = 100,
         )
 
 history = hist.history
