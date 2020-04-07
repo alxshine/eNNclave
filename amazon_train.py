@@ -8,6 +8,7 @@ import pandas as pd
 
 import json
 import os
+from os.path import join
 import plotille
 
 SEED = 1337
@@ -24,25 +25,42 @@ DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 300
 EPOCHS = 300
 
-data = pd.read_pickle(os.path.join(DATA_DIR, PICKLE_FILE))
+try:
+    # load numpy matrices
+    print(f"Trying to load training data from {DATA_DIR}")
 
-split_index = int(0.8*len(data.index))
-train_data = data[:split_index]['text']
-y_train = np.array(data[:split_index]['rating'])
-y_train -= 1 # move from [1,5] to [0,4]
+    x_train = np.load(join(DATA_DIR, 'x_train.npy'))
+    y_train = np.load(join(DATA_DIR, 'y_train.npy'))
+    x_test = np.load(join(DATA_DIR, 'x_test.npy'))
+    y_test = np.load(join(DATA_DIR, 'y_test.npy'))
+except IOError:
+    print("Not found, generating...")
+    data = pd.read_pickle(os.path.join(DATA_DIR, PICKLE_FILE))
 
-test_data = data[split_index:]['text']
-y_test = np.array(data[split_index:]['rating'])
-y_test -= 1
+    split_index = int(0.8*len(data.index))
+    train_data = data[:split_index]['text']
+    y_train = np.array(data[:split_index]['rating'])
+    y_train -= 1 # move from [1,5] to [0,4]
 
-tokenizer = pre_text.Tokenizer(NUM_WORDS)
-tokenizer.fit_on_texts(train_data)
+    test_data = data[split_index:]['text']
+    y_test = np.array(data[split_index:]['rating'])
+    y_test -= 1
 
-train_sequences = tokenizer.texts_to_sequences(train_data)
-test_sequences = tokenizer.texts_to_sequences(test_data)
+    tokenizer = pre_text.Tokenizer(NUM_WORDS)
+    tokenizer.fit_on_texts(train_data)
 
-x_train = sequence.pad_sequences(train_sequences, maxlen=SEQUENCE_LENGTH)
-x_test = sequence.pad_sequences(test_sequences, maxlen=SEQUENCE_LENGTH)
+    train_sequences = tokenizer.texts_to_sequences(train_data)
+    test_sequences = tokenizer.texts_to_sequences(test_data)
+
+    x_train = sequence.pad_sequences(train_sequences, maxlen=SEQUENCE_LENGTH)
+    x_test = sequence.pad_sequences(test_sequences, maxlen=SEQUENCE_LENGTH)
+
+    np.save(join(DATA_DIR, 'x_train.npy'), x_train)
+    np.save(join(DATA_DIR, 'y_train.npy'), y_train)
+    np.save(join(DATA_DIR, 'x_test.npy'), x_test)
+    np.save(join(DATA_DIR, 'y_test.npy'), y_test)
+
+print("DONE")
 
 model = Sequential()
 model.add(layers.Embedding(NUM_WORDS, 64, input_length=SEQUENCE_LENGTH))

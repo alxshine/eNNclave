@@ -16,7 +16,8 @@ DATA_DIR = '/data/datasets/amazon'
 JSON_FILE = 'Books.json'
 PICKLE_FILE = 'reduced.pkl'
 
-SAMPLES_PER_CLASS = 1850565
+SAMPLES_PER_CLASS = 100000
+#  SAMPLES_PER_CLASS = 1850565
 TOTAL_ROWS = 51311621
 
 sample_counts = {0:0, 1:0, 2:0, 3:0, 4:0}
