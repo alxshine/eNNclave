@@ -14,6 +14,7 @@ SEED = 1337
 
 DATA_DIR = '/data/datasets/amazon'
 PICKLE_FILE = 'reduced.pkl'
+MODEL_FILE = 'models/amazon.h5'
 
 NUM_SAMPLES = 2000000
 SEQUENCE_LENGTH = 500
@@ -86,3 +87,7 @@ fig.plot(range(EPOCHS), history['acc'], label='Training accuracy')
 fig.plot(range(EPOCHS), history['val_acc'], label='Validation accuracy')
 
 print(fig.show(legend=True))
+
+print("Saving model to {MODEL_FILE}")
+model.save(MODEL_FILE)
+
