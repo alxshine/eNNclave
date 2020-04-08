@@ -13,7 +13,7 @@ import plotille
 
 SEED = 1337
 
-DATA_DIR = '/scratch/alex.schloegl/datasets/amazon'
+DATA_DIR = '/data/datasets/amazon'
 PICKLE_FILE = 'reduced.pkl'
 MODEL_FILE = 'models/amazon.h5'
 
@@ -24,7 +24,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 500
-EPOCHS = 20
+EPOCHS = 200
 
 try:
     # load numpy matrices
@@ -77,9 +77,9 @@ model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
 
 model.add(layers.Dense(150, activation='relu'))
-model.add(layers.Dense(5, activation='softmax'))
+model.add(layers.Dense(1, activation='linear'))
 
-model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['acc'])
+model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
 print(model.summary())
 
 hist = model.fit(
@@ -87,7 +87,7 @@ hist = model.fit(
         y_train,
         epochs = EPOCHS,
         shuffle=True,
-        batch_size = 256,
+        batch_size = 128,
         verbose = 2,
         validation_data = (x_test, y_test),
         validation_steps = 100,
@@ -100,13 +100,13 @@ fig.height = 30
 fig.set_x_limits(min_=0, max_=EPOCHS)
 fig.set_y_limits(min_=0, max_=1)
 
-fig.plot(range(EPOCHS), history['acc'], label='Training accuracy')
-fig.plot(range(EPOCHS), history['val_acc'], label='Validation accuracy')
+fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
+fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 print(fig.show(legend=True))
 
-_, acc = model.evaluate(x_test, y_test)
-print(f"Final validation accuracy {acc}")
+_, mae, _ = model.evaluate(x_test, y_test, verbose = 0)
+print(f"Final mean absolute error {mae}")
 
 print(f"Saving model to {MODEL_FILE}")
 model.save(MODEL_FILE)
