@@ -13,7 +13,7 @@ import plotille
 
 SEED = 1337
 
-DATA_DIR = '/data/datasets/amazon'
+DATA_DIR = '/scratch/alex.schloegl/datasets/amazon'
 PICKLE_FILE = 'reduced.pkl'
 MODEL_FILE = 'models/amazon.h5'
 
@@ -23,7 +23,7 @@ NUM_WORDS = 10000
 TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
-HIDDEN_NEURONS = 300
+HIDDEN_NEURONS = 500
 EPOCHS = 20
 
 try:
@@ -63,11 +63,11 @@ except IOError:
 print("DONE")
 
 model = Sequential()
-model.add(layers.Embedding(NUM_WORDS, 32, input_length=SEQUENCE_LENGTH))
-#  model.add(layers.SeparableConv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
-#  model.add(layers.MaxPooling1D(pool_size=2))
-#  model.add(layers.SeparableConv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
-#  model.add(layers.MaxPooling1D(pool_size=2))
+model.add(layers.Embedding(NUM_WORDS, 64, input_length=SEQUENCE_LENGTH))
+model.add(layers.SeparableConv1D(filters=64, kernel_size=3, padding='same', activation='relu'))
+model.add(layers.MaxPooling1D(pool_size=2))
+model.add(layers.SeparableConv1D(filters=128, kernel_size=3, padding='same', activation='relu'))
+model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.Flatten())
 
 model.add(layers.Dropout(DROPOUT_RATE))
@@ -105,6 +105,9 @@ fig.plot(range(EPOCHS), history['val_acc'], label='Validation accuracy')
 
 print(fig.show(legend=True))
 
-print("Saving model to {MODEL_FILE}")
+_, acc = model.evaluate(x_test, y_test)
+print(f"Final validation accuracy {acc}")
+
+print(f"Saving model to {MODEL_FILE}")
 model.save(MODEL_FILE)
 
