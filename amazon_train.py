@@ -79,7 +79,7 @@ model.add(layers.Dropout(DROPOUT_RATE))
 model.add(layers.Dense(150, activation='relu'))
 model.add(layers.Dense(5, activation='softmax'))
 
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['acc'])
+model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['acc'])
 print(model.summary())
 
 hist = model.fit(
