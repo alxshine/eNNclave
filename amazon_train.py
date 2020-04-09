@@ -97,7 +97,6 @@ fig = plotille.Figure()
 fig.width = 60
 fig.height = 30
 fig.set_x_limits(min_=0, max_=EPOCHS)
-fig.set_y_limits(min_=0, max_=1)
 
 fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
 fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
