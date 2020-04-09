@@ -24,7 +24,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 500
-EPOCHS = 8 # this is where we start to overfit
+EPOCHS = 1 # this is where we start to overfit
 
 try:
     # load numpy matrices
@@ -72,7 +72,7 @@ model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', act
 model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=2))
-model.add(layers.GlobalAveragePooling1D())
+model.add(layers.Flatten())
 
 model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
@@ -108,12 +108,18 @@ print(fig.show(legend=True))
 #  _, mae, _ = model.evaluate(x_test, y_test, verbose = 0)
 #  print(f"Final mean absolute error {mae}")
 
-print("Generating true accuracy")
-predictions = model.predict(x_test, verbose = 0)
-cleaned_predictions = predictions.flatten().round()
-acc = np.mean(cleaned_predictions == y_test)
+print("Generating true training accuracy")
+train_predictions = model.predict(x_train, verbose = 0)
+train_cleaned_predictions = predictions.flatten().round()
+train_acc = np.mean(cleaned_predictions == y_train)
 
-print(f'True validation accuracy: {acc*100:.4}')
+print("Generating true test accuracy")
+test_predictions = model.predict(x_test, verbose = 0)
+test_cleaned_predictions = predictions.flatten().round()
+test_acc = np.mean(cleaned_predictions == y_test)
+
+print(f'True training accuracy: {train_acc*100:.4}')
+print(f'True validation accuracy: {test_acc*100:.4}')
 
 print(f"Saving model to {MODEL_FILE}")
 model.save(MODEL_FILE)
