@@ -24,7 +24,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 500
-EPOCHS = 1 # this is where we start to overfit
+EPOCHS = 15 # this is where we start to overfit
 
 try:
     # load numpy matrices
@@ -87,8 +87,7 @@ hist = model.fit(
         y_train,
         epochs = EPOCHS,
         shuffle=True,
-        batch_size = 128,
-        verbose = 1,
+        verbose = 2,
         validation_data = (x_test, y_test),
         validation_steps = 100,
         )
@@ -110,16 +109,13 @@ print(fig.show(legend=True))
 
 print("Generating true training accuracy")
 train_predictions = model.predict(x_train, verbose = 0)
-train_cleaned_predictions = predictions.flatten().round()
-train_acc = np.mean(cleaned_predictions == y_train)
+train_cleaned_predictions = train_predictions.flatten().round()
+train_acc = np.mean(train_cleaned_predictions == y_train)
 
 print("Generating true test accuracy")
 test_predictions = model.predict(x_test, verbose = 0)
-test_cleaned_predictions = predictions.flatten().round()
-test_acc = np.mean(cleaned_predictions == y_test)
+test_cleaned_predictions = test_predictions.flatten().round()
+test_acc = np.mean(test_cleaned_predictions == y_test)
 
 print(f'True training accuracy: {train_acc*100:.4}')
 print(f'True validation accuracy: {test_acc*100:.4}')
-
-print(f"Saving model to {MODEL_FILE}")
-model.save(MODEL_FILE)
