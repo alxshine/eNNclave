@@ -18,3 +18,4 @@ sbatch_*.sh
 **/*.npy
 /hists/
 **/_build
+datasets

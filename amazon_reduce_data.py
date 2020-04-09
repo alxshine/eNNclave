@@ -12,7 +12,7 @@ import plotille
 
 SEED = 42
 
-DATA_DIR = '/data/datasets/amazon'
+DATA_DIR = 'datasets/amazon'
 JSON_FILE = 'Books.json'
 PICKLE_FILE = 'reduced.pkl'
 

@@ -13,7 +13,7 @@ import plotille
 
 SEED = 1337
 
-DATA_DIR = '/data/datasets/amazon'
+DATA_DIR = 'datasets/amazon'
 PICKLE_FILE = 'reduced.pkl'
 MODEL_FILE = 'models/amazon.h5'
 
@@ -24,7 +24,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 500
-EPOCHS = 200
+EPOCHS = 20
 
 try:
     # load numpy matrices
@@ -79,7 +79,7 @@ model.add(layers.Dropout(DROPOUT_RATE))
 model.add(layers.Dense(150, activation='relu'))
 model.add(layers.Dense(1, activation='linear'))
 
-model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
+model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mae', 'acc'])
 print(model.summary())
 
 hist = model.fit(
@@ -88,7 +88,7 @@ hist = model.fit(
         epochs = EPOCHS,
         shuffle=True,
         batch_size = 128,
-        verbose = 2,
+        verbose = 1,
         validation_data = (x_test, y_test),
         validation_steps = 100,
         )
