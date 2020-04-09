@@ -24,7 +24,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 500
-EPOCHS = 20
+EPOCHS = 8 # this is where we start to overfit
 
 try:
     # load numpy matrices
@@ -75,10 +75,11 @@ model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.GlobalAveragePooling1D())
 
 model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
+model.add(layers.Dropout(DROPOUT_RATE))
 model.add(layers.Dense(150, activation='relu'))
 model.add(layers.Dense(1, activation='linear'))
 
-model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mae', 'acc'])
+model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
 print(model.summary())
 
 hist = model.fit(
