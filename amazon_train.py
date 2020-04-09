@@ -70,16 +70,11 @@ model.add(layers.SeparableConv1D(filters=128, kernel_size=3, padding='same', act
 model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=2))
-model.add(layers.Flatten())
+model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
+model.add(layers.MaxPooling1D(pool_size=2))
+model.add(layers.GlobalAveragePooling1D())
 
-model.add(layers.Dropout(DROPOUT_RATE))
 model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
-model.add(layers.Dropout(DROPOUT_RATE))
-model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
-model.add(layers.Dropout(DROPOUT_RATE))
-model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
-model.add(layers.Dropout(DROPOUT_RATE))
-
 model.add(layers.Dense(150, activation='relu'))
 model.add(layers.Dense(1, activation='linear'))
 
@@ -109,9 +104,15 @@ fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 print(fig.show(legend=True))
 
-_, mae, _ = model.evaluate(x_test, y_test, verbose = 0)
-print(f"Final mean absolute error {mae}")
+#  _, mae, _ = model.evaluate(x_test, y_test, verbose = 0)
+#  print(f"Final mean absolute error {mae}")
+
+print("Generating true accuracy")
+predictions = model.predict(x_test, verbose = 0)
+cleaned_predictions = predictions.flatten().round()
+acc = np.mean(cleaned_predictions == y_test)
+
+print(f'True validation accuracy: {acc*100:.4}')
 
 print(f"Saving model to {MODEL_FILE}")
 model.save(MODEL_FILE)
-
