@@ -24,7 +24,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 600
 EPOCHS = 10 # this is where we start to overfit
-LARGE = True
+LARGE = False
 
 if LARGE:
     try:
