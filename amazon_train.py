@@ -50,10 +50,9 @@ if LARGE:
             current_train_data = current_data.sample(frac=TRAIN_SPLIT, replace=False, random_state=SEED).dropna(how='all')
             current_test_data = current_data[~current_data.isin(current_train_data)].dropna(how='all')
 
-            train_data.append(current_train_data)
-            test_data.append(current_test_data)
+            train_data = train_data.append(current_train_data)
+            test_data = test_data.append(current_test_data)
 
-        split_index = int(0.8*len(data.index))
         train_texts = train_data['text']
         y_train = np.array(train_data['rating'])
 
@@ -95,10 +94,10 @@ else:
             current_train_data = current_data.sample(frac=TRAIN_SPLIT, replace=False, random_state=SEED).dropna(how='all')
             current_test_data = current_data[~current_data.isin(current_train_data)].dropna(how='all')
 
-            train_data.append(current_train_data)
-            test_data.append(current_test_data)
+            train_data = train_data.append(current_train_data)
+            test_data = test_data.append(current_test_data)
 
-        split_index = int(0.8*len(data.index))
+        breakpoint()
         train_texts = train_data['text']
         y_train = np.array(train_data['rating'])
 
