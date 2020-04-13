@@ -97,7 +97,6 @@ else:
             train_data = train_data.append(current_train_data)
             test_data = test_data.append(current_test_data)
 
-        breakpoint()
         train_texts = train_data['text']
         y_train = np.array(train_data['rating'])
 
