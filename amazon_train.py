@@ -28,6 +28,7 @@ DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 600
 EPOCHS = 10 # this is where we start to overfit
 LARGE = False
+TRAIN_SPLIT = 0.8
 
 if LARGE:
     try:
@@ -41,20 +42,29 @@ if LARGE:
     except IOError:
         print("Not found, generating...")
         data = pd.read_pickle(os.path.join(DATA_DIR, 'large.pkl'))
-        data = data.sample(frac=1, replace=False, random_state = SEED)
+        train_data = pd.DataFrame(columns=data.columns)
+        test_data = pd.DataFrame(columns=data.columns)
+
+        for i in range(1,5):
+            current_data = data.where(data['rating'] == i)
+            current_train_data = current_data.sample(frac=TRAIN_SPLIT, replace=False, random_state=SEED).dropna(how='all')
+            current_test_data = current_data[~current_data.isin(current_train_data)].dropna(how='all')
+
+            train_data.append(current_train_data)
+            test_data.append(current_test_data)
 
         split_index = int(0.8*len(data.index))
-        train_data = data[:split_index]['text']
-        y_train = np.array(data[:split_index]['rating'])
+        train_texts = train_data['text']
+        y_train = np.array(train_data['rating'])
 
-        test_data = data[split_index:]['text']
-        y_test = np.array(data[split_index:]['rating'])
+        test_texts = test_data['text']
+        y_test = np.array(test_data['rating'])
 
         tokenizer = pre_text.Tokenizer(NUM_WORDS)
-        tokenizer.fit_on_texts(train_data)
+        tokenizer.fit_on_texts(train_texts)
 
-        train_sequences = tokenizer.texts_to_sequences(train_data)
-        test_sequences = tokenizer.texts_to_sequences(test_data)
+        train_sequences = tokenizer.texts_to_sequences(train_texts)
+        test_sequences = tokenizer.texts_to_sequences(test_texts)
 
         x_train = sequence.pad_sequences(train_sequences, maxlen=SEQUENCE_LENGTH)
         x_test = sequence.pad_sequences(test_sequences, maxlen=SEQUENCE_LENGTH)
@@ -76,20 +86,30 @@ else:
     except IOError:
         print("Not found, generating...")
         data = pd.read_pickle(os.path.join(DATA_DIR, 'reduced.pkl'))
-        data = data.sample(frac=1, replace=False, random_state = SEED)
+
+        train_data = pd.DataFrame(columns=data.columns)
+        test_data = pd.DataFrame(columns=data.columns)
+
+        for i in range(1,5):
+            current_data = data.where(data['rating'] == i)
+            current_train_data = current_data.sample(frac=TRAIN_SPLIT, replace=False, random_state=SEED).dropna(how='all')
+            current_test_data = current_data[~current_data.isin(current_train_data)].dropna(how='all')
+
+            train_data.append(current_train_data)
+            test_data.append(current_test_data)
 
         split_index = int(0.8*len(data.index))
-        train_data = data[:split_index]['text']
-        y_train = np.array(data[:split_index]['rating'])
+        train_texts = train_data['text']
+        y_train = np.array(train_data['rating'])
 
-        test_data = data[split_index:]['text']
-        y_test = np.array(data[split_index:]['rating'])
+        test_texts = test_data['text']
+        y_test = np.array(test_data['rating'])
 
         tokenizer = pre_text.Tokenizer(NUM_WORDS)
-        tokenizer.fit_on_texts(train_data)
+        tokenizer.fit_on_texts(train_texts)
 
-        train_sequences = tokenizer.texts_to_sequences(train_data)
-        test_sequences = tokenizer.texts_to_sequences(test_data)
+        train_sequences = tokenizer.texts_to_sequences(train_texts)
+        test_sequences = tokenizer.texts_to_sequences(test_texts)
 
         x_train = sequence.pad_sequences(train_sequences, maxlen=SEQUENCE_LENGTH)
         x_test = sequence.pad_sequences(test_sequences, maxlen=SEQUENCE_LENGTH)

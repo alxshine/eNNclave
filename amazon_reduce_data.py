@@ -36,7 +36,7 @@ with open(os.path.join(DATA_DIR, JSON_FILE), 'r') as input_file:
         json_dict = json.loads(line)
         try:
             text = json_dict['reviewText']
-            rating = int(json_dict['overall'])-1
+            rating = int(json_dict['overall'])
 
             if sample_counts[rating] >= SAMPLES_PER_CLASS:
                 continue
