@@ -2,6 +2,7 @@ import tensorflow.keras.preprocessing.text as pre_text
 import tensorflow.keras.preprocessing.sequence as sequence
 from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as layers
+import tensorflow as tf
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,8 @@ from os.path import join
 import plotille
 
 SEED = 1337
+tf.random.set_seed(SEED)
+np.random.seed(SEED)
 
 DATA_DIR = 'datasets/amazon'
 MODEL_FILE = 'models/amazon.h5'
