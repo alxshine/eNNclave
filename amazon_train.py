@@ -53,6 +53,14 @@ if LARGE:
             train_data = train_data.append(current_train_data)
             test_data = test_data.append(current_test_data)
 
+        train_data = train_data.sample(frac=1, replace=False, random_state=SEED)
+        test_data = test_data.sample(frac=1, replace=False, random_state=SEED)
+
+        print("train data value counts:")
+        print(train_data['rating'].value_counts())
+        print("test data value counts:")
+        print(test_data['rating'].value_counts())
+
         train_texts = train_data['text']
         y_train = np.array(train_data['rating'])
 
@@ -89,13 +97,21 @@ else:
         train_data = pd.DataFrame(columns=data.columns)
         test_data = pd.DataFrame(columns=data.columns)
 
-        for i in range(1,5):
+        for i in range(1,6):
             current_data = data.where(data['rating'] == i)
             current_train_data = current_data.sample(frac=TRAIN_SPLIT, replace=False, random_state=SEED).dropna(how='all')
             current_test_data = current_data[~current_data.isin(current_train_data)].dropna(how='all')
 
             train_data = train_data.append(current_train_data)
             test_data = test_data.append(current_test_data)
+
+        train_data = train_data.sample(frac=1, replace=False, random_state=SEED)
+        test_data = test_data.sample(frac=1, replace=False, random_state=SEED)
+
+        print("train data value counts:")
+        print(train_data['rating'].value_counts())
+        print("test data value counts:")
+        print(test_data['rating'].value_counts())
 
         train_texts = train_data['text']
         y_train = np.array(train_data['rating'])
