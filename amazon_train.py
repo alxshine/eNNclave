@@ -26,7 +26,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 600
-EPOCHS = 6 # this is where we start to overfit
+EPOCHS = 10 # this is where we start to overfit
 LARGE = False
 TRAIN_SPLIT = 0.8
 
@@ -154,7 +154,8 @@ hist = model.fit(
         validation_steps = 100,
         )
 
-model.save('models/amazon.h5')
+print(f"Saving model under {MODEL_FILE}")
+model.save(MODEL_FILE)
 
 history = hist.history
 fig = plotille.Figure()
