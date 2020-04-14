@@ -53,9 +53,6 @@ if LARGE:
             train_data = train_data.append(current_train_data)
             test_data = test_data.append(current_test_data)
 
-        train_data = train_data.sample(frac=1, replace=False, random_state = SEED)
-        test_data = test_data.sample(frac=1, replace=False, random_state = SEED)
-
         train_texts = train_data['text']
         y_train = np.array(train_data['rating'])
 
