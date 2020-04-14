@@ -26,7 +26,7 @@ TOKENIZER_CONFIG_FILE = 'data/amazon_tokenizer_config.json'
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 600
-EPOCHS = 10 # this is where we start to overfit
+EPOCHS = 6 # this is where we start to overfit
 LARGE = False
 TRAIN_SPLIT = 0.8
 
@@ -52,6 +52,9 @@ if LARGE:
 
             train_data = train_data.append(current_train_data)
             test_data = test_data.append(current_test_data)
+
+        train_data = train_data.sample(frac=1, replace=False, random_state = SEED)
+        test_data = test_data.sample(frac=1, replace=False, random_state = SEED)
 
         train_texts = train_data['text']
         y_train = np.array(train_data['rating'])
@@ -127,9 +130,9 @@ model.add(layers.SeparableConv1D(filters=128, kernel_size=3, padding='same', act
 model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=2))
-model.add(layers.SeparableConv1D(filters=384, kernel_size=3, padding='same', activation='relu'))
+model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=2))
-model.add(layers.GlobalAveragePooling1D())
+model.add(layers.Flatten())
 
 model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
@@ -150,6 +153,8 @@ hist = model.fit(
         validation_data = (x_test, y_test),
         validation_steps = 100,
         )
+
+model.save('models/amazon.h5')
 
 history = hist.history
 fig = plotille.Figure()
