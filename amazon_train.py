@@ -145,7 +145,7 @@ model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', act
 model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=2))
-model.add(layers.Flatten())
+model.add(layers.GlobalAveragePooling1D())
 
 model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
