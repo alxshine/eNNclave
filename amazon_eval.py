@@ -2,10 +2,9 @@ from tensorflow.keras.models import load_model
 
 import numpy as np
 
-x_train = np.load('datasets/amazon/x_train.npy')
-y_train = np.load('datasets/amazon/y_train.npy')
-x_test = np.load('datasets/amazon/x_test.npy')
-y_test = np.load('datasets/amazon/y_test.npy')
+from amazon_prepare_data import load_data
+
+x_train, y_train, x_test, y_test = load_data(10000,500,1337)
 
 model = load_model('models/amazon.h5')
 

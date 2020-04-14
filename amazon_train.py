@@ -1,5 +1,3 @@
-import tensorflow.keras.preprocessing.text as pre_text
-import tensorflow.keras.preprocessing.sequence as sequence
 from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as layers
 import tensorflow as tf
@@ -12,70 +10,22 @@ import os
 from os.path import join
 import plotille
 
+from amazon_prepare_data import load_data
+
 SEED = 1337
 tf.random.set_seed(SEED)
 np.random.seed(SEED)
 
-DATA_DIR = 'datasets/amazon'
 MODEL_FILE = 'models/amazon.h5'
 
-SEQUENCE_LENGTH = 500
 NUM_WORDS = 10000
-TOKENIZER_CONFIG_FILE = 'datasets/amazon/tokenizer_config.json'
+SEQUENCE_LENGTH = 500
 
 DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 600
 EPOCHS = 10 # this is where we start to overfit
-TRAIN_SPLIT = 0.8
 
-data = pd.read_pickle(os.path.join(DATA_DIR, 'large.pkl'))
-
-train_data = pd.DataFrame(columns=data.columns)
-test_data = pd.DataFrame(columns=data.columns)
-
-for i in range(1,6):
-    current_data = data.where(data['rating'] == i)
-    current_train_data = current_data.sample(frac=TRAIN_SPLIT, replace=False, random_state=SEED).dropna(how='all')
-    current_test_data = current_data[~current_data.isin(current_train_data)].dropna(how='all')
-
-    train_data = train_data.append(current_train_data)
-    test_data = test_data.append(current_test_data)
-
-train_data = train_data.sample(frac=1, replace=False, random_state=SEED)
-test_data = test_data.sample(frac=1, replace=False, random_state=SEED)
-
-print("train data value counts:")
-print(train_data['rating'].value_counts())
-print("test data value counts:")
-print(test_data['rating'].value_counts())
-
-train_texts = train_data['text']
-y_train = np.array(train_data['rating'])
-
-test_texts = test_data['text']
-y_test = np.array(test_data['rating'])
-
-try:
-    with open(TOKENIZER_CONFIG_FILE, 'r') as f:
-        print("Tokenizer config found, loading...")
-        tokenizer = pre_text.tokenizer_from_json(f.read())
-except IOError:
-    print("Generating tokenizer...")
-    tokenizer = pre_text.Tokenizer(NUM_WORDS)
-    tokenizer.fit_on_texts(train_texts)
-
-    with open(TOKENIZER_CONFIG_FILE, 'w+') as f:
-        print("Saving tokenizer...")
-        json_dict = {'config': tokenizer.get_config()}
-        json.dump(json_dict, f)
-
-train_sequences = tokenizer.texts_to_sequences(train_texts)
-test_sequences = tokenizer.texts_to_sequences(test_texts)
-
-x_train = sequence.pad_sequences(train_sequences, maxlen=SEQUENCE_LENGTH)
-x_test = sequence.pad_sequences(test_sequences, maxlen=SEQUENCE_LENGTH)
-
-print("DONE")
+x_train, y_train, x_test, y_test = load_data(NUM_WORDS, SEQUENCE_LENGTH, seed = SEED)
 
 model = Sequential()
 model.add(layers.Embedding(NUM_WORDS, 64, input_length=SEQUENCE_LENGTH))
