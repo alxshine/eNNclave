@@ -20,7 +20,7 @@ SAMPLES_PER_CLASS = 100000
 #  SAMPLES_PER_CLASS = 1850565
 TOTAL_ROWS = 51311621
 
-sample_counts = {0:0, 1:0, 2:0, 3:0, 4:0}
+sample_counts = {1:0, 2:0, 3:0, 4:0, 5:0}
 
 def _check_complete():
     for v in sample_counts.values():
@@ -55,3 +55,5 @@ data['rating'] = pd.Series(ratings)
 data['text'] = pd.Series(texts, index=data.index)
 data.to_pickle(os.path.join(DATA_DIR, PICKLE_FILE))
 
+print("Sample counts:")
+print(sample_counts)
