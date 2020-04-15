@@ -10,7 +10,7 @@ import os
 from os.path import join
 import plotille
 
-from amazon_prepare_data import load_data
+from amazon_prepare_data import load_books
 
 SEED = 1337
 tf.random.set_seed(SEED)
@@ -25,7 +25,7 @@ DROPOUT_RATE = 0.3
 HIDDEN_NEURONS = 600
 EPOCHS = 10 # this is where we start to overfit
 
-x_train, y_train, x_test, y_test = load_data(NUM_WORDS, SEQUENCE_LENGTH, seed = SEED)
+x_train, y_train, x_test, y_test = load_books(NUM_WORDS, SEQUENCE_LENGTH, seed = SEED)
 
 model = Sequential()
 model.add(layers.Embedding(NUM_WORDS, 64, input_length=SEQUENCE_LENGTH))
