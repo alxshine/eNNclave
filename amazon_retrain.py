@@ -42,12 +42,13 @@ print("\n\n####### Retraining last layer #######")
 original_model = load_model(MODEL_FILE)
 
 last_layer_model = Sequential()
-for i in range(len(original_model.layers[:-1])):
-    l = original_model.layers[i]
+for l in original_model.layers[:-1]:
     l.trainable = False
     last_layer_model.add(l)
 
-last_layer_model.add(layers.Dense(1, activation='linear', name='final'))
+for l in original_model.layers[-1:]:
+    l.trainable = True
+    last_layer_model.add(l)
 
 last_layer_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
 print(last_layer_model.summary())
@@ -60,7 +61,7 @@ hist = last_layer_model.fit(
         y_train,
         epochs = EPOCHS,
         shuffle=True,
-        verbose = 2,
+        verbose = 0,
         validation_data = (x_test, y_test),
         validation_steps = 100,
         )
@@ -77,7 +78,7 @@ fig.set_x_limits(min_=0, max_=EPOCHS)
 fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
 fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
-print(fig.show(legend=True))
+#  print(fig.show(legend=True))
 
 print("Generating true training accuracy")
 train_predictions = last_layer_model.predict(x_train, verbose = 0)
@@ -102,17 +103,13 @@ print("\n\n####### Retraining dense layers #######")
 original_model = load_model(MODEL_FILE)
 
 dense_model = Sequential()
-for i in range(len(original_model.layers[:-6])):
-    l = original_model.layers[i]
+for l in original_model.layers[:-6]:
     l.trainable = False
     dense_model.add(l)
 
-dense_model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
-dense_model.add(layers.Dropout(DROPOUT_RATE))
-dense_model.add(layers.Dense(150, activation='relu'))
-dense_model.add(layers.Dropout(DROPOUT_RATE))
-dense_model.add(layers.Dense(150, activation='relu'))
-dense_model.add(layers.Dense(1, activation='linear'))
+for l in original_model.layers[-6:]:
+    l.trainable = True
+    dense_model.add(l)
 
 dense_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
 print(dense_model.summary())
@@ -125,7 +122,7 @@ hist = dense_model.fit(
         y_train,
         epochs = EPOCHS,
         shuffle=True,
-        verbose = 2,
+        verbose = 0,
         validation_data = (x_test, y_test),
         validation_steps = 100,
         )
@@ -142,7 +139,7 @@ fig.set_x_limits(min_=0, max_=EPOCHS)
 fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
 fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
-print(fig.show(legend=True))
+#  print(fig.show(legend=True))
 
 print("Generating true training accuracy")
 train_predictions = dense_model.predict(x_train, verbose = 0)
@@ -167,26 +164,13 @@ print("\n\n####### Keeping only embedding and tokenizer #######")
 original_model = load_model(MODEL_FILE)
 
 conv_model = Sequential()
-l = original_model.layers[0]
-l.trainable = False
-conv_model.add(l)
+for l in original_model.layers[:1]:
+    l.trainable = False
+    conv_model.add(l)
 
-conv_model.add(layers.SeparableConv1D(filters=64, kernel_size=3, padding='same', activation='relu'))
-conv_model.add(layers.MaxPooling1D(pool_size=2))
-conv_model.add(layers.SeparableConv1D(filters=128, kernel_size=3, padding='same', activation='relu'))
-conv_model.add(layers.MaxPooling1D(pool_size=2))
-conv_model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
-conv_model.add(layers.MaxPooling1D(pool_size=2))
-conv_model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
-conv_model.add(layers.MaxPooling1D(pool_size=2))
-conv_model.add(layers.GlobalAveragePooling1D())
-
-conv_model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
-conv_model.add(layers.Dropout(DROPOUT_RATE))
-conv_model.add(layers.Dense(150, activation='relu'))
-conv_model.add(layers.Dropout(DROPOUT_RATE))
-conv_model.add(layers.Dense(150, activation='relu'))
-conv_model.add(layers.Dense(1, activation='linear'))
+for l in original_model.layers[1:]:
+    l.trainable = True
+    conv_model.add(l)
 
 conv_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
 print(conv_model.summary())
@@ -199,7 +183,7 @@ hist = conv_model.fit(
         y_train,
         epochs = EPOCHS,
         shuffle=True,
-        verbose = 2,
+        verbose = 0,
         validation_data = (x_test, y_test),
         validation_steps = 100,
         )
@@ -216,7 +200,7 @@ fig.set_x_limits(min_=0, max_=EPOCHS)
 fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
 fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
-print(fig.show(legend=True))
+#  print(fig.show(legend=True))
 
 print("Generating true training accuracy")
 train_predictions = conv_model.predict(x_train, verbose = 0)
@@ -240,24 +224,10 @@ print(f'Test MAE: {test_mae:.4}')
 print("\n\n####### Keeping only tokenizer #######")
 original_model = load_model(MODEL_FILE)
 
-full_model.add(layers.Embedding(NUM_WORDS, 64, input_length=SEQUENCE_LENGTH))
-full_model.add(layers.SeparableConv1D(filters=64, kernel_size=3, padding='same', activation='relu'))
-full_model.add(layers.MaxPooling1D(pool_size=2))
-full_model.add(layers.SeparableConv1D(filters=128, kernel_size=3, padding='same', activation='relu'))
-full_model.add(layers.MaxPooling1D(pool_size=2))
-full_model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
-full_model.add(layers.MaxPooling1D(pool_size=2))
-full_model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
-full_model.add(layers.MaxPooling1D(pool_size=2))
-full_model.add(layers.GlobalAveragePooling1D())
-
-full_model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
-full_model.add(layers.Dropout(DROPOUT_RATE))
-full_model.add(layers.Dense(150, activation='relu'))
-full_model.add(layers.Dropout(DROPOUT_RATE))
-full_model.add(layers.Dense(150, activation='relu'))
-full_model.add(layers.Dense(1, activation='linear'))
-
+full_model = Sequential()
+for l in original_model.layers:
+    l.trainable = True
+    full_model.add(l)
 full_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
 print(full_model.summary())
 
@@ -269,7 +239,7 @@ hist = full_model.fit(
         y_train,
         epochs = EPOCHS,
         shuffle=True,
-        verbose = 2,
+        verbose = 0,
         validation_data = (x_test, y_test),
         validation_steps = 100,
         )
@@ -286,7 +256,7 @@ fig.set_x_limits(min_=0, max_=EPOCHS)
 fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
 fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
-print(fig.show(legend=True))
+#  print(fig.show(legend=True))
 
 print("Generating true training accuracy")
 train_predictions = full_model.predict(x_train, verbose = 0)
