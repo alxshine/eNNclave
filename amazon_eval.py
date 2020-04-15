@@ -4,7 +4,7 @@ import numpy as np
 
 from amazon_prepare_data import load_books
 
-def eval_true_accuracy(model, x_train, y_train, x_test, y_test)
+def eval_true_accuracy(model, x_train, y_train, x_test, y_test):
     print("Generating true training accuracy")
     train_predictions = model.predict(x_train, verbose = 0)
     train_cleaned_predictions = train_predictions.flatten().round()

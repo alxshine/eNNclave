@@ -66,7 +66,7 @@ def load_books(num_words, sequence_length, seed = 1337):
 
 def load_cds(num_words, sequence_length, seed = 1337):
     data_dir = join(DATA_DIR, 'cds')
-    data = pd.read_pickle(join(data_dir, 'books.pkl'))
+    data = pd.read_pickle(join(data_dir, 'cds.pkl'))
 
     train_data = pd.DataFrame(columns=data.columns)
     test_data = pd.DataFrame(columns=data.columns)
