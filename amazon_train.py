@@ -27,7 +27,7 @@ EPOCHS = 14 # this is where we start to overfit
 x_train, y_train, x_test, y_test = load_books(NUM_WORDS, SEQUENCE_LENGTH, seed = SEED)
 
 model = Sequential()
-model.add(layers.Embedding(NUM_WORDS, 64, input_length=SEQUENCE_LENGTH))
+model.add(layers.Embedding(NUM_WORDS, 32, input_length=SEQUENCE_LENGTH))
 model.add(layers.SeparableConv1D(filters=64, kernel_size=3, padding='same', activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.SeparableConv1D(filters=128, kernel_size=3, padding='same', activation='relu'))
@@ -38,7 +38,7 @@ model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', act
 model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.Flatten())
 
-model.add(layers.Dense(150, activation='relu'))
+model.add(layers.Dense(600, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
 model.add(layers.Dense(150, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
