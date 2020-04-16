@@ -22,8 +22,7 @@ NUM_WORDS = 10000
 SEQUENCE_LENGTH = 500
 
 DROPOUT_RATE = 0.3
-HIDDEN_NEURONS = 600
-EPOCHS = 10 # this is where we start to overfit
+EPOCHS = 14 # this is where we start to overfit
 
 x_train, y_train, x_test, y_test = load_books(NUM_WORDS, SEQUENCE_LENGTH, seed = SEED)
 
@@ -37,9 +36,9 @@ model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', act
 model.add(layers.MaxPooling1D(pool_size=2))
 model.add(layers.SeparableConv1D(filters=256, kernel_size=3, padding='same', activation='relu'))
 model.add(layers.MaxPooling1D(pool_size=2))
-model.add(layers.GlobalAveragePooling1D())
+model.add(layers.Flatten())
 
-model.add(layers.Dense(HIDDEN_NEURONS, activation='relu'))
+model.add(layers.Dense(150, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
 model.add(layers.Dense(150, activation='relu'))
 model.add(layers.Dropout(DROPOUT_RATE))
