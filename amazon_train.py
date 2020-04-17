@@ -18,7 +18,7 @@ np.random.seed(SEED)
 
 MODEL_FILE = 'models/amazon.h5'
 
-NUM_WORDS = 10000
+NUM_WORDS = 20000
 SEQUENCE_LENGTH = 500
 
 DROPOUT_RATE = 0.3
