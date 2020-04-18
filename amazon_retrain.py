@@ -51,7 +51,7 @@ for l in original_model.layers[-1:]:
     last_layer_model.add(l)
 
 last_layer_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
-print(last_layer_model.summary())
+# print(last_layer_model.summary())
 
 tf.random.set_seed(SEED)
 np.random.seed(SEED)
@@ -62,21 +62,19 @@ hist = last_layer_model.fit(
         epochs = EPOCHS,
         shuffle=True,
         verbose = 0,
-        validation_data = (x_test, y_test),
-        validation_steps = 100,
         )
 
 print(f"Saving model under models/amazon_last_layer.h5")
 last_layer_model.save('models/amazon_last_layer.h5')
 
-history = hist.history
-fig = plotille.Figure()
-fig.width = 60
-fig.height = 30
-fig.set_x_limits(min_=0, max_=EPOCHS)
-
-fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
+# history = hist.history
+# fig = plotille.Figure()
+# fig.width = 60
+# fig.height = 30
+# fig.set_x_limits(min_=0, max_=EPOCHS)
+# 
+# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
+# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 
@@ -96,7 +94,7 @@ for l in original_model.layers[-6:]:
     dense_model.add(l)
 
 dense_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
-print(dense_model.summary())
+# print(dense_model.summary())
 
 tf.random.set_seed(SEED)
 np.random.seed(SEED)
@@ -107,21 +105,19 @@ hist = dense_model.fit(
         epochs = EPOCHS,
         shuffle=True,
         verbose = 0,
-        validation_data = (x_test, y_test),
-        validation_steps = 100,
         )
 
 print(f"Saving model under models/amazon_dense.h5")
 dense_model.save('models/amazon_dense.h5')
 
-history = hist.history
-fig = plotille.Figure()
-fig.width = 60
-fig.height = 30
-fig.set_x_limits(min_=0, max_=EPOCHS)
-
-fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
+# history = hist.history
+# fig = plotille.Figure()
+# fig.width = 60
+# fig.height = 30
+# fig.set_x_limits(min_=0, max_=EPOCHS)
+# 
+# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
+# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 
@@ -141,7 +137,7 @@ for l in original_model.layers[1:]:
     conv_model.add(l)
 
 conv_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
-print(conv_model.summary())
+# print(conv_model.summary())
 
 tf.random.set_seed(SEED)
 np.random.seed(SEED)
@@ -152,21 +148,19 @@ hist = conv_model.fit(
         epochs = EPOCHS,
         shuffle=True,
         verbose = 0,
-        validation_data = (x_test, y_test),
-        validation_steps = 100,
         )
 
-print(f"Saving model under models/amazon_new.h5")
-conv_model.save('models/amazon_new.h5')
+print(f"Saving model under models/amazon_conv.h5")
+conv_model.save('models/amazon_conv.h5')
 
-history = hist.history
-fig = plotille.Figure()
-fig.width = 60
-fig.height = 30
-fig.set_x_limits(min_=0, max_=EPOCHS)
-
-fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
+# history = hist.history
+# fig = plotille.Figure()
+# fig.width = 60
+# fig.height = 30
+# fig.set_x_limits(min_=0, max_=EPOCHS)
+# 
+# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
+# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 
@@ -181,7 +175,7 @@ for l in original_model.layers:
     l.trainable = True
     full_model.add(l)
 full_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
-print(full_model.summary())
+# print(full_model.summary())
 
 tf.random.set_seed(SEED)
 np.random.seed(SEED)
@@ -192,21 +186,19 @@ hist = full_model.fit(
         epochs = EPOCHS,
         shuffle=True,
         verbose = 0,
-        validation_data = (x_test, y_test),
-        validation_steps = 100,
         )
 
 print(f"Saving model under models/amazon_new.h5")
 full_model.save('models/amazon_new.h5')
 
-history = hist.history
-fig = plotille.Figure()
-fig.width = 60
-fig.height = 30
-fig.set_x_limits(min_=0, max_=EPOCHS)
-
-fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
+# history = hist.history
+# fig = plotille.Figure()
+# fig.width = 60
+# fig.height = 30
+# fig.set_x_limits(min_=0, max_=EPOCHS)
+# 
+# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
+# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 

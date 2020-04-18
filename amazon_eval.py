@@ -13,7 +13,7 @@ def eval_true_accuracy(model, x_train, y_train, x_test, y_test):
     train_acc = np.mean(train_cleaned_predictions == y_train)
     train_errors = np.abs(train_predictions - y_train)
     train_mae = np.mean(train_errors)
-    print(plotille.hist(train_errors, bins=50,))    
+    # print(plotille.hist(train_errors, bins=50,))    
 
     print(f'True training accuracy: {train_acc*100:.4}')
     print(f'Training MAE: {train_mae:.4}')
@@ -27,7 +27,7 @@ def eval_true_accuracy(model, x_train, y_train, x_test, y_test):
 
     print(f'True test accuracy: {test_acc*100:.4}')
     print(f'Test MAE: {test_mae:.4}')
-    print(plotille.hist(test_errors, bins=50,))    
+    # print(plotille.hist(test_errors, bins=50,))    
 
 
 if __name__ == '__main__':
