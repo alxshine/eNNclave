@@ -80,7 +80,7 @@ fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 
-eval_true_accuracy(last_layer_model, x_test, y_test)
+eval_true_accuracy(last_layer_model, x_train, y_train, x_test, y_test)
 
 # retrain dense layers
 print("\n\n####### Retraining dense layers #######")
@@ -125,7 +125,7 @@ fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 
-eval_true_accuracy(dense_model, x_test, y_test)
+eval_true_accuracy(dense_model, x_train, y_train, x_test, y_test)
 
 # retrain conv and dense layers
 print("\n\n####### Keeping only embedding and tokenizer #######")
@@ -170,7 +170,7 @@ fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 
-eval_true_accuracy(conv_model, x_test, y_test)
+eval_true_accuracy(conv_model, x_train, y_train, x_test, y_test)
 
 # retrain entire network
 print("\n\n####### Keeping only tokenizer #######")
@@ -210,4 +210,4 @@ fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
 
 #  print(fig.show(legend=True))
 
-eval_true_accuracy(full_model, x_test, y_test)
+eval_true_accuracy(full_model, x_train, y_train, x_test, y_test)
