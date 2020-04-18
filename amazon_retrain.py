@@ -10,7 +10,7 @@ import os
 from os.path import join
 import plotille
 
-from amazon_prepare_data import load_books, load_cds
+from amazon_prepare_data import load_books, load_cds, rebuild_cds
 from amazon_eval import eval_true_accuracy
 
 SEED = 1337
@@ -67,17 +67,6 @@ hist = last_layer_model.fit(
 print(f"Saving model under models/amazon_last_layer.h5")
 last_layer_model.save('models/amazon_last_layer.h5')
 
-# history = hist.history
-# fig = plotille.Figure()
-# fig.width = 60
-# fig.height = 30
-# fig.set_x_limits(min_=0, max_=EPOCHS)
-# 
-# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
-
-#  print(fig.show(legend=True))
-
 eval_true_accuracy(last_layer_model, x_train, y_train, x_test, y_test)
 
 # retrain dense layers
@@ -109,17 +98,6 @@ hist = dense_model.fit(
 
 print(f"Saving model under models/amazon_dense.h5")
 dense_model.save('models/amazon_dense.h5')
-
-# history = hist.history
-# fig = plotille.Figure()
-# fig.width = 60
-# fig.height = 30
-# fig.set_x_limits(min_=0, max_=EPOCHS)
-# 
-# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
-
-#  print(fig.show(legend=True))
 
 eval_true_accuracy(dense_model, x_train, y_train, x_test, y_test)
 
@@ -153,20 +131,10 @@ hist = conv_model.fit(
 print(f"Saving model under models/amazon_conv.h5")
 conv_model.save('models/amazon_conv.h5')
 
-# history = hist.history
-# fig = plotille.Figure()
-# fig.width = 60
-# fig.height = 30
-# fig.set_x_limits(min_=0, max_=EPOCHS)
-# 
-# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
-
-#  print(fig.show(legend=True))
 
 eval_true_accuracy(conv_model, x_train, y_train, x_test, y_test)
 
-# retrain entire network
+#  retrain entire network
 print("\n\n####### Keeping only tokenizer #######")
 original_model = load_model(MODEL_FILE)
 
@@ -188,18 +156,35 @@ hist = full_model.fit(
         verbose = 0,
         )
 
-print(f"Saving model under models/amazon_new.h5")
-full_model.save('models/amazon_new.h5')
-
-# history = hist.history
-# fig = plotille.Figure()
-# fig.width = 60
-# fig.height = 30
-# fig.set_x_limits(min_=0, max_=EPOCHS)
-# 
-# fig.plot(range(EPOCHS), history['mae'], label='Training MAE')
-# fig.plot(range(EPOCHS), history['val_mae'], label='Validation MAE')
-
-#  print(fig.show(legend=True))
+print(f"Saving model under models/amazon_full.h5")
+full_model.save('models/amazon_full.h5')
 
 eval_true_accuracy(full_model, x_train, y_train, x_test, y_test)
+
+#  rebuild even tokenizer
+print("\n\n####### rebuilding everything #######")
+original_model = load_model(MODEL_FILE)
+x_train, y_train, x_test, y_test, _ = rebuild_cds(NUM_WORDS, SEQUENCE_LENGTH, seed = SEED)
+
+new_model = Sequential()
+for l in original_model.layers:
+    l.trainable = True
+    new_model.add(l)
+new_model.compile(loss='mean_absolute_error', optimizer='adam', metrics=['mae', 'acc'])
+#  print(new_model.summary())
+
+tf.random.set_seed(SEED)
+np.random.seed(SEED)
+
+hist = new_model.fit(
+        x_train,
+        y_train,
+        epochs = EPOCHS,
+        shuffle=True,
+        verbose = 0,
+        )
+
+print(f"Saving model under models/amazon_new.h5")
+new_model.save('models/amazon_new.h5')
+
+eval_true_accuracy(new_model, x_train, y_train, x_test, y_test)
