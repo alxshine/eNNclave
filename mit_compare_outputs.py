@@ -27,7 +27,7 @@ tf_model = load_model(tf_model_file)
 enclave_model_file = sys.argv[2]
 enclave_model = load_model(enclave_model_file, custom_objects={'EnclaveLayer': EnclaveLayer})
 
-data_dir = 'data/mit67'
+data_dir = 'datasets/mit67'
 test_file = 'TestImages.txt'
 
 print("Taking {} images from MIT67 test_set".format(NUM_IMAGES))
