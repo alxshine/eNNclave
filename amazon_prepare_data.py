@@ -13,7 +13,7 @@ DATA_DIR = 'datasets/amazon'
 
 TOKENIZER_CONFIG_FILE = 'datasets/amazon/tokenizer_config.json'
 
-def load_books(num_words, sequence_length, seed = 1337):
+def load_books(num_words, sequence_length, seed = 1337, verbose = 0):
     print('Loading books')
     data_dir = join(DATA_DIR, 'books')
     data = pd.read_pickle(join(data_dir, 'books.pkl'))
@@ -32,10 +32,11 @@ def load_books(num_words, sequence_length, seed = 1337):
     train_data = train_data.sample(frac=1, replace=False, random_state=seed)
     test_data = test_data.sample(frac=1, replace=False, random_state=seed)
 
-    print("train data value counts:")
-    print(train_data['rating'].value_counts())
-    print("test data value counts:")
-    print(test_data['rating'].value_counts())
+    if verbose:
+        print("train data value counts:")
+        print(train_data['rating'].value_counts())
+        print("test data value counts:")
+        print(test_data['rating'].value_counts())
 
     train_texts = train_data['text']
     y_train = np.array(train_data['rating'])
@@ -65,7 +66,7 @@ def load_books(num_words, sequence_length, seed = 1337):
 
     return x_train, y_train, x_test, y_test
 
-def load_cds(num_words, sequence_length, seed = 1337):
+def load_cds(num_words, sequence_length, seed = 1337, verbose = 0):
     print('Loading cds')
     data_dir = join(DATA_DIR, 'cds')
     data = pd.read_pickle(join(data_dir, 'cds.pkl'))
@@ -84,10 +85,11 @@ def load_cds(num_words, sequence_length, seed = 1337):
     train_data = train_data.sample(frac=1, replace=False, random_state=seed)
     test_data = test_data.sample(frac=1, replace=False, random_state=seed)
 
-    print("train data value counts:")
-    print(train_data['rating'].value_counts())
-    print("test data value counts:")
-    print(test_data['rating'].value_counts())
+    if verbose:
+        print("train data value counts:")
+        print(train_data['rating'].value_counts())
+        print("test data value counts:")
+        print(test_data['rating'].value_counts())
 
     train_texts = train_data['text']
     y_train = np.array(train_data['rating'])
