@@ -130,14 +130,9 @@ int matutil_conv2(float *input, int h, int w, int c, int f, float *kernels,
 }
 
 void matutil_relu(float *m, int r, int c) {
-  for (int i = 0; i < r * c; i++){
-    // if (m[i] < 0)
-    //   m[i] = 0;
-
-    // (hopefully) constant time ReLU
-    int add = m[i] < 0;
-    m[i] = m[i] + add*m[i];
-  }
+  for (int i = 0; i < r * c; i++)
+    if (m[i] < 0)
+      m[i] = 0;
 }
 
 void matutil_global_average_pooling_1d(float *m, int steps, int c, float *ret){
