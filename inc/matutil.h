@@ -1,6 +1,9 @@
 #ifndef MATUTIL_H
 #define MATUTIL_H
 
+#define PADDING_VALID 0
+#define PADDING_SAME 1
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -19,6 +22,8 @@ extern "C" {
 
     int matutil_conv2(float *input, int h, int w, int c, int f, float *kernels, int kh, int kw, float *biases, float *ret);
 
+    int matutil_depthwise_conv2(float *input, int h, int w, int c, int padding, float *kernels, int kh, int kw, float *ret);
+
     void matutil_relu(float *m, int r, int c); // TODO: This doesn't need 2 dimensions
 
     void matutil_global_average_pooling_1d(float *m, int steps, int c, float *ret);
@@ -28,6 +33,8 @@ extern "C" {
     void matutil_max_pooling_1d(float *m, int steps, int c, int pool_size, float *ret);
 
     void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float *ret);
+
+    void matutil_zero_pad2(float *m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad, float *ret);
 
     int matutil_forward(float *m, int size, int *label);
 

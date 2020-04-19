@@ -61,7 +61,9 @@ add_template = "matutil_add(%s, %d, %d, %s, %d, %d, %s)"
 mult_template = "matutil_multiply(%s, %d, %d, %s, %d, %d, %s)"
 sep_conv1_template = "  matutil_sep_conv1(%s, %d, %d, %d, %s, %s, %d, %s, %s);\n"
 conv2_template = "  matutil_conv2(%s, %d, %d, %d, %d, %s, %d, %d, %s, %s);\n"
+depthwise_conv2_template = "  matutil_depthwise_conv2(%s, %d, %d, %d, %s, %s, %d, %d, %s);\n"
 relu_template = "  matutil_relu(%s, %d, %d);\n"
+zero_pad2_template = "  matutil_zero_pad2(%s, %d, %d, %d, %d, %d, %d, %d, %s);\n"
 softmax_template = """
   // get maximum for label
   int max_index = 0;

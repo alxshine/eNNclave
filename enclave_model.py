@@ -58,8 +58,14 @@ class Enclave(Sequential):
                 bf.write(point_kernels.astype(np.float32).tobytes())
                 bf.write(biases.astype(np.float32).tobytes())
 
+            elif type(l) in [layers.DepthwiseConv2D]:
+                depth_kernels = l.get_weights()[0]
+
+                bf.write(depth_kernels.astype(np.float32).tobytes())
+
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
-                             layers.MaxPooling1D,layers.MaxPooling2D, layers.Flatten]:
+                             layers.MaxPooling1D,layers.MaxPooling2D, layers.Flatten, layers.ZeroPadding2D,
+                             layers.ReLU]:
                 # these layers are either not used during inference or have no parameters
                 continue
             else:
@@ -216,6 +222,34 @@ class Enclave(Sequential):
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
 
+        elif type(layer) in [layers.DepthwiseConv2D]:
+            if layer.padding == 'valid':
+                padding = 'PADDING_VALID'
+            elif layer.padding == 'same':
+                padding = 'PADDING_SAME'
+            else:
+                raise NotImplementedError(f"Padding {layer.padding} not implemented, requested for layer {layer}")
+            
+            _, h, w, c = layer.input_shape
+            f = layer.output_shape[-1]
+            new_size = np.prod(layer.output_shape[1:])
+            new_buffer = tmp_buffer_template % tmp_index
+            kh, kw = layer.kernel_size
+
+            s += load_template % (kw*kh*c*f + f) 
+            kernels = parameter_offset_template % 0
+
+            s += depthwise_conv2_template % (inputs, h, w, c, padding, kernels, kh, kw, new_buffer)
+
+            if layer.activation.__name__ == 'relu':
+                # relu
+                s += relu_template % (new_buffer, 1, new_size)
+            elif layer.activation.__name__ == 'linear':
+                s += "  // no activation function for layer {}".format(layer.name)
+            else:
+                raise NotImplementedError("Unknown activation function {} in layer {}".format(
+                    layer.activation.__name__, layer.name))
+
         elif type(layer) in [layers.GlobalAveragePooling1D]:
             _, steps, c = layer.input_shape
             s = global_average_pooling_1d_template % (inputs, steps, c, tmp_buffer_template % tmp_index)
@@ -235,6 +269,24 @@ class Enclave(Sequential):
 
             new_size = np.prod(layer.output_shape[1:])
             s = max_pooling_2d_template % (inputs, h, w, c, pool_size, tmp_buffer_template % tmp_index)
+
+        elif type(layer) in [layers.ZeroPadding2D]:
+            _, h, w, c = layer.input_shape
+            padding = layer.padding
+            if len(padding) != 2:
+                raise NotImplementedError("Asymmetrical padding is not implemented")
+            new_buffer = tmp_buffer_template % tmp_index
+            
+            s = zero_pad2_template % (inputs, h, w, c, padding[0][0], padding[0][1],
+                    padding[1][0], padding[1][1], new_buffer)
+
+        elif type(layer) in [layers.ReLU]:
+            size = np.prod(layer.output_shape[1:])
+
+            # relu
+            s += relu_template % (inputs, 1, size)
+
+            added_ops = False
 
         elif type(layer) in [layers.Dropout, layers.Flatten]:
             # these layers are inactive during inference, so they can be skipped
