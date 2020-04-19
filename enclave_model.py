@@ -154,6 +154,8 @@ class Enclave(Sequential):
                 s += softmax
             elif layer.activation.__name__ == 'sigmoid':
                 s += sigmoid_template % tmp_name
+            elif layer.activation.__name__ == 'linear':
+                s += '\t//linear activation requires no action\n'
             else:
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
