@@ -16,7 +16,7 @@ DATA_DIR = 'datasets/amazon/cds'
 JSON_FILE = 'CDs_and_Vinyl.json'
 PICKLE_FILE = 'cds.pkl'
 
-SAMPLES_PER_CLASS = 1200
+SAMPLES_PER_CLASS = 200
 #  SAMPLES_PER_CLASS = 1850565
 TOTAL_ROWS = 51311621
 
