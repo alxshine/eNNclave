@@ -23,13 +23,13 @@ for l in mobilenet.layers:
         model.add(l)
 
 model.add(layers.MaxPooling2D(7))
-model.add(layers.Flatten())
+model.add(layers.GlobalAveragePooling2D())
 
 # add dense layers
 model.add(layers.Dropout(0.2))
-model.add(layers.Dense(2048, activation='relu'))
-model.add(layers.Dropout(0.2))
 model.add(layers.Dense(1024, activation='relu'))
+model.add(layers.Dropout(0.2))
+model.add(layers.Dense(512, activation='relu'))
 model.add(layers.Dropout(0.2))
 
 model.add(layers.Dense(5, activation='softmax'))
@@ -37,6 +37,7 @@ model.add(layers.Dense(5, activation='softmax'))
 model.compile(optimizer='adam',
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy'])
+model.summary()
 history = model.fit(x_train, y_train,
         epochs = 100,
         )
