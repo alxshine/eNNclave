@@ -110,5 +110,5 @@ def train_ngram_model(data,
 
 if __name__ == '__main__':
     # Using the IMDb movie reviews dataset to demonstrate training n-gram model
-    data = load_imdb('./data')
+    data = load_imdb('./datasets')
     train_ngram_model(data)

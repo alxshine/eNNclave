@@ -207,11 +207,11 @@ def train_sequence_model(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='./data',
+    parser.add_argument('--data_dir', type=str, default='./datasets',
                         help='input data directory')
     FLAGS, unparsed = parser.parse_known_args()
 
     # Using the Rotten tomatoes movie reviews dataset to demonstrate
     # training sequence model.
-    data = load_data.load_rotten_tomatoes('./data')
+    data = load_data.load_rotten_tomatoes('./datasets')
     train_sequence_model(data)

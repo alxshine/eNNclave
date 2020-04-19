@@ -22,7 +22,7 @@ if len(sys.argv) < 3:
     print("Usage: {} tf_model enclave_model".format(sys.argv[0]))
     sys.exit(1)
 
-_, _, x_test, y_test, _ = load_rotten_tomatoes('./data')
+_, _, x_test, y_test, _ = load_rotten_tomatoes('./datasets')
 all_indices = np.arange(x_test.shape[0])
 print("Taking {} samples from Rotten Tomatoes sentiment test set".format(NUM_SAMPLES))
 test_indices = np.random.choice(all_indices, NUM_SAMPLES)

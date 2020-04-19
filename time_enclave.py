@@ -165,9 +165,9 @@ if __name__ == '__main__':
         test_ds = test_ds.map(utils.preprocess_mnist)
         x_test = np.array([x.numpy() for x,_ in test_ds])
     elif dataset == 'rotten':
-        _, _, x_test, _, _ = rotten_tomatoes_prepare_data.load_rotten_tomatoes('./data')
+        _, _, x_test, _, _ = rotten_tomatoes_prepare_data.load_rotten_tomatoes('./datasets')
     elif dataset == 'imdb':
-        _, _, x_test, y_test = imdb_prepare_data.load_imdb('./data')
+        _, _, x_test, y_test = imdb_prepare_data.load_imdb('./datasets')
     elif dataset == 'amazon':
         _, _, x_test, y_test = amazon_prepare_data.load_cds(20000, 500)
     else:

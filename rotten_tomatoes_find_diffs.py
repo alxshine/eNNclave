@@ -22,7 +22,7 @@ if len(sys.argv) < 3:
     print("Usage: {} tf_model enclave_model".format(sys.argv[0]))
     sys.exit(1)
 
-_, _, x_test, y_test, _ = load_rotten_tomatoes('./data')
+_, _, x_test, y_test, _ = load_rotten_tomatoes('./datasets')
 
 tf_model = load_model(sys.argv[1])
 enclave_model = load_model(sys.argv[2], custom_objects={'EnclaveLayer': EnclaveLayer})
