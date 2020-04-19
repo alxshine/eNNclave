@@ -42,13 +42,9 @@ mobilenet = MobileNet(include_top = False, input_shape=(224,224,3))
 
 model = Sequential()
 
-# model building pass
 for l in mobilenet.layers:
     if type(l).__name__ == 'BatchNormalization':
         continue
-    elif type(l) == layers.Conv2D:
-        new_layer = layers.Conv2D(l.filters, l.kernel_size, l.strides, padding='same', activation='relu', name=l.name)
-        model.add(new_layer)
     else:
         l.trainable = False
         model.add(l)
@@ -64,10 +60,6 @@ model.add(layers.Dense(1024, activation='relu'))
 model.add(layers.Dropout(0.2))
 
 model.add(layers.Dense(5, activation='softmax'))
-
-# weight setting pass
-for layer in model.layers:
-    breakpoint()
 
 model.compile(optimizer='adam',
         loss='sparse_categorical_crossentropy',
