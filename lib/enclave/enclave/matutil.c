@@ -220,6 +220,87 @@ void matutil_max_pooling_2d(float *m, int h, int w, int c, int pool_size, float 
     }
 }
 
+int matutil_depthwise_conv2(float *input, int h, int w, int c, int padding, float *kernels, int kh, int kw, float *ret){
+  int len_ret = h * w * c;
+  for(int i = 0; i< len_ret; ++i)
+    ret[i] = 0;
+
+  int min_row_offset = kh / 2;
+  int min_col_offset = kw / 2;
+
+  int row_start, row_end, col_start, col_end;
+  if(padding == PADDING_SAME){
+    row_start = 0;
+    row_end = h;
+    col_start = 0;
+    col_end = w;
+  } else if (padding == PADDING_VALID){
+    row_start = min_row_offset;
+    row_end = h - min_row_offset;
+    col_start = min_col_offset;
+    col_end = h - min_col_offset;
+  } else {
+    print_error("Unknown padding\n");
+    return 1;
+  }
+
+  for(int i = 0; i<h; ++i){
+    for(int j = 0; j<w; ++j){
+      for(int ki = 0; ki<kh; ++ki){
+        for(int kj = 0; kj<kw; ++kj){
+          for(int ci = 0; ci<c; ++ci){
+              int input_i = i - min_row_offset + ki;
+              int input_j = j - min_col_offset + kj;
+	      
+              // zero padding // TODO: make this data independent
+              if (input_i < 0 || input_i >= h || input_j < 0 || input_j >= w)
+                continue;
+
+              ret[i*w*c + j*c + ci] +=
+                input[input_i*w*c + input_j*c + ci] *
+                kernels[ki*kw*c + kj*c + ci];
+          }
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
+void matutil_zero_pad2(float *m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad, float *ret){
+  int new_width = w + left_pad + right_pad;
+
+  //top pad
+  for(int i=0; i<top_pad; ++i)
+    for(int j=0; j<new_width; ++j)
+      for(int ci=0; ci<c; ++ci)
+        ret[i*new_width*c + j*c + ci] = 0;
+
+  //copy contents
+  for(int i=0; i<h; ++i){
+    //left pad
+    for(int lj=0; lj<left_pad; ++lj)
+      for(int ci=0; ci<c; ++ci)
+        ret[i*new_width*c + lj*c + ci] = 0;
+
+    for(int j=0; j<w; ++j)
+      for(int ci=0; ci<c; ++ci)
+        ret[i*new_width*c + (left_pad+j)*c + ci] = m[i*w*c + j*c + ci];
+
+    //right pad
+    for(int rj=0; rj<left_pad; ++rj)
+      for(int ci=0; ci<c; ++ci)
+        ret[i*new_width*c + (left_pad+w+rj)*c + ci] = 0;
+  }
+
+  //bottom pad
+  for(int i=0; i<bottom_pad; ++i)
+    for(int j=0; j<new_width; ++j)
+      for(int ci=0; ci<c; ++ci)
+        ret[(top_pad+h+i)*new_width*c + j*c + ci] = 0;
+}
+
 void matutil_dump_matrix(float *m, int r, int c) {
     for (int i = 0; i < r; ++i) {
         for (int j = 0; j < c; ++j) {
