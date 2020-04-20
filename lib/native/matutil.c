@@ -10,48 +10,48 @@ int matutil_initialize(void) { return 0; }
 
 int matutil_teardown(void) { return 0; }
 
-void matutil_get_new_dimensions(int r1, int c1, int r2, int c2, int *rr,
-                                int *cr) {
-  *rr = r1;
-  *cr = c2;
+void matutil_get_new_dimensions(int h1, int w1, int h2, int w2, int *hr,
+                                int *wr) {
+  *hr = h1;
+  *wr = w2;
 }
 
-int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2,
+int matutil_multiply(float *m1, int h1, int w1, float *m2, int h2, int w2,
                      float *ret) {
   // check dimensions
-  if (c1 != r2) {
+  if (w1 != h2) {
     fprintf(stderr,
             "Matrices have incompatible dimensions for multiplication %dx%d "
             "and %dx%d\n",
-            r1, c1, r2, c2);
+            h1, w1, h2, w2);
     return -1;
   }
 
-  int rr = r1, cr = c2;
-  for (int y = 0; y < rr; ++y) { // coordinates in ret
-    for (int x = 0; x < cr; ++x) {
-      ret[y * cr + x] = 0;
-      for (int i = 0, j = 0; i < c1; ++i, ++j) {
-        ret[y * cr + x] += m1[y * c1 + j] * m2[i * c2 + x];
-      }
+  int hr = h1, wr = w2;
+  for (int i = 0; i < hr; ++i) { // coordinates in ret
+    for (int j = 0; j < wr; ++j) {
+      ret[i * wr + j] = 0;
+
+      for(int mul_i = 0, mul_j = 0; mul_i < h2; ++mul_i, ++mul_j)
+        ret[i*wr + j] += m1[i*w1 + mul_j] * m2[mul_i*w2 + j];
     }
   }
   return 0;
 }
 
-int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2,
+int matutil_add(float *m1, int h1, int w1, float *m2, int h2, int w2,
                 float *ret) {
-  if (r1 != r2 || c1 != c2) {
+  if (h1 != h2 || w1 != w2) {
     fprintf(
 	    stderr,
 	    "Matrices have incompatible dimensions for addition %dx%d and %dx%d\n",
-	    r1, c1, r2, c2);
+	    h1, w1, h2, w2);
     return -1;
   }
 
-  for (int i = 0; i < r1; ++i) {
-    for (int j = 0; j < c1; ++j) {
-      int coord = i * c1 + j;
+  for (int i = 0; i < h1; ++i) {
+    for (int j = 0; j < w1; ++j) {
+      int coord = i * w1 + j;
       ret[coord] = m1[coord] + m2[coord];
     }
   }
