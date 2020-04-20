@@ -3,42 +3,43 @@
 
 /* #include "matutil.hpp" */
 #include "native_nn.h"
-#include "enclave_nn.h"
+/* #include "enclave_nn.h" */
 
 int main(void) {
   // matutil_initialize();
-  enclave_nn_start();
+  /* enclave_nn_start(); */
   printf("Matutil initialized\n");
 
-  /* int r1 = 2, c1 = 3; */
-  /* float m1[] = {1, 2, 3, 4, 5, 6}; */
-  /* int r2 = 3, c2 = 2; */
-  /* float m2[] = {7, 8, 9, 10, 11, 12}; */
+  int r1 = 1, c1 = 3;
+  float m1[] = {0,1,2};
+  int r2 = 3, c2 = 3;
+  float m2[] = {1,1,.5,.25,1,1,1,1,.5};
 
-  /* printf("m1:\n"); */
-  /* matutil_dump_matrix(m1, r1, c1); */
-  /* printf("m2:\n"); */
-  /* matutil_dump_matrix(m2, r2, c2); */
+  printf("m1:\n");
+  matutil_dump_matrix(m1, r1, c1);
+  printf("m2:\n");
+  matutil_dump_matrix(m2, r2, c2);
 
-  /* int rret, cret; */
-  /* printf("get_new_dimensions\n"); */
-  /* matutil_get_new_dimensions(r1, c1, r2, c2, &rret, &cret); */
-  /* float mret[rret * cret]; */
-  /* printf("multiply\n"); */
-  /* if (matutil_multiply(m1, r1, c1, m2, r2, c2, mret)) { */
-  /*   return 1; */
-  /* }; */
+  int rret, cret;
+  printf("get_new_dimensions\n");
+  matutil_get_new_dimensions(r1, c1, r2, c2, &rret, &cret);
+  float mret[rret * cret];
+  printf("multiply\n");
+  if (matutil_multiply(m1, r1, c1, m2, r2, c2, mret)) {
+    return 1;
+  };
 
-  /* printf("mret:\n"); */
-  /* matutil_dump_matrix(mret, rret, cret); */
+  printf("mret:\n");
+  matutil_dump_matrix(mret, rret, cret);
 
-  /* float mret2[rret * cret]; */
-  /* printf("add\n"); */
-  /* if (matutil_add(mret, rret, cret, mret, rret, cret, mret2)) */
-  /*   return 1; */
+  float mret2[rret * cret];
+  float madd[] = {1,1,1};
+  printf("add\n");
+  if (matutil_add(mret, rret, cret, madd, rret, cret, mret2))
+    return 1;
 
-  /* printf("mret2:\n"); */
-  /* matutil_dump_matrix(mret2, rret, cret); */
+  printf("mret2:\n");
+  matutil_dump_matrix(mret2, rret, cret);
 
   /* mret2[2] = -1; */
   /* printf("relu\n"); */
@@ -47,18 +48,18 @@ int main(void) {
   /* printf("mret2:\n"); */
   /* matutil_dump_matrix(mret2, rret, cret); */
 
-  int c = 14*14*512;
-  float input[c];
-  for (int i = 0; i < c; ++i) {
-    input[i] = i;
-  }
+  /* int c = 14*14*512; */
+  /* float input[c]; */
+  /* for (int i = 0; i < c; ++i) { */
+    /* input[i] = i; */
+  /* } */
 
-  int native_label = -1;
-  int enclave_label = -1;
-  enclave_nn_forward(input, c, &enclave_label);
-  native_nn_forward(input, c, &native_label);
-  printf("Enclave label: %d\n", enclave_label);
-  printf("Native label: %d\n", native_label);
+  /* int native_label = -1; */
+  /* int enclave_label = -1; */
+  /* enclave_nn_forward(input, c, &enclave_label); */
+  /* native_nn_forward(input, c, &native_label); */
+  /* printf("Enclave label: %d\n", enclave_label); */
+  /* printf("Native label: %d\n", native_label); */
 
   /* printf("\n\nConvolution:\n"); */
   /* int conv_input_size = 18; */
