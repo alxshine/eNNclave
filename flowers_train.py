@@ -1,9 +1,10 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.applications import MobileNet
+from tensorflow.keras.applications import VGG19
 import tensorflow.keras.layers as layers
 
 from flowers_prepare_data import load_data
+import utils
 
 IMG_SIZE = 224
 
@@ -11,26 +12,14 @@ BATCH_SIZE = 32
 
 x_train, y_train, x_test, y_test = load_data()
 
-mobilenet = MobileNet(include_top = False, input_shape=(224,224,3))
+extractor = VGG19()
 
 model = Sequential()
 
-for l in mobilenet.layers:
-    if type(l).__name__ == 'BatchNormalization':
-        continue
-    else:
-        l.trainable = False
-        model.add(l)
-
-model.add(layers.MaxPooling2D(7))
-model.add(layers.GlobalAveragePooling2D())
-
-# add dense layers
-model.add(layers.Dropout(0.2))
-model.add(layers.Dense(1024, activation='relu'))
-model.add(layers.Dropout(0.2))
-model.add(layers.Dense(512, activation='relu'))
-model.add(layers.Dropout(0.2))
+all_layers = utils.get_all_layers(extractor)
+for l in all_layers[:-1]:
+    l.trainable = False
+    model.add(l)
 
 model.add(layers.Dense(5, activation='softmax'))
 
