@@ -28,7 +28,8 @@ model.compile(optimizer='adam',
         metrics=['accuracy'])
 model.summary()
 history = model.fit(x_train, y_train,
-        epochs = 100,
+        epochs = 20,
+	verbose = 0,
         )
 
 loss0, accuracy0 = model.evaluate(x_test, y_test)
