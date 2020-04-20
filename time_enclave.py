@@ -19,6 +19,7 @@ import mit_prepare_data
 import rotten_tomatoes_prepare_data
 import imdb_prepare_data
 import amazon_prepare_data
+import flowers_prepare_data
 
 def time_from_file(model_path, samples):
     model = load_model(model_path, custom_objects={'EnclaveLayer': EnclaveLayer})
@@ -34,8 +35,8 @@ def _predict_samples(samples, num_classes, forward):
         label = forward(x.astype(np.float32).tobytes(), np.prod(x.shape))
         #  print('label: %d\n' % label)
 
-        if label >= num_classes:
-            #  print("Got label %d, out of %d possible..." % (label, num_classes))
+        if label >= num_classes or label < 0:
+            print("Got label %d, out of %d possible..." % (label, num_classes))
             continue
 
         if num_classes > 1:
@@ -170,6 +171,8 @@ if __name__ == '__main__':
         _, _, x_test, y_test = imdb_prepare_data.load_imdb('./datasets')
     elif dataset == 'amazon':
         _, _, x_test, y_test = amazon_prepare_data.load_cds(20000, 500)
+    elif dataset == 'flowers':
+        _, _, x_test, y_test = flowers_prepare_data.load_data()
     else:
         raise ValueError("Unknown dataset " + dataset)
 
@@ -178,6 +181,7 @@ if __name__ == '__main__':
     
     time_dict = time_from_file(model_path, samples)
     time_dict['layers_in_enclave'] = layers_in_enclave
+    time_dict['correct_label'] = int(y_test[sample_index])
 
     print("\n\n")
     print(json.dumps(time_dict, indent=2))
