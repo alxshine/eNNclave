@@ -12,46 +12,10 @@ import json
 import argparse
 import os.path as path
 
+import tikz_utils
+
 # global config
 Y_MAX = 7
-
-def _texify_number(num):
-    "uses a-j instead of 0-9 to work with tex"
-    ret = ''
-
-    if num == 0:
-        return 'a'
-    
-    #  for i in range(num_digits):
-    while num > 0:
-        int_val = ord('a') + (num % 10)
-        ret += chr(int_val)
-        num //= 10
-        
-        #  if num == 0:
-            #  ret += 'a'
-
-    return ret[::-1]
-
-def _build_log_scale(smallest_exponent, largest_exponent):
-    num_scales = largest_exponent - smallest_exponent + 1
-    y_ticks = np.empty(num_scales*9+1)
-    y_labels = []
-    for i, exp in enumerate(range(smallest_exponent, largest_exponent+1)):
-        base = 10**exp
-        y_labels.append((base, "10^{%d}" % exp))
-        for j in range(9):
-            y_ticks[i*9+j] = (j+1)*base
-
-    y_ticks[-1] = 10*base
-    y_labels.append((10*base, "10^{%d}" % (exp + 1)))
-
-    return y_ticks, y_labels
-
-def _calc_log_coord(lin_coord, y_min, y_max):
-    scale_width = (y_max+0.05) - (y_min-0.05)
-    log_coord = np.log10(lin_coord)
-    return (log_coord-y_min)/scale_width
 
 def net_summary(model):
     start_x = 0
@@ -96,39 +60,6 @@ def net_summary(model):
 
     return ret
 
-def generate_y_axis(y_min, y_max):
-    y_ticks, y_labels = _build_log_scale(y_min, y_max-1) # TODO: ugly workaround for scales
-    ret = ''
-    ret += '\\newcommand{\\ymax}{%f}\n' % Y_MAX
-    ret += '\\newcommand{\\yticks}{'
-    with np.errstate(all='raise'):
-        try:
-            for i,y in enumerate(y_ticks):
-                coordinate = _calc_log_coord(y, y_min, y_max)
-            
-                if i > 0:
-                    ret += ','
-                ret += '%f' % (coordinate*Y_MAX)
-        except FloatingPointError as e:
-            print("ERROR: %s" % e, file=sys.stderr)
-            print("y: %f" % y, file=sys.stderr)
-
-    ret += '}\n'
-
-    # generate command for y labels
-    label_command = "\\newcommand{\\ylabels}[1]{\n"
-    for lin_y, label_text in y_labels:
-        log_y = _calc_log_coord(lin_y, y_min, y_max)
-
-        current_label = "\\draw (#1, %f) node {\\tiny $%s$};\n" % (log_y * Y_MAX, label_text)
-        label_command += current_label
-    label_command += "}\n"
-
-    ret += label_command
-
-    return ret
-
-
 def time_rectangles(times, platform, y_min, y_max):
     rectangle_width = 0.3
 
@@ -137,8 +68,8 @@ def time_rectangles(times, platform, y_min, y_max):
     # generate time rectangles
     for i, row in times.iterrows():
         tf_time = row['tf_time']
-        enclave_time = row['combined_enclave_time']
-        native_time = row['native_time']
+        enclave_time = row['enclave_time']
+        setup_time = row['enclave_setup_time']
         split = int(row.name)
         
         left_0 = f"{split+1}*\\nodedistance - \\spacebetween/2 - {rectangle_width/2}"
@@ -147,18 +78,18 @@ def time_rectangles(times, platform, y_min, y_max):
         
         with np.errstate(all='raise'):
             try:
-                tf_north = _calc_log_coord(tf_time, y_min, y_max)*Y_MAX
-                native_north = _calc_log_coord(tf_time + native_time, y_min, y_max)*Y_MAX
-                enclave_north = _calc_log_coord(tf_time + native_time + enclave_time, y_min, y_max)*Y_MAX
+                tf_north = tikz_utils.calc_log_coord(tf_time, y_min, y_max)*Y_MAX
+                enclave_north = tikz_utils.calc_log_coord(tf_time + enclave_time, y_min, y_max)*Y_MAX
+                setup_north = tikz_utils.calc_log_coord(tf_time + enclave_time + setup_time, y_min, y_max)*Y_MAX
             except FloatingPointError as e:
                 print("ERROR: %s" % e, file=sys.stderr)
                 print("GPU time: %f, native time: %f, enclave time: %f" % (tf_time, native_time, enclave_time), file=sys.stderr)
         
         node = '\\draw[fill=color1] (%s, 0) rectangle (%s, %f);\n' % (left_0, right_0, tf_north)
-        node += '\\draw[fill=color4] (%s, %s) rectangle (%s, %f);\n' % (left_0, tf_north, right_0, native_north)
-        node += '\\draw[fill=color7] (%s, %s) rectangle (%s, %f);\n' % (left_0, native_north, right_0, enclave_north)
+        node += '\\draw[fill=color4] (%s, %s) rectangle (%s, %f);\n' % (left_0, tf_north, right_0, enclave_north)
+        node += '\\draw[fill=color7] (%s, %s) rectangle (%s, %f);\n' % (left_0, enclave_north, right_0, setup_north)
 
-        ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (platform, _texify_number(split), node)
+        ret += '\\newcommand{\\%ssplit%s}{%s}\n' % (platform, tikz_utils.texify_number(split), node)
 
         
     return ret
@@ -190,4 +121,4 @@ if __name__ == "__main__":
             model = load_model(f, custom_objects={'EnclaveLayer': EnclaveLayer, 'Enclave': Enclave})
             print(net_summary(model))
 
-        print(generate_y_axis(args.ymin, args.ymax))
+        print(tikz_utils.generate_y_axis(args.ymin, args.ymax))
