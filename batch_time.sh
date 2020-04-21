@@ -8,7 +8,7 @@ exit_on_error() {
 }
 
 
-runs_per_index=5
+runs_per_index=20
 
 if [ -z ${2+x} ];
 then
