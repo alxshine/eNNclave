@@ -159,14 +159,16 @@ if __name__ == '__main__':
     dataset = utils.get_dataset_from_model_path(model_path)
 
     np.random.seed(1337)
+    sample_index = 42
     if dataset == 'mit':
-        x_test, _ = mit_prepare_data.load_test_set()
+        x_test, y_test = mit_prepare_data.load_test_set()
+        sample_index = 20
     elif dataset == 'mnist':
         test_ds = tfds.load('mnist', split=tfds.Split.TEST, as_supervised=True)
         test_ds = test_ds.map(utils.preprocess_mnist)
         x_test = np.array([x.numpy() for x,_ in test_ds])
     elif dataset == 'rotten':
-        _, _, x_test, _, _ = rotten_tomatoes_prepare_data.load_rotten_tomatoes('./datasets')
+        _, _, x_test, y_test, _ = rotten_tomatoes_prepare_data.load_rotten_tomatoes('./datasets')
     elif dataset == 'imdb':
         _, _, x_test, y_test = imdb_prepare_data.load_imdb('./datasets')
     elif dataset == 'amazon':
@@ -176,7 +178,6 @@ if __name__ == '__main__':
     else:
         raise ValueError("Unknown dataset " + dataset)
 
-    sample_index = 42
     samples = x_test[sample_index:sample_index+1]
     
     time_dict = time_from_file(model_path, samples)

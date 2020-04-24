@@ -41,7 +41,7 @@ def net_summary(model):
         
         cleaned_name = l.name.replace('_','\_')
         current_x = start_x + node_distance*i
-        ret += "\\node[draw=black,minimum width=%fcm,minimum height=%fcm,rotate=-90, anchor=south west] at (%f,#1) {\\tiny %s};" \
+        ret += "\\node[draw=black,minimum width=%fcm,minimum height=%fcm,rotate=90, anchor=south west] at (%f,#1) {\\tiny %s};" \
             % (width, height, current_x, cleaned_name)
         ret += "\n"
 
