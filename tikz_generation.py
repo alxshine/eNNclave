@@ -39,9 +39,12 @@ def net_summary(model):
         if 'input' in l.name or 'embedding' in l.name:
             continue
         
-        cleaned_name = l.name.replace('_','\_')
+        if l.name == 'global_average_pooling2d':
+            cleaned_name = 'gap2d'
+        else:
+            cleaned_name = l.name.replace('_','\_')
         current_x = start_x + node_distance*i
-        ret += "\\node[draw=black,minimum width=%fcm,minimum height=%fcm,rotate=90, anchor=south west] at (%f,#1) {\\tiny %s};" \
+        ret += "\\node[draw=black,minimum width=%fcm,minimum height=%fcm,rotate=90, anchor=north east] at (%f,#1) {\\tiny %s};" \
             % (width, height, current_x, cleaned_name)
         ret += "\n"
 
