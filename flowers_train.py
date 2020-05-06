@@ -12,14 +12,19 @@ BATCH_SIZE = 32
 
 x_train, y_train, x_test, y_test = load_data()
 
-extractor = VGG19()
+extractor = VGG19(include_top=False, input_shape=(224,224,3))
 
 model = Sequential()
 
 all_layers = utils.get_all_layers(extractor)
-for l in all_layers[:-1]:
+for l in all_layers:
     l.trainable = False
     model.add(l)
+
+model.add(layers.Flatten())
+model.add(layers.Dense(800, activation='relu'))
+model.add(layers.Dense(800, activation='relu'))
+model.add(layers.Dense(600, activation='relu'))
 
 model.add(layers.Dense(5, activation='softmax'))
 
