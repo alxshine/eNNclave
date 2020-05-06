@@ -1,12 +1,17 @@
+print("Setting seeds")
+from numpy.random import seed
+seed(1337)
+import tensorflow as tf
+tf.random.set_seed(1337)
+print("Done")
+
 import tensorflow.keras.layers as layers
 import tensorflow.keras.applications as apps
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.losses import sparse_categorical_crossentropy
-import tensorflow as tf
 
 import pandas as pd
 
-tf.compat.v1.set_random_seed(1337)
 
 from os.path import join
 import os
