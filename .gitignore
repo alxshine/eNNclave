@@ -19,3 +19,4 @@ sbatch_*.sh
 /hists/
 **/_build
 datasets
+.vscode
