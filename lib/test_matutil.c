@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 
-/* #include "matutil.hpp" */
+#include "matutil.h"
 #include "native_nn.h"
 /* #include "enclave_nn.h" */
 

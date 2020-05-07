@@ -1,10 +1,7 @@
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
-
 #include <math.h>
 
 #include "matutil.h"
+#include "output.h"
 
 int matutil_initialize(void) { return 0; }
 
@@ -20,7 +17,7 @@ int matutil_multiply(float *m1, int h1, int w1, float *m2, int h2, int w2,
                      float *ret) {
   // check dimensions
   if (w1 != h2) {
-    fprintf(stderr,
+    print_err(
             "Matrices have incompatible dimensions for multiplication %dx%d "
             "and %dx%d\n",
             h1, w1, h2, w2);
@@ -42,8 +39,7 @@ int matutil_multiply(float *m1, int h1, int w1, float *m2, int h2, int w2,
 int matutil_add(float *m1, int h1, int w1, float *m2, int h2, int w2,
                 float *ret) {
   if (h1 != h2 || w1 != w2) {
-    fprintf(
-	    stderr,
+    print_err(
 	    "Matrices have incompatible dimensions for addition %dx%d and %dx%d\n",
 	    h1, w1, h2, w2);
     return -1;
@@ -238,7 +234,7 @@ int matutil_depthwise_conv2(float *input, int h, int w, int c, int padding, floa
     col_start = min_col_offset;
     col_end = h - min_col_offset;
   } else {
-    printf("Unknown padding\n");
+    print_out("Unknown padding\n");
     return 1;
   }
 
@@ -303,41 +299,20 @@ void matutil_zero_pad2(float *m, int h, int w, int c, int top_pad, int bottom_pa
 void matutil_dump_matrix(float *m, int r, int c) {
   for (int i = 0; i < r; ++i) {
     for (int j = 0; j < c; ++j) {
-      printf("%.09f, ", m[i * c + j]);
+      print_out("%.09f, ", m[i * c + j]);
     }
-    printf("\n");
+    print_out("\n");
   }
 }
 
 void matutil_dump_matrix3(float *m, int h, int w, int c){
   for (int ci = 0; ci < c; ++ci) {
-    printf("Ci=%d:\n", ci);
+    print_out("Ci=%d:\n", ci);
     for (int i = 0; i < h; ++i) {
       for (int j = 0; j < w; ++j) {
-	printf("%.07f, ", m[i*w*c + j*c + ci]);
+	print_out("%.07f, ", m[i*w*c + j*c + ci]);
       }
-      printf("\n");
+      print_out("\n");
     }
   }
 }
-
-int print_error(const char *fmt, ...) {
-  char buf[BUFSIZ] = {'\0'};
-  va_list ap;
-  va_start(ap, fmt);
-  vsnprintf(buf, BUFSIZ, fmt, ap);
-  va_end(ap);
-  fprintf(stderr, "%s", buf);
-  return (int)strnlen(buf, BUFSIZ - 1) + 1;
-}
-
-int print(const char *fmt, ...) {
-  char buf[BUFSIZ] = {'\0'};
-  va_list ap;
-  va_start(ap, fmt);
-  vsnprintf(buf, BUFSIZ, fmt, ap);
-  va_end(ap);
-  fprintf(stdout, "%s", buf);
-  return (int)strnlen(buf, BUFSIZ - 1) + 1;
-}
-
