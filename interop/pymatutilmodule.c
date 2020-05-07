@@ -1,42 +1,7 @@
 #define PY_SSIZE_T_CLEAN
-#ifdef HOST
 #include <python3.7m/Python.h>
-#else
-#include <python3.6m/Python.h>
-#endif
 
-#include "enclave_nn.h"
 #include "native_nn.h"
-
-static PyObject *pymatutil_test_bytes(PyObject *self, PyObject *args) {
-  // return range(10) to test return value interoperability
-  int test[10];
-  for (int i = 0; i < 10; ++i) {
-    test[i] = i;
-  }
-
-  PyObject *ret = PyBytes_FromStringAndSize((char *)test, 40);
-  return ret;
-}
-
-static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
-  const PyBytesObject *b;
-  int s;
-
-  if (!PyArg_ParseTuple(args, "Si", &b, &s))
-    return NULL;
-
-  float *m = (float *)PyBytes_AsString((PyObject *)b);
-  int label = -1;
-  printf("Enclave NN forward\n");
-  int sts = enclave_nn_forward(m, s, &label);
-  if (sts){
-    PyErr_SetString(PyExc_IOError, "Error in enclave");
-    return NULL; // TODO: do some error handling
-  }
-
-  return PyLong_FromLong(label);
-}
 
 static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
@@ -57,6 +22,45 @@ static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
   return PyLong_FromLong(label);
 }
 
+#if SGX_MODE == SIM
+
+static PyObject *pymatutil_forward(PyObject *self, PyObject *args){
+  return pymatutil_native_forward(self, args);
+}
+
+static PyMethodDef PymatutilMethods[] = {
+    {"native_forward", pymatutil_native_forward, METH_VARARGS, "Execute forward pass of enclave layers in native C"},
+    {"forward", pymatutil_forward, METH_VARARGS, "Execute forward pass of enclave layers"},
+    {NULL, NULL, 0, NULL} // Sentinel
+};
+
+#else
+
+#include "enclave_nn.h"
+
+static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
+  const PyBytesObject *b;
+  int s;
+
+  if (!PyArg_ParseTuple(args, "Si", &b, &s))
+    return NULL;
+
+  float *m = (float *)PyBytes_AsString((PyObject *)b);
+  int label = -1;
+  printf("Enclave NN forward\n");
+  int sts = enclave_nn_forward(m, s, &label);
+  if (sts){
+    PyErr_SetString(PyExc_IOError, "Error in enclave");
+    return NULL; // TODO: do some error handling
+  }
+
+  return PyLong_FromLong(label);
+}
+
+static PyObject *pymatutil_forward(PyObject *self, PyObject *args){
+  return pymatutil_enclave_forward(self, args);
+}
+
 static PyObject *pymatutil_initialize(PyObject *self, PyObject *args){
   enclave_nn_start();
   return Py_None;
@@ -74,6 +78,8 @@ static PyMethodDef PymatutilMethods[] = {
     {"native_forward", pymatutil_native_forward, METH_VARARGS, "Execute forward pass of enclave layers in native C"},
     {NULL, NULL, 0, NULL} // Sentinel
 };
+
+#endif
 
 static struct PyModuleDef pymatutilmodule = {
     PyModuleDef_HEAD_INIT,
