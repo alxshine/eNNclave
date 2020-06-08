@@ -14,7 +14,7 @@ RUN sh -c 'echo yes | ./sgx_linux_x64_sdk_*.bin'
 
 # build requisites
 RUN apt-get install -y \
-  build-essential python3.7-dev
+  build-essential python3.7-dev python3-pip
 
 WORKDIR /eNNclave
 RUN \
@@ -30,7 +30,7 @@ USER ennclave
 
 RUN make clean
 
-COPY --chown=ennclave:ennclave parameters.bin /eNNclave/
+# COPY --chown=ennclave:ennclave parameters.bin /eNNclave/
 
 # RUN pip3 install \
 #   tensorflow pandas numpy
