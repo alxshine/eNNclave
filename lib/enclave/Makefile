@@ -10,7 +10,16 @@ wrapper_name:= libenclave.so
 C_FLAGS = -fPIC -g -DSGX_DEBUG_FLAG=1
 
 SGX_LIBRARY_PATH=$(SGX_SDK)/lib64
-TRTS=sgx_trts
+ifeq ($(MODE), SIM)
+	URTS=sgx_urts_sim
+	TRTS=sgx_trts_sim
+	MESSAGE:="Built enclave in SIMULATION mode"
+else
+	URTS=sgx_urts
+	TRTS=sgx_trts
+	MESSAGE:="Built enclave in HARDWARE mode"
+endif
+
 CRYPTO=sgx_tcrypto
 SERVICE=sgx_tservice
 STDLIB=sgx_tstdc
@@ -36,11 +45,12 @@ enclave_link_flags := $(app_link_flags) \
 
 enclave_includes =-I$(SGX_SDK)/include -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/libcxx -I$(INC)
 app_includes =-I$(SGX_SDK)/include -I$(INC)
-link_flags =-L$(SGX_LIBRARY_PATH) -lsgx_urts -lpthread -l:libsgx_capable.a -lsgx_uprotected_fs
+link_flags =-L$(SGX_LIBRARY_PATH) -l$(URTS) -lpthread -l:libsgx_capable.a -lsgx_uprotected_fs
 
 binary_output_files = $(patsubst %.bin,%_bin.o,$(wildcard enclave/*.bin))
 
 all: $(wrapper_name) $(app_name) $(signed_enclave_name) parameters
+	@printf "\n\n%s\n\n\n" $(MESSAGE)
 
 # generate code files
 edger8r: enclave/enclave.edl
