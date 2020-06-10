@@ -1,6 +1,7 @@
 #include "enclave.h"
 #include "enclave_t.h"
 #include "matutil.h"
+#include "output.h"
 
 #include "sgx_tprotected_fs.h"
 
@@ -11,7 +12,7 @@
 SGX_FILE *encrypted_parameters = NULL;
 
 void test(){
-    print("This is the enclave :)\n");
+    print_out("This is the enclave :)\n");
     float a[] = {0,1,2};
     float b[] = {1,2,3};
     float ret[] = {0,0,0};
@@ -20,7 +21,7 @@ void test(){
     matutil_dump_matrix(ret, 1, 1);
 }
 
-int print(const char* fmt, ...)
+int print_out(const char* fmt, ...)
 {
     char buf[BUFSIZ] = { '\0' };
     va_list ap;
@@ -31,7 +32,7 @@ int print(const char* fmt, ...)
     return (int)strnlen(buf, BUFSIZ - 1) + 1;
 }
 
-int print_error(const char* fmt, ...)
+int print_err(const char* fmt, ...)
 {
     char buf[BUFSIZ] = { '\0' };
     va_list ap;
@@ -45,14 +46,14 @@ int print_error(const char* fmt, ...)
 void open_encrypted_parameters(){
     encrypted_parameters = sgx_fopen_auto_key("encrypted_params.aes.bin", "wb+");
     if(encrypted_parameters == NULL){
-        print_error("could not open encrypted parameters\n");
+        print_err("could not open encrypted parameters\n");
     }
 }
 
 int encrypt_parameters(float *buffer, int num_elements){
     int blocks_wrote = sgx_fwrite(buffer, sizeof(float), num_elements, encrypted_parameters);
     if(blocks_wrote != num_elements){
-        print_error("Expected to write %d blocks, but wrote only %d\n", num_elements, blocks_wrote);
+        print_err("Expected to write %d blocks, but wrote only %d\n", num_elements, blocks_wrote);
         return -1;
     }
 }

@@ -87,7 +87,7 @@ $(signed_enclave_name): $(enclave_name)
 	sgx_sign sign -enclave $< -out $@ -key enclave/signing_key.pem -config enclave/config.xml
 	@ln -sf enclave/enclave.signed.so ../
 
-$(enclave_name): enclave/enclave_t.o enclave/enclave.o enclave/matutil.o enclave/forward.o enclave/parameters.o
+$(enclave_name): enclave/enclave_t.o enclave/enclave.o ../common/matutil.c enclave/forward.o enclave/parameters.o
 	$(CC) $(enclave_includes) $^ -o $@ $(enclave_link_flags)
 	@ln -sf enclave/enclave.so ../
 
