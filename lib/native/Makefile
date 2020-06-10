@@ -1,4 +1,4 @@
-ROOT=${HOME}/Projects/nn-sgx
+ROOT=../..
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 

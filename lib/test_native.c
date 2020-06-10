@@ -2,11 +2,9 @@
 #include <math.h>
 
 #include "matutil.h"
-#include "native_nn.h"
-/* #include "enclave_nn.h" */
+#include "enclave_nn.h"
 
 int main(void) {
-  // matutil_initialize();
   /* enclave_nn_start(); */
   printf("Matutil initialized\n");
 
@@ -114,8 +112,6 @@ int main(void) {
   /* printf("Outputs:\n"); */
   /* matutil_dump_matrix3(mp_results, 2,2,2); */
 
-  // /* enclave_teardown(); */
-  /* matutil_teardown(); */
   printf("Matutil torn down\n");
   return 0;
 }

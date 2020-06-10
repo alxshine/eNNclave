@@ -1,21 +1,18 @@
-ROOT=${HOME}/Projects/nn-sgx
+ROOT=..
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
-ifeq ($(SGX_MODE), SIM)
-
+ifeq ($(TEST_MODE), native)
 TEST_LIB=-lnative
-libs: native
-	@printf "\n\n****** NOT BUILDING SGX LIBRARY ******\n\n\n"
-
+test_lib: native
+	@printf "\n\n****** TESTING NATIVE ******\n\n\n"
 else
-
 TEST_LIB=-lenclave
-libs: native enclave
-
+test_lib: enclave
+	@printf "\n\n****** TESTING ENCLAVE ******\n\n\n"
 endif
 
-all: libs
+all: native enclave
 
 native:
 	@printf "\n\nMaking library in native mode\n\n\n"
@@ -27,8 +24,15 @@ enclave:
 	@ln -sf lib/enclave.so ../
 	@ln -sf lib/enclave.signed.so ../
 
-test: test_matutil.c libs
-	gcc -g $< -I$(INC) -L$(LIB) -L$(CURDIR) $(TEST_LIB) -o test
+test: test_native test_enclave
+
+test_native: test_native.c native
+	@printf "\n\n****** TESTING NATIVE ******\n\n\n"
+	@gcc -g $< -I$(INC) -L$(LIB) -lnative -o test_native
+
+test_enclave: test_enclave.c enclave
+	@printf "\n\n****** TESTING ENCLAVE ******\n\n\n"
+	@gcc -g $< -I$(INC) -L$(LIB) -lenclave -o test_enclave
 
 .PHONY: clean native enclave
 clean:

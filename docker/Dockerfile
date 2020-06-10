@@ -42,4 +42,4 @@ COPY --chown=ennclave:ennclave models /eNNclave/models
 # RUN pip3 install \
 #   tensorflow pandas numpy
 
-CMD bash
+CMD ["bash"]
