@@ -6,11 +6,11 @@ weight_binaries:= $(wildcard *.bin)
 weight_objects:=$(patsubst %.bin,%.o,$(weight_binaries))
 
 all: ../common/matutil.c forward.c native_nn.c parameters.c output.c
-	$(CC) -g -shared -fPIC -I${INC} $^ -o libnative.so
-	ln -sf native/libnative.so ../
+	@$(CC) -g -shared -fPIC -I${INC} $^ -o libnative.so
+	@ln -sf native/libnative.so ../
 
 %.o: %.bin
-	ld -r -b binary $< -o $@
+	@ld -r -b binary $< -o $@
 
 .PHONY:
 clean:
