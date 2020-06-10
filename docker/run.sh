@@ -9,4 +9,4 @@ source setup_ld_path.sh
 
 cd lib
 make test
-./test_enclave
+./test_matutil

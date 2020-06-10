@@ -24,15 +24,8 @@ enclave:
 	@ln -sf lib/enclave.so ../
 	@ln -sf lib/enclave.signed.so ../
 
-test: test_native test_enclave
-
-test_native: test_native.c native
-	@printf "\n\n****** TESTING NATIVE ******\n\n\n"
-	@gcc -g $< -I$(INC) -L$(LIB) -lnative -o test_native
-
-test_enclave: test_enclave.c enclave
-	@printf "\n\n****** TESTING ENCLAVE ******\n\n\n"
-	@gcc -g $< -I$(INC) -L$(LIB) -lenclave -o test_enclave
+test: test_matutil.c native
+	gcc -g $< -I$(INC) -L$(LIB) -lnative -o test_matutil
 
 .PHONY: clean native enclave
 clean:
