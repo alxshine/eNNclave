@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 
 # SGX setup
 WORKDIR /opt/intel
-COPY --from=sgx_builder:latest /linux-sgx/linux/installer/bin/*.bin ./
+COPY --from=alxshine/linux-sgx:latest /linux-sgx/linux/installer/bin/*.bin ./
 RUN ./sgx_linux_x64_psw*.bin --no-start-aesm
 RUN sh -c 'echo yes | ./sgx_linux_x64_sdk_*.bin'
 
@@ -42,4 +42,4 @@ COPY --chown=ennclave:ennclave models /eNNclave/models
 # RUN pip3 install \
 #   tensorflow pandas numpy
 
-CMD ["bash", "./run.sh"]
+CMD bash
