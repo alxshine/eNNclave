@@ -2,6 +2,8 @@ ROOT=..
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
+TEST_FILES=$(wildcard test/*.c)
+
 ifeq ($(TEST_MODE), native)
 TEST_LIB=-lnative
 test_lib: native
@@ -24,8 +26,8 @@ enclave:
 	@ln -sf lib/enclave.so ../
 	@ln -sf lib/enclave.signed.so ../
 
-test: test_matutil.c native
-	gcc -g $< -I$(INC) -L$(LIB) -lnative -o test_matutil
+test: test_matutil.c $(TEST_FILES) native
+	gcc -g $< $(TEST_FILES) -I$(INC) -L$(LIB) -lnative -o test_matutil
 
 .PHONY: clean native enclave
 clean:
