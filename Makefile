@@ -9,6 +9,9 @@ lib:
 interop:
 	$(MAKE) -C interop -e
 
+test:
+	$(MAKE) -C lib -e test
+
 clean:
 	$(MAKE) -C lib clean
 	$(MAKE) -C interop clean
