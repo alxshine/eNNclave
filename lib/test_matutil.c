@@ -159,14 +159,14 @@ void test_add(int *correct_cases, int *total_cases)
 
   // random 3
   float rand_3_a[] = {-0.479, -0.378, -0.283,
-                    -0.131, 0.298, -0.232,
-                    0.284, -0.31, 0.403};
+                      -0.131, 0.298, -0.232,
+                      0.284, -0.31, 0.403};
   float rand_3_b[] = {0.114, 0.479, 0.0337,
-                    0.0228, 0.425, 0.33,
-                    0.104, -0.119, -0.189};
+                      0.0228, 0.425, 0.33,
+                      0.104, -0.119, -0.189};
   float rand_3_exp[] = {-0.365, 0.101, -0.25,
-                      -0.108, 0.722, 0.0983,
-                      0.387, -0.429, 0.214};
+                        -0.108, 0.722, 0.0983,
+                        0.387, -0.429, 0.214};
   float rand_3_res[9];
   matutil_add(rand_3_a, 3, 3, rand_3_b, 3, 3, rand_3_res);
   *correct_cases += print_result("Addition random 3", assert_similarity(rand_3_res, rand_3_exp, 9));
@@ -184,13 +184,27 @@ int main(void)
   test_multiply(&correct_cases, &total_cases);
   print_separator();
   test_add(&correct_cases, &total_cases);
-
-  // add
-
+  print_separator();
+  
   // sep_conv1
   // identity
   // zeros
   // random 1
+  int steps = 3;
+  int channels = 3;
+  int filters = 3;
+  int kernel_size = 2;
+
+  float inputs[] = {0.473, 0.235, 0.686, 0.159, 0.134, 0.454, 0.16, 0.874, 0.743};
+  float depth_kernels[] = {0.437, -0.0364, 0.351, -0.4, -0.792, -0.0659};
+  float point_kernels[] = {0.663, 0.552, 0.605, 0.702, -0.792, 0.432, 0.475, -0.825, 0.817};
+  float biases[] = {0.0, 0.0, 0.0};
+  float expected[] = {0.114, -0.00393, 0.209, -0.434, 0.465, -0.208};
+  float ret[steps * filters];
+  matutil_sep_conv1(inputs, steps, channels, filters, depth_kernels, point_kernels, kernel_size, biases, ret);
+  correct_cases += print_result("Sep conv random 1", assert_similarity(ret, expected, steps*filters));
+  total_cases++;
+  
   // random 2
   // random 3
 
