@@ -31,6 +31,6 @@ test: test_matutil.c $(TEST_FILES) native
 
 .PHONY: clean native enclave
 clean:
-	rm -rf *.o test_matutil *.so test
+	rm -f *.o test_matutil *.so test_matutil
 	make -C native clean
 	make -C enclave clean
