@@ -9,6 +9,7 @@
 #include "test/assert.h"
 #include "test/multiply.h"
 #include "test/add.h"
+#include "test/sep_conv1.h"
 
 int main(void)
 {
@@ -24,26 +25,7 @@ int main(void)
     print_separator();
 
     // sep_conv1
-    // identity
-    // zeros
-    // random 1
-    int steps = 3;
-    int channels = 3;
-    int filters = 3;
-    int kernel_size = 2;
-
-    float inputs[] = {0.473, 0.235, 0.686, 0.159, 0.134, 0.454, 0.16, 0.874, 0.743};
-    float depth_kernels[] = {0.437, -0.0364, 0.351, -0.4, -0.792, -0.0659};
-    float point_kernels[] = {0.663, 0.552, 0.605, 0.702, -0.792, 0.432, 0.475, -0.825, 0.817};
-    float biases[] = {0.0, 0.0, 0.0};
-    float expected[] = {0.114, -0.00393, 0.209, -0.434, 0.465, -0.208};
-    float ret[steps * filters];
-    matutil_sep_conv1(inputs, steps, channels, filters, depth_kernels, point_kernels, kernel_size, biases, ret);
-    correct_cases += print_result("Sep conv random 1", assert_similarity(ret, expected, steps * filters));
-    total_cases++;
-
-    // random 2
-    // random 3
+    test_sep_conv1(&correct_cases, &total_cases);
 
     // conv2
     // identity
