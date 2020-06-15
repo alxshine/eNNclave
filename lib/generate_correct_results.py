@@ -5,6 +5,7 @@ import sys
 
 rng = np.random.default_rng()
 
+
 def dump_array(name, a):
     print("float %s[] = {" % name, end='')
     for i in range(a.shape[0]):
@@ -27,7 +28,7 @@ def dump_array_flatten(name, a):
     print('};')
 
 
-def generate_mul(): # TODO: rebuild to use tensorflow
+def generate_mul():  # TODO: rebuild to use tensorflow
     rand_a = np.random.rand(3, 3) - .5
     dump_array('rand_a', rand_a)
     rand_b = np.random.rand(3, 3) - .5
@@ -36,7 +37,7 @@ def generate_mul(): # TODO: rebuild to use tensorflow
     dump_array('rand_exp', rand_res)
 
 
-def generate_add(): # TODO: rebuild to use tensorflow
+def generate_add():  # TODO: rebuild to use tensorflow
     rand_a = np.random.rand(3, 3) - .5
     dump_array('rand_a', rand_a)
     rand_b = np.random.rand(3, 3) - .5
@@ -83,7 +84,7 @@ def generate_conv2(h=3, w=3, channels=3, filters=3, kernel_size=3, mode='full'):
     print(f"int kernel_size = {kernel_size};")
     print()
 
-    inputs = np.random.rand(1,h,w,channels)
+    inputs = np.random.rand(1, h, w, channels)
     dump_array_flatten('inputs', inputs)
 
     if mode == 'zeros':
@@ -104,11 +105,12 @@ def generate_conv2(h=3, w=3, channels=3, filters=3, kernel_size=3, mode='full'):
     dump_array_flatten('biases', biases)
     dump_array_flatten('expected', results)
 
-def generate_relu(size = 10):
+
+def generate_relu(size=10):
     print(f"int size = {size};")
     print()
 
-    inputs = np.random.rand(1,size)
+    inputs = np.random.rand(1, size)
     dump_array_flatten('inputs', inputs)
 
     layer = tf.keras.layers.ReLU(input_shape=inputs)
@@ -117,5 +119,20 @@ def generate_relu(size = 10):
     print()
     dump_array_flatten('ret', inputs)
 
+
+def generate_global_average_pooling_1d(steps=10, channels=3):
+    print(f"int steps = {steps};")
+    print(f"int channels = {channels};")
+    print()
+
+    inputs = rng.uniform(-1, 1, (1, steps, channels))
+    dump_array_flatten('inputs', inputs)
+
+    layer = tf.keras.layers.GlobalAveragePooling1D(input_shape = (steps,channels))
+
+    results = layer(inputs).numpy()
+    dump_array_flatten('expected', results)
+
+
 if __name__ == "__main__":
-    generate_relu(size=100)
+    generate_global_average_pooling_1d(steps=50, channels=10)
