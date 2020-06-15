@@ -14,6 +14,7 @@
 #include "test/relu.h"
 #include "test/global_average_pooling1.h"
 #include "test/global_average_pooling2.h"
+#include "test/max_pool1.h"
 
 int main(void)
 {
@@ -42,6 +43,9 @@ int main(void)
 
     print_separator();
     test_global_average_pooling2(&correct_cases, &total_cases);
+
+    print_separator();
+    test_max_pool1(&correct_cases, &total_cases);
 
     // max_pooling_1d
     // identity

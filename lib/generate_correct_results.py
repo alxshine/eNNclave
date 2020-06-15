@@ -151,5 +151,21 @@ def generate_global_average_pooling_2d(h=5, w=5, channels=3):
     dump_array_flatten('expected', results)
 
 
+def generate_max_pooling1d(steps=10, channels=3, pool_size=3):
+    print(f"int steps = {steps};")
+    print(f"int channels = {channels};")
+    print(f"int pool_size = {pool_size};")
+    print()
+
+    inputs = rng.uniform(-1, 1, (1, steps, channels))
+    dump_array_flatten('inputs', inputs)
+
+    layer = tf.keras.layers.MaxPooling1D(
+        input_shape=inputs.shape, pool_size=pool_size, padding='same')
+    
+    results = layer(inputs).numpy()
+    dump_array_flatten('expected', results)
+
+
 if __name__ == "__main__":
-    generate_global_average_pooling_2d(h=5, w=5, channels=10)
+    generate_max_pooling1d(steps=20, channels=5, pool_size=5)

@@ -4,7 +4,7 @@
 #include "test/assert.h"
 #include "matutil.h"
 
-int test_random_1()
+int global_average_pool1_random_1()
 {
     int steps = 10;
     int channels = 3;
@@ -17,7 +17,7 @@ int test_random_1()
     return print_result("GAP1 random 1", assert_similarity(expected, ret, channels));
 }
 
-int test_random_2()
+int global_average_pool1_random_2()
 {
     int steps = 10;
     int channels = 3;
@@ -30,7 +30,7 @@ int test_random_2()
     return print_result("GAP1 random 2", assert_similarity(expected, ret, channels));
 }
 
-int test_random_3()
+int global_average_pool1_random3()
 {
     int steps = 50;
     int channels = 10;
@@ -45,10 +45,10 @@ int test_random_3()
 
 void test_global_average_pooling1(int *correct_cases, int *total_cases)
 {
-    *correct_cases += test_random_1();
+    *correct_cases += global_average_pool1_random_1();
     *total_cases += 1;
-    *correct_cases += test_random_2();
+    *correct_cases += global_average_pool1_random_2();
     *total_cases += 1;
-    *correct_cases += test_random_3();
+    *correct_cases += global_average_pool1_random3();
     *total_cases += 1;
 }
