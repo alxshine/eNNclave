@@ -3,6 +3,7 @@ import tensorflow as tf
 
 import sys
 
+rng = np.random.default_rng()
 
 def dump_array(name, a):
     print("float %s[] = {" % name, end='')
@@ -103,8 +104,18 @@ def generate_conv2(h=3, w=3, channels=3, filters=3, kernel_size=3, mode='full'):
     dump_array_flatten('biases', biases)
     dump_array_flatten('expected', results)
 
+def generate_relu(size = 10):
+    print(f"int size = {size};")
+    print()
 
+    inputs = np.random.rand(1,size)
+    dump_array_flatten('inputs', inputs)
+
+    layer = tf.keras.layers.ReLU(input_shape=inputs)
+    results = layer(inputs).numpy()
+    dump_array_flatten('expected', results)
+    print()
+    dump_array_flatten('ret', inputs)
 
 if __name__ == "__main__":
-    # generate_conv2(mode='zeros')
-    generate_conv2(10, 10, 4, 5, 3, 'full')
+    generate_relu(size=100)
