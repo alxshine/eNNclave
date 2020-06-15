@@ -167,5 +167,21 @@ def generate_max_pooling1d(steps=10, channels=3, pool_size=3):
     dump_array_flatten('expected', results)
 
 
+def generate_max_pooling2d(h=5, w=5, channels=3, pool_size=3):
+    print(f"int h = {h};")
+    print(f"int w = {w};")
+    print(f"int channels = {channels};")
+    print(f"int pool_size = {pool_size};")
+    print()
+
+    inputs = rng.uniform(-1, 1, (1, h, w, channels))
+    dump_array_flatten('inputs', inputs)
+
+    layer = tf.keras.layers.MaxPooling2D(
+        input_shape=inputs.shape, pool_size=pool_size, padding='same')
+    
+    results = layer(inputs).numpy()
+    dump_array_flatten('expected', results)
+
 if __name__ == "__main__":
-    generate_max_pooling1d(steps=20, channels=5, pool_size=5)
+    generate_max_pooling2d(h=8, w=8, channels=8, pool_size=5)

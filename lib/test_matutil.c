@@ -15,6 +15,7 @@
 #include "test/global_average_pooling1.h"
 #include "test/global_average_pooling2.h"
 #include "test/max_pool1.h"
+#include "test/max_pool2.h"
 
 int main(void)
 {
@@ -47,19 +48,8 @@ int main(void)
     print_separator();
     test_max_pool1(&correct_cases, &total_cases);
 
-    // max_pooling_1d
-    // identity
-    // zeros
-    // random 1
-    // random 2
-    // random 3
-
-    // max_pooling_2d
-    // identity
-    // zeros
-    // random 1
-    // random 2
-    // random 3
+    print_separator();
+    test_max_pool2(&correct_cases, &total_cases);
 
     // zero_pad2
     // random 1
