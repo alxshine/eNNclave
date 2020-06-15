@@ -28,7 +28,6 @@ int main(void)
     print_separator();
     test_sep_conv1(&correct_cases, &total_cases);
 
-    // conv2
     print_separator();
     test_conv2(&correct_cases, &total_cases);
 
