@@ -10,6 +10,7 @@
 #include "test/multiply.h"
 #include "test/add.h"
 #include "test/sep_conv1.h"
+#include "test/conv2.h"
 
 int main(void)
 {
@@ -20,19 +21,16 @@ int main(void)
     int total_cases = 0;
 
     test_multiply(&correct_cases, &total_cases);
+
     print_separator();
     test_add(&correct_cases, &total_cases);
-    print_separator();
 
-    // sep_conv1
+    print_separator();
     test_sep_conv1(&correct_cases, &total_cases);
 
     // conv2
-    // identity
-    // zeros
-    // random 1
-    // random 2
-    // random 3
+    print_separator();
+    test_conv2(&correct_cases, &total_cases);
 
     // depthwise_conv2
     // identity

@@ -26,7 +26,7 @@ def dump_array_flatten(name, a):
     print('};')
 
 
-def generate_mul():
+def generate_mul(): # TODO: rebuild to use tensorflow
     rand_a = np.random.rand(3, 3) - .5
     dump_array('rand_a', rand_a)
     rand_b = np.random.rand(3, 3) - .5
@@ -35,7 +35,7 @@ def generate_mul():
     dump_array('rand_exp', rand_res)
 
 
-def generate_add():
+def generate_add(): # TODO: rebuild to use tensorflow
     rand_a = np.random.rand(3, 3) - .5
     dump_array('rand_a', rand_a)
     rand_b = np.random.rand(3, 3) - .5
@@ -74,5 +74,37 @@ def generate_sep_conv1(steps=3, channels=3, filters=3, kernel_size=2, mode='full
     dump_array_flatten('expected', results)
 
 
+def generate_conv2(h=3, w=3, channels=3, filters=3, kernel_size=3, mode='full'):
+    print(f"int h = {h};")
+    print(f"int w = {w};")
+    print(f"int channels = {channels};")
+    print(f"int filters = {filters};")
+    print(f"int kernel_size = {kernel_size};")
+    print()
+
+    inputs = np.random.rand(1,h,w,channels)
+    dump_array_flatten('inputs', inputs)
+
+    if mode == 'zeros':
+        layer = tf.keras.layers.Conv2D(
+            filters, kernel_size, strides=1, input_shape=inputs.shape, padding='same', use_bias=True, bias_initializer='zeros', kernel_initializer='zeros')
+    elif mode == 'full':
+        layer = tf.keras.layers.Conv2D(
+            filters, kernel_size, strides=1, input_shape=inputs.shape, padding='same', use_bias=True, bias_initializer='glorot_uniform', kernel_initializer='glorot_uniform')
+    else:
+        print("Unknown test mode")
+        sys.exit(1)
+
+    results = layer(inputs).numpy()
+    params = layer.get_weights()
+    kernels = params[0]
+    dump_array_flatten('kernels', kernels)
+    biases = params[1]
+    dump_array_flatten('biases', biases)
+    dump_array_flatten('expected', results)
+
+
+
 if __name__ == "__main__":
-    generate_sep_conv1(steps=10, channels=4, filters=5, kernel_size=3,mode='full')
+    # generate_conv2(mode='zeros')
+    generate_conv2(10, 10, 4, 5, 3, 'full')
