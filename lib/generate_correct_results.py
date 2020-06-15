@@ -128,11 +128,28 @@ def generate_global_average_pooling_1d(steps=10, channels=3):
     inputs = rng.uniform(-1, 1, (1, steps, channels))
     dump_array_flatten('inputs', inputs)
 
-    layer = tf.keras.layers.GlobalAveragePooling1D(input_shape = (steps,channels))
+    layer = tf.keras.layers.GlobalAveragePooling1D(
+        input_shape=(steps, channels))
+
+    results = layer(inputs).numpy()
+    dump_array_flatten('expected', results)
+
+
+def generate_global_average_pooling_2d(h=5, w=5, channels=3):
+    print(f"int h = {h};")
+    print(f"int w = {w};")
+    print(f"int channels = {channels};")
+    print()
+
+    inputs = rng.uniform(-1, 1, (1, h, w, channels))
+    dump_array_flatten('inputs', inputs)
+
+    layer = tf.keras.layers.GlobalAveragePooling2D(
+        input_shape=(h, w, channels))
 
     results = layer(inputs).numpy()
     dump_array_flatten('expected', results)
 
 
 if __name__ == "__main__":
-    generate_global_average_pooling_1d(steps=50, channels=10)
+    generate_global_average_pooling_2d(h=5, w=5, channels=10)
