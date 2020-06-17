@@ -4,16 +4,6 @@ LIB=${ROOT}/lib
 
 TEST_FILES=$(wildcard test/*.c)
 
-ifeq ($(TEST_MODE), native)
-TEST_LIB=-lnative
-test_lib: native
-	@printf "\n\n****** TESTING NATIVE ******\n\n\n"
-else
-TEST_LIB=-lenclave
-test_lib: enclave
-	@printf "\n\n****** TESTING ENCLAVE ******\n\n\n"
-endif
-
 all: native enclave
 
 native:
