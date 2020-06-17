@@ -19,7 +19,7 @@ int sep_conv1_zeros()
 
     float ret[steps * filters];
 
-    return print_result("Sep-Conv-1 zeros", assert_equality(ret, expected, steps * filters));
+    return print_result("Sep-Conv-1 zeros", assert_similarity(ret, expected, steps * filters));
 }
 
 int sep_conv1_random_1()
