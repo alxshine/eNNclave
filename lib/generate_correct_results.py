@@ -174,14 +174,21 @@ def generate_max_pooling1d(steps=10, channels=3, pool_size=3, mode='random'):
     dump_array_flatten('expected', results)
 
 
-def generate_max_pooling2d(h=5, w=5, channels=3, pool_size=3):
+def generate_max_pooling2d(h=5, w=5, channels=3, pool_size=3, mode='random'):
     print(f"int h = {h};")
     print(f"int w = {w};")
     print(f"int channels = {channels};")
     print(f"int pool_size = {pool_size};")
     print()
 
-    inputs = rng.uniform(-1, 1, (1, h, w, channels))
+    if mode=='random':
+        inputs = rng.uniform(-1, 1, (1, h, w, channels))
+    elif mode=='sequential':
+        inputs = np.arange(h*w*channels, dtype=np.float).reshape(1,h,w,channels)
+    else:
+        print(f"Unknown test mode {mode}")
+        sys.exit(1)
+
     dump_array_flatten('inputs', inputs)
 
     layer = tf.keras.layers.MaxPooling2D(
@@ -212,4 +219,4 @@ def generate_zero_pad2(h=3, w=3, channels=3, top_pad=1, bottom_pad=1, left_pad=1
 
 
 if __name__ == "__main__":
-    generate_max_pooling1d(20,5,5,mode='random')
+    generate_max_pooling2d(mode='sequential')
