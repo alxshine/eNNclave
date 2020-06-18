@@ -28,22 +28,36 @@ def dump_array_flatten(name, a):
     print('};')
 
 
-def generate_mul():  # TODO: rebuild to use tensorflow
-    rand_a = np.random.rand(3, 3) - .5
-    dump_array('rand_a', rand_a)
-    rand_b = np.random.rand(3, 3) - .5
-    dump_array('rand_b', rand_b)
-    rand_res = rand_a*rand_b
-    dump_array('rand_exp', rand_res)
+def generate_mul(h=3, w=3, mode='full'):
+    print(f"int h = {h};")
+    print(f"int w = {w};")
+
+    if mode == 'full':
+        a = rng.uniform(-1, 1, (h, w))
+        b = rng.uniform(-1, 1, (h, w))
+    elif mode == 'zeros':
+        a = rng.uniform(-1, 1, (h, w))
+        b = np.zeros((h, w))
+    elif mode == 'sequential':
+        a = np.arange(h*w, dtype=np.float).reshape((h, w))
+        b = np.ones((h, w))
+    else:
+        print("Unknown test mode")
+        sys.exit(1)
+
+    dump_array_flatten('a', a)
+    dump_array_flatten('b', b)
+    expected = np.matmul(a,b)
+    dump_array_flatten('expected', expected)
 
 
 def generate_add():  # TODO: rebuild to use tensorflow
     rand_a = np.random.rand(3, 3) - .5
-    dump_array('rand_a', rand_a)
+    dump_array_flatten('rand_a', rand_a)
     rand_b = np.random.rand(3, 3) - .5
-    dump_array('rand_b', rand_b)
+    dump_array_flatten('rand_b', rand_b)
     rand_res = rand_a+rand_b
-    dump_array('rand_exp', rand_res)
+    dump_array_flatten('rand_exp', rand_res)
 
 
 def generate_sep_conv1(steps=3, channels=3, filters=3, kernel_size=2, mode='full'):
@@ -227,4 +241,4 @@ def generate_zero_pad2(h=3, w=3, channels=3, top_pad=1, bottom_pad=1, left_pad=1
 
 
 if __name__ == "__main__":
-    generate_conv2(mode='sequential', filters=1, kernel_size=1, channels=1)
+    generate_mul(h=7, w=7, mode='full')
