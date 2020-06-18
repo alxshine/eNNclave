@@ -85,17 +85,23 @@ def generate_conv2(h=3, w=3, channels=3, filters=3, kernel_size=3, mode='full'):
     print()
 
     inputs = np.random.rand(1, h, w, channels)
-    dump_array_flatten('inputs', inputs)
 
     if mode == 'zeros':
         layer = tf.keras.layers.Conv2D(
             filters, kernel_size, strides=1, input_shape=inputs.shape, padding='same', use_bias=True, bias_initializer='zeros', kernel_initializer='zeros')
+    elif mode == 'sequential':
+        inputs = np.arange(
+            h*w*channels, dtype=np.float).reshape((1, h, w, channels))
+        layer = tf.keras.layers.Conv2D(filters, kernel_size, strides=1, input_shape=inputs.shape,
+                                       padding='same', use_bias=True, bias_initializer='zeros', kernel_initializer='ones')
     elif mode == 'full':
         layer = tf.keras.layers.Conv2D(
             filters, kernel_size, strides=1, input_shape=inputs.shape, padding='same', use_bias=True, bias_initializer='glorot_uniform', kernel_initializer='glorot_uniform')
     else:
         print("Unknown test mode")
         sys.exit(1)
+
+    dump_array_flatten('inputs', inputs)
 
     results = layer(inputs).numpy()
     params = layer.get_weights()
@@ -157,10 +163,11 @@ def generate_max_pooling1d(steps=10, channels=3, pool_size=3, mode='random'):
     print(f"int pool_size = {pool_size};")
     print()
 
-    if mode=='random':
+    if mode == 'random':
         inputs = rng.uniform(-1, 1, (1, steps, channels))
-    elif mode=='sequential':
-        inputs = np.arange(steps*channels).reshape((1,steps,channels)).astype(np.float)
+    elif mode == 'sequential':
+        inputs = np.arange(
+            steps*channels).reshape((1, steps, channels)).astype(np.float)
     else:
         print(f"Unknown test mode {mode}")
         sys.exit(1)
@@ -181,10 +188,11 @@ def generate_max_pooling2d(h=5, w=5, channels=3, pool_size=3, mode='random'):
     print(f"int pool_size = {pool_size};")
     print()
 
-    if mode=='random':
+    if mode == 'random':
         inputs = rng.uniform(-1, 1, (1, h, w, channels))
-    elif mode=='sequential':
-        inputs = np.arange(h*w*channels, dtype=np.float).reshape(1,h,w,channels)
+    elif mode == 'sequential':
+        inputs = np.arange(
+            h*w*channels, dtype=np.float).reshape(1, h, w, channels)
     else:
         print(f"Unknown test mode {mode}")
         sys.exit(1)
@@ -219,4 +227,4 @@ def generate_zero_pad2(h=3, w=3, channels=3, top_pad=1, bottom_pad=1, left_pad=1
 
 
 if __name__ == "__main__":
-    generate_max_pooling2d(mode='sequential')
+    generate_conv2(mode='sequential', filters=1, kernel_size=1, channels=1)
