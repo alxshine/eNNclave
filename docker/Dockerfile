@@ -13,7 +13,7 @@ RUN ./sgx_linux_x64_psw*.bin --no-start-aesm
 RUN sh -c 'echo yes | ./sgx_linux_x64_sdk_*.bin'
 
 # build requisites
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
   build-essential python3.7-dev python3-pip
 
 WORKDIR /eNNclave

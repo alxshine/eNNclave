@@ -8,8 +8,6 @@ else
 USER_LIBS:=-lnative -lenclave
 endif
 
-HOST=$(shell [ -d /usr/include/python3.7m ] && echo "-DHOST")
-
 all: pymatutilmodule.c
 	$(CC) -fPIC -g -shared pymatutilmodule.c -I${INC} -L${LIB} $(HOST) $(USER_LIBS) -o pymatutil.so
 
