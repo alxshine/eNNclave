@@ -11,8 +11,8 @@ extern "C" {
 
     void test();
 
-    int print(const char* fmt, ...);
-    int print_error(const char* fmt, ...);
+    int print_out(const char* fmt, ...);
+    int print_err(const char* fmt, ...);
 
     void open_encrypted_parameters();
     int encrypt_parameters(float *target_buffer, int num_elements);

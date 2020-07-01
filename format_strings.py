@@ -9,6 +9,7 @@ preamble_template = """
 #include "parameters.h"
 #include "enclave_nn.h"
 #include "native_nn.h"
+#include "output.h"
 
 int %s_f(float *m, int s, int *label) {
     int sts;
@@ -25,19 +26,19 @@ tmp_buffer_template = "tmp%d"
 buffer_declaration_template = """
     float *tmp0 = (float*) malloc(%d*sizeof(float));
     if(tmp0 == NULL){
-        print_error("\\n\\nENCLAVE ERROR:Could not allocate tmp0 of size %d\\n\\n\\n");
+        print_err("\\n\\nENCLAVE ERROR:Could not allocate tmp0 of size %d\\n\\n\\n");
         return 1;
     }
 
     float *tmp1 = (float*) malloc(%d*sizeof(float));
     if(tmp1 == NULL){
-        print_error("\\n\\nENCLAVE ERROR:Could not allocate tmp1 of size %d\\n\\n\\n");
+        print_err("\\n\\nENCLAVE ERROR:Could not allocate tmp1 of size %d\\n\\n\\n");
         return 1;
     }
 
     float *params = (float*) malloc(%d*sizeof(float));
     if(params == NULL){
-        print_error("\\n\\nENCLAVE ERROR:Could not allocate params of size %d\\n\\n\\n");
+        print_err("\\n\\nENCLAVE ERROR:Could not allocate params of size %d\\n\\n\\n");
         return 1;
     }
 """

@@ -10,14 +10,12 @@ import pandas as pd
 
 import utils
 
-tf.compat.v1.enable_eager_execution()
-
 # hyperparameters
 MODEL_FILE = 'models/mnist.h5'
 HIST_FILE = 'hist_mnist.csv'
 HIDDEN_NEURONS = 128
 DROPOUT_RATIO = 0.4
-NUM_EPOCHS = 200
+NUM_EPOCHS = 20
 STEPS_PER_EPOCH = 10
 VALIDATION_STEPS = 2
 BATCH_SIZE = 32

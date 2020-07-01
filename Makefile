@@ -6,7 +6,7 @@ all: lib interop
 
 lib:
 	$(MAKE) -C lib -e
-interop:
+interop: lib
 	$(MAKE) -C interop -e
 
 test:

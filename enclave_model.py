@@ -100,7 +100,7 @@ class Enclave(Sequential):
                 inputs, i, l, tmp_index)
             forward_file.write(call_string)
 
-            #if the function generated a call, it declared a new tmp buffer
+            #if the function generated a call, it switched tmp buffers
             if generated_ops:
                 inputs = tmp_buffer_template % tmp_index
                 tmp_index = 1-tmp_index
@@ -156,7 +156,7 @@ class Enclave(Sequential):
                 s += relu
             elif layer.activation.__name__ == 'softmax':
                 # here we compute the actual label
-                softmax = softmax_template % (w.shape[1], tmp_name, tmp_name)
+                softmax = softmax_template % (w.shape[1], inputs, inputs)
                 s += softmax
             elif layer.activation.__name__ == 'sigmoid':
                 s += sigmoid_template % tmp_name
