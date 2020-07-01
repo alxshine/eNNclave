@@ -8,5 +8,5 @@ source /opt/intel/sgxsdk/environment
 source setup_ld_path.sh
 
 make interop
-python3 build_enclave.py models/mnist.h5 2
-python3 time_enclave.py models/mnist_enclave.h5 2
+python3 build_enclave.py models/mnist.h5 7
+python3 time_enclave.py models/mnist_enclave.h5 7

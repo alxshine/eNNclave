@@ -101,7 +101,7 @@ class Enclave(Sequential):
         for i, l in enumerate(self.layers):
             tmp_name = templates.tmp_buffer.render(i=tmp_index)
             call_string, generated_ops = Enclave.get_call_string(
-                inputs, i, l, tmp_name)
+                inputs, l, tmp_name)
             forward_file.write(call_string)
 
             # if the function generated a call, it switched tmp buffers
@@ -115,8 +115,9 @@ class Enclave(Sequential):
         forward_file.write(templates.postamble)
         forward_file.close()
 
+
     @staticmethod
-    def get_call_string(inputs, i, layer, tmp_name):
+    def get_call_string(inputs, layer, tmp_name):
         """Generates C function calls required for layer.
 
         Arguments:
@@ -132,160 +133,16 @@ class Enclave(Sequential):
         added_ops = True
         s = ''
         if type(layer) in [layers.Dense]:
-            # the output of the dense layer will be a
-            # row vector with ncols(w) elements
-            parameters = layer.get_weights()
-            num_params = [np.prod(p.shape) for p in parameters]
-            s += templates.load.render(num_params=np.sum(num_params))
-            w = parameters[0]
-
-            weight_name = templates.parameter_offset.render(offset=0)
-            mult = templates.multiply.render(
-                m1=inputs, h1=1, w1=w.shape[0], m2=weight_name, h2=w.shape[0], w2=w.shape[1],
-                ret=tmp_name)
-            s += templates.handle_error.render(expression=mult)
-
-            if len(parameters) > 1:
-                # add bias
-                b = parameters[1]
-                bias_name = templates.parameter_offset.render(
-                    offset=num_params[0])
-                add = templates.add.render(
-                    m1=tmp_name, h1=1, w1=w.shape[1], m2=bias_name, h2=1, w2=b.shape[0],
-                    ret=tmp_name)
-                s += templates.handle_error.render(expression=add)
-
-            if layer.activation.__name__ == 'relu':
-                relu = templates.relu.render(
-                    m=tmp_name, h=1, w=w.shape[1])
-                s += relu
-            elif layer.activation.__name__ == 'softmax':
-                # here we compute the actual label
-                softmax = templates.softmax.render(
-                    num_labels=w.shape[1], input=inputs)
-                s += softmax
-            elif layer.activation.__name__ == 'sigmoid':
-                s += templates.sigmoid.render(input=tmp_name)
-            elif layer.activation.__name__ == 'linear':
-                s += '\t//linear activation requires no action\n'
-            else:
-                raise NotImplementedError("Unknown activation function {} in layer {}".format(
-                    layer.activation.__name__, layer.name))
+            s += Enclave.generate_dense(layer, inputs, tmp_name)
 
         elif type(layer) in [layers.SeparableConv1D]:
-            if layer.padding != 'same':
-                raise NotImplementedError(
-                    "Padding modes other than 'same' are not implemented")
-
-            _, steps, c = layer.input_shape
-            f = layer.output_shape[-1]
-
-            new_size = np.prod(layer.output_shape[1:])
-            ks = layer.kernel_size[0]
-
-            # from matutil:
-            # num_depth = ks*c
-            # num_point = c*f
-            # num_bias = f
-            s += templates.load.render(num_params=ks*c+c*f+f)
-
-            depth_kernels = templates.parameter_offset.render(offset=0)
-            point_kernels = templates.parameter_offset.render(offset=ks*c)
-            biases = templates.parameter_offset.render(offset=ks*c+c*f)
-            s += templates.sep_conv1_template.render(
-                input=inputs,
-                steps=steps,
-                channels=c,
-                filters=f,
-                depth_kernels=depth_kernels,
-                point_kernels=point_kernels,
-                kernel_size=ks,
-                biases=biases,
-                ret=tmp_name)
-
-            if layer.activation.__name__ == 'relu':
-                # relu
-                s += templates.relu.render(input=tmp_name, h=1, w=new_size)
-            elif layer.activation.__name__ == 'linear':
-                s += "  // no activation function for layer {}".format(
-                    layer.name)
-            else:
-                raise NotImplementedError("Unknown activation function {} in layer {}".format(
-                    layer.activation.__name__, layer.name))
+            s += generate_separable_conv1d(layer)
 
         elif type(layer) in [layers.Conv2D]:
-            if layer.padding != 'same':
-                raise NotImplementedError(
-                    "Padding modes other than 'same' are not implemented")
-
-            _, h, w, c = layer.input_shape
-            f = layer.output_shape[-1]
-            new_size = np.prod(layer.output_shape[1:])
-            kh, kw = layer.kernel_size
-
-            s += templates.load(num_params=kw*kh*c*f + f)
-            kernels = templates.parameter_offset(offset=0)
-            biases = templates.parameter_offset(offset=kw*kh*c*f)
-
-            s += templates.conv2_template.render(
-                input=inputs,
-                h=h,
-                w=w,
-                channels=c,
-                filters=f,
-                kernels=kernels,
-                kernel_height=kh,
-                kernel_width=kw,
-                biases=biases,
-                ret=tmp_name)
-
-            if layer.activation.__name__ == 'relu':
-                # relu
-                s += templates.relu.render(input=tmp_name, h=1, w=new_size)
-            elif layer.activation.__name__ == 'linear':
-                s += "  // no activation function for layer {}".format(
-                    layer.name)
-            else:
-                raise NotImplementedError("Unknown activation function {} in layer {}".format(
-                    layer.activation.__name__, layer.name))
+            s += Enclave.generate_conv_2d(inputs, layer, tmp_name)
 
         elif type(layer) in [layers.DepthwiseConv2D]:
-            if layer.padding == 'valid':
-                padding = 'PADDING_VALID'
-            elif layer.padding == 'same':
-                padding = 'PADDING_SAME'
-            else:
-                raise NotImplementedError(
-                    f"Padding {layer.padding} not implemented, requested for layer {layer}")
-
-            _, h, w, c = layer.input_shape
-            f = layer.output_shape[-1]
-            new_size = np.prod(layer.output_shape[1:])
-            kh, kw = layer.kernel_size
-
-            s += templates.load.render(num_params=kw*kh*c*f + f)
-            kernels = templates.parameter_offset.render(offset=0)
-
-            s += templates.depthwise_conv2.render(
-                input=inputs,
-                h=h,
-                w=w,
-                c=c,
-                padding=padding,
-                kernels=kernels,
-                kernel_height=kh,
-                kernel_width=kw,
-                ret=tmp_name)
-
-            if layer.activation.__name__ == 'relu':
-                # relu
-                s += templates.relu.render(input=tmp_name, h=1, w=new_size)
-            elif layer.activation.__name__ == 'linear':
-                s += "  // no activation function for layer {}".format(
-                    layer.name)
-            else:
-                raise NotImplementedError("Unknown activation function {} in layer {}".format(
-                    layer.activation.__name__, layer.name))
+            s += Enclave.generate_depthwise_conv_2d(inputs, layer, tmp_name)
 
         elif type(layer) in [layers.GlobalAveragePooling1D]:
             _, steps, c = layer.input_shape
@@ -366,3 +223,156 @@ class Enclave(Sequential):
         s += "\n"
 
         return s, added_ops
+
+    @staticmethod
+    def generate_dense(layer, inputs, tmp_name):
+        # the output of the dense layer will be a
+        # row vector with ncols(w) elements
+        ret = ''
+
+        parameters = layer.get_weights()
+        num_params = [np.prod(p.shape) for p in parameters]
+        ret += templates.load.render(num_params=np.sum(num_params))
+        w = parameters[0]
+
+        weight_name = templates.parameter_offset.render(offset=0)
+        mult = templates.multiply.render(
+            m1=inputs, h1=1, w1=w.shape[0], m2=weight_name, h2=w.shape[0], w2=w.shape[1],
+            ret=tmp_name)
+        ret += templates.handle_error.render(expression=mult)
+
+        if len(parameters) > 1:
+            # add bias
+            b = parameters[1]
+            bias_name = templates.parameter_offset.render(
+                offset=num_params[0])
+            add = templates.add.render(
+                m1=tmp_name, h1=1, w1=w.shape[1], m2=bias_name, h2=1, w2=b.shape[0],
+                ret=tmp_name)
+            ret += templates.handle_error.render(expression=add)
+
+        ret += Enclave.generate_activation(layer, tmp_name, w.shape[1])
+
+        return ret
+
+    @staticmethod
+    def generate_separable_conv1d(layer, inputs, tmp_name):
+        if layer.padding != 'same':
+            raise NotImplementedError(
+                "Padding modes other than 'same' are not implemented")
+
+        ret = ''
+        _, steps, c = layer.input_shape
+        f = layer.output_shape[-1]
+
+        new_size = np.prod(layer.output_shape[1:])
+        ks = layer.kernel_size[0]
+
+        # from matutil:
+        # num_depth = ks*c
+        # num_point = c*f
+        # num_bias = f
+        ret += templates.load.render(num_params=ks*c+c*f+f)
+
+        depth_kernels = templates.parameter_offset.render(offset=0)
+        point_kernels = templates.parameter_offset.render(offset=ks*c)
+        biases = templates.parameter_offset.render(offset=ks*c+c*f)
+        ret += templates.sep_conv1_template.render(
+            input=inputs,
+            steps=steps,
+            channels=c,
+            filters=f,
+            depth_kernels=depth_kernels,
+            point_kernels=point_kernels,
+            kernel_size=ks,
+            biases=biases,
+            ret=tmp_name)
+
+        ret += Enclave.generate_activation(layer, tmp_name, new_size)
+        return ret
+
+    @staticmethod
+    def generate_depthwise_conv_2d(layer, inputs, tmp_name):
+        if layer.padding == 'valid':
+            padding = 'PADDING_VALID'
+        elif layer.padding == 'same':
+            padding = 'PADDING_SAME'
+        else:
+            raise NotImplementedError(
+                f"Padding {layer.padding} not implemented, requested for layer {layer}")
+
+        ret = ''
+        _, h, w, c = layer.input_shape
+        f = layer.output_shape[-1]
+        new_size = np.prod(layer.output_shape[1:])
+        kh, kw = layer.kernel_size
+
+        ret += templates.load.render(num_params=kw*kh*c*f + f)
+        kernels = templates.parameter_offset.render(offset=0)
+
+        ret += templates.depthwise_conv2.render(
+            input=inputs,
+            h=h,
+            w=w,
+            c=c,
+            padding=padding,
+            kernels=kernels,
+            kernel_height=kh,
+            kernel_width=kw,
+            ret=tmp_name)
+
+        ret += Enclave.generate_activation(layer, tmp_name, new_size)
+
+        return ret
+
+    @staticmethod
+    def generate_conv_2d(inputs, layer, tmp_name):
+        if layer.padding != 'same':
+            raise NotImplementedError(
+                "Padding modes other than 'same' are not implemented")
+
+        ret = ''
+        _, h, w, c = layer.input_shape
+        f = layer.output_shape[-1]
+        new_size = np.prod(layer.output_shape[1:])
+        kh, kw = layer.kernel_size
+
+        ret += templates.load.render(num_params=kw*kh*c*f + f)
+        kernels = templates.parameter_offset.render(offset=0)
+        biases = templates.parameter_offset.render(offset=kw*kh*c*f)
+
+        ret += templates.conv2.render(
+            input=inputs,
+            h=h,
+            w=w,
+            channels=c,
+            filters=f,
+            kernels=kernels,
+            kernel_height=kh,
+            kernel_width=kw,
+            biases=biases,
+            ret=tmp_name)
+
+        ret += Enclave.generate_activation(layer, tmp_name, new_size)
+
+        return ret
+
+    @staticmethod
+    def generate_activation(layer, target_buffer, input_size):
+        if layer.activation.__name__ == 'relu':
+            relu = templates.relu.render(
+                m=target_buffer, h=1, w=input_size)
+            return relu
+        elif layer.activation.__name__ == 'softmax':
+            # here we compute the actual label
+            softmax = templates.softmax.render(
+                num_labels=input_size, input=target_buffer)
+            return softmax
+        elif layer.activation.__name__ == 'sigmoid':
+            return templates.sigmoid.render(input=target_buffer)
+        elif layer.activation.__name__ == 'linear':
+            return '\t//linear activation requires no action\n'
+        else:
+            raise NotImplementedError("Unknown activation function {} in layer {}".format(
+                layer.activation.__name__, layer.name))
+
