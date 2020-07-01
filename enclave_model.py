@@ -99,14 +99,16 @@ class Enclave(Sequential):
         tmp_index = 0
         inputs = 'm'
         for i, l in enumerate(self.layers):
+            tmp_name = templates.tmp_buffer.render(i=tmp_index)
             call_string, generated_ops = Enclave.get_call_string(
-                inputs, i, l, tmp_index)
+                inputs, i, l, tmp_name)
             forward_file.write(call_string)
 
             # if the function generated a call, it switched tmp buffers
             if generated_ops:
-                inputs = templates.tmp_buffer.render(i=tmp_index)
+                inputs = tmp_name
                 tmp_index = 1-tmp_index
+                tmp_name = templates.tmp_buffer.render(i=tmp_index)
 
         # free tmp buffers
         forward_file.write(templates.release_buffers)
@@ -114,12 +116,12 @@ class Enclave(Sequential):
         forward_file.close()
 
     @staticmethod
-    def get_call_string(inputs, i, layer, tmp_index):
+    def get_call_string(inputs, i, layer, tmp_name):
         """Generates C function calls required for layer.
 
         Arguments:
         inputs -- the name of the input buffer
-        tmp_index -- the index of the current tmp buffer
+        tmp_name -- the name of the current tmp buffer
         layer -- the layer to generate for
 
         Returns:
@@ -132,7 +134,6 @@ class Enclave(Sequential):
         if type(layer) in [layers.Dense]:
             # the output of the dense layer will be a
             # row vector with ncols(w) elements
-            tmp_name = templates.tmp_buffer.render(i=tmp_index)
             parameters = layer.get_weights()
             num_params = [np.prod(p.shape) for p in parameters]
             s += templates.load.render(num_params=np.sum(num_params))
@@ -180,7 +181,6 @@ class Enclave(Sequential):
             f = layer.output_shape[-1]
 
             new_size = np.prod(layer.output_shape[1:])
-            new_buffer = templates.tmp_buffer.render(i=tmp_index)
             ks = layer.kernel_size[0]
 
             # from matutil:
@@ -201,11 +201,11 @@ class Enclave(Sequential):
                 point_kernels=point_kernels,
                 kernel_size=ks,
                 biases=biases,
-                ret=new_buffer)
+                ret=tmp_name)
 
             if layer.activation.__name__ == 'relu':
                 # relu
-                s += templates.relu.render(input=new_buffer, h=1, w=new_size)
+                s += templates.relu.render(input=tmp_name, h=1, w=new_size)
             elif layer.activation.__name__ == 'linear':
                 s += "  // no activation function for layer {}".format(
                     layer.name)
@@ -221,7 +221,6 @@ class Enclave(Sequential):
             _, h, w, c = layer.input_shape
             f = layer.output_shape[-1]
             new_size = np.prod(layer.output_shape[1:])
-            new_buffer = templates.tmp_buffer.render(i=tmp_index)
             kh, kw = layer.kernel_size
 
             s += templates.load(num_params=kw*kh*c*f + f)
@@ -238,11 +237,11 @@ class Enclave(Sequential):
                 kernel_height=kh,
                 kernel_width=kw,
                 biases=biases,
-                ret=new_buffer)
+                ret=tmp_name)
 
             if layer.activation.__name__ == 'relu':
                 # relu
-                s += templates.relu.render(input=new_buffer, h=1, w=new_size)
+                s += templates.relu.render(input=tmp_name, h=1, w=new_size)
             elif layer.activation.__name__ == 'linear':
                 s += "  // no activation function for layer {}".format(
                     layer.name)
@@ -262,7 +261,6 @@ class Enclave(Sequential):
             _, h, w, c = layer.input_shape
             f = layer.output_shape[-1]
             new_size = np.prod(layer.output_shape[1:])
-            new_buffer = templates.tmp_buffer.render(i=tmp_index)
             kh, kw = layer.kernel_size
 
             s += templates.load.render(num_params=kw*kh*c*f + f)
@@ -277,11 +275,11 @@ class Enclave(Sequential):
                 kernels=kernels,
                 kernel_height=kh,
                 kernel_width=kw,
-                ret=new_buffer)
+                ret=tmp_name)
 
             if layer.activation.__name__ == 'relu':
                 # relu
-                s += templates.relu.render(input=new_buffer, h=1, w=new_size)
+                s += templates.relu.render(input=tmp_name, h=1, w=new_size)
             elif layer.activation.__name__ == 'linear':
                 s += "  // no activation function for layer {}".format(
                     layer.name)
@@ -290,36 +288,32 @@ class Enclave(Sequential):
                     layer.activation.__name__, layer.name))
 
         elif type(layer) in [layers.GlobalAveragePooling1D]:
-            tmp_buffer = templates.tmp_buffer.render(i=tmp_index)
             _, steps, c = layer.input_shape
             s = templates.global_average_pooling_1d.render(
                 input=inputs,
                 steps=steps,
                 channels=c,
-                ret=tmp_buffer)
+                ret=tmp_name)
 
         elif type(layer) in [layers.GlobalAveragePooling2D]:
-            tmp_buffer = templates.tmp_buffer.render(i=tmp_index)
             _, h, w, c = layer.input_shape
             s = templates.global_average_pooling_2d.render(
                 input=inputs,
                 h=h,
                 w=w,
                 channels=c,
-                tmp_buffer=tmp_buffer)
+                tmp_buffer=tmp_name)
 
         elif type(layer) in [layers.MaxPooling1D]:
-            tmp_buffer = templates.tmp_buffer(i=tmp_index)
             _, steps, c = layer.input_shape
             s = templates.max_pooling_1d.render(
                 input=inputs,
                 steps=steps,
                 channels=c,
                 pool_size=layer.pool_size[0],
-                ret=tmp_buffer)
+                ret=tmp_name)
 
         elif type(layer) in [layers.MaxPooling2D]:
-            tmp_buffer = templates.tmp_buffer(i=tmp_index)
             _, h, w, c = layer.input_shape
             pool_size = layer.pool_size[0]
             if layer.pool_size[0] != layer.pool_size[1]:
@@ -333,7 +327,7 @@ class Enclave(Sequential):
                 w=w,
                 channels=c,
                 pool_size=pool_size,
-                ret=tmp_buffer)
+                ret=tmp_name)
 
         elif type(layer) in [layers.ZeroPadding2D]:
             _, h, w, c = layer.input_shape
@@ -341,7 +335,6 @@ class Enclave(Sequential):
             if len(padding) != 2:
                 raise NotImplementedError(
                     "Asymmetrical padding is not implemented")
-            new_buffer = templates.tmp_buffer.render(i=tmp_index)
 
             s = templates.zero_pad2.render(
                 input=inputs,
@@ -352,7 +345,7 @@ class Enclave(Sequential):
                 bottom_pad=padding[0][1],
                 left_pad=padding[1][0],
                 right_pad=padding[1][1],
-                ret=new_buffer)
+                ret=tmp_name)
 
         elif type(layer) in [layers.ReLU]:
             size = np.prod(layer.output_shape[1:])
