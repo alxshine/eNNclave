@@ -1,7 +1,7 @@
 from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as layers
 import tensorflow as tf
-from format_strings import *
+import templates
 import numpy as np
 import os
 
@@ -15,13 +15,13 @@ class Enclave(Sequential):
     def generate_config(self, target_dir='lib/enclave/enclave/'):
         all_layers = utils.get_all_layers(self)
         output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
-        output_sizes.sort(reverse = True)
+        output_sizes.sort(reverse=True)
         # get max tmp_buffer size
         max_size = output_sizes[0]
         total_tmp_size = 2*max_size*4
         # align to 4kB
         num_heap_blocks = int(np.ceil(total_tmp_size / 0x1000))
-        num_heap_blocks += 1000 # for tolerance
+        num_heap_blocks += 1000  # for tolerance
         heap_size = num_heap_blocks * 0x1000
 
         print("Max required heap size: %s MB" % (heap_size/1024/1024))
@@ -30,7 +30,8 @@ class Enclave(Sequential):
         print("Configuring heap size for %d MB for now" % mb_size)
         heap_size = mb_size*1024*1024
         config_path = os.path.join(target_dir, 'config.xml')
-        config = config_template % (hex(heap_size), hex(heap_size))
+        config = templates.config.render(
+            heapInitSize=hex(heap_size), heapMaxSize=hex(heap_size))
 
         with open(config_path, 'w+') as config_file:
             config_file.write(config)
@@ -64,7 +65,7 @@ class Enclave(Sequential):
                 bf.write(depth_kernels.astype(np.float32).tobytes())
 
             elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
-                             layers.MaxPooling1D,layers.MaxPooling2D, layers.Flatten, layers.ZeroPadding2D,
+                             layers.MaxPooling1D, layers.MaxPooling2D, layers.Flatten, layers.ZeroPadding2D,
                              layers.ReLU]:
                 # these layers are either not used during inference or have no parameters
                 continue
@@ -83,15 +84,17 @@ class Enclave(Sequential):
         expected_c = self.layers[0].input_shape[1]
 
         parent_dir = target_dir.split('/')[-1]
-        forward_file.write(preamble.render(mode = parent_dir))
+        forward_file.write(templates.preamble.render(mode=parent_dir))
         # declare tmp buffers
         output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
-        output_sizes.sort(reverse = True)
+        output_sizes.sort(reverse=True)
 
         # get required size for weight buffer
-        param_numbers = [np.sum([np.prod(w.shape) for w in l.get_weights()]) for l in all_layers]
+        param_numbers = [np.sum([np.prod(w.shape)
+                                 for w in l.get_weights()]) for l in all_layers]
         max_size = max(param_numbers)
-        forward_file.write(buffer_declaration.render(tmp1_size = output_sizes[0], tmp2_size = output_sizes[0], param_size = max_size))
+        forward_file.write(templates.buffer_declaration.render(
+            tmp1_size=output_sizes[0], tmp2_size=output_sizes[0], param_size=max_size))
 
         tmp_index = 0
         inputs = 'm'
@@ -100,14 +103,14 @@ class Enclave(Sequential):
                 inputs, i, l, tmp_index)
             forward_file.write(call_string)
 
-            #if the function generated a call, it switched tmp buffers
+            # if the function generated a call, it switched tmp buffers
             if generated_ops:
-                inputs = tmp_buffer_template % tmp_index
+                inputs = templates.tmp_buffer.render(i=tmp_index)
                 tmp_index = 1-tmp_index
 
-        #free tmp buffers
-        forward_file.write(release_template)
-        forward_file.write(postamble)
+        # free tmp buffers
+        forward_file.write(templates.release_buffers)
+        forward_file.write(templates.postamble)
         forward_file.close()
 
     @staticmethod
@@ -129,37 +132,39 @@ class Enclave(Sequential):
         if type(layer) in [layers.Dense]:
             # the output of the dense layer will be a
             # row vector with ncols(w) elements
-            tmp_name = tmp_buffer_template % tmp_index
+            tmp_name = templates.tmp_buffer.render(i=tmp_index)
             parameters = layer.get_weights()
             num_params = [np.prod(p.shape) for p in parameters]
-            s += load_template % np.sum(num_params)
+            s += templates.load.render(num_params=np.sum(num_params))
             w = parameters[0]
 
-            weight_name = parameter_offset_template % 0
-            mult = mult_template % (
-                inputs, 1, w.shape[0], weight_name, w.shape[0], w.shape[1],
-                tmp_name)
-            s += error_handling_template % mult
+            weight_name = templates.parameter_offset.render(offset=0)
+            mult = templates.multiply.render(
+                m1=inputs, h1=1, w1=w.shape[0], m2=weight_name, h2=w.shape[0], w2=w.shape[1],
+                ret=tmp_name)
+            s += templates.handle_error.render(expression=mult)
 
             if len(parameters) > 1:
                 # add bias
                 b = parameters[1]
-                bias_name = parameter_offset_template % num_params[0]
-                add = add_template % (
-                    tmp_name, 1, w.shape[1], bias_name, 1, b.shape[0],
-                    tmp_name)
-                s += error_handling_template % add
+                bias_name = templates.parameter_offset.render(
+                    offset=num_params[0])
+                add = templates.add.render(
+                    m1=tmp_name, h1=1, w1=w.shape[1], m2=bias_name, h2=1, w2=b.shape[0],
+                    ret=tmp_name)
+                s += templates.handle_error.render(expression=add)
 
             if layer.activation.__name__ == 'relu':
-                relu = relu_template % (
-                    tmp_name, 1, w.shape[1])
+                relu = templates.relu.render(
+                    m=tmp_name, h=1, w=w.shape[1])
                 s += relu
             elif layer.activation.__name__ == 'softmax':
                 # here we compute the actual label
-                softmax = softmax_template % (w.shape[1], inputs, inputs)
+                softmax = templates.softmax.render(
+                    num_labels=w.shape[1], input=inputs)
                 s += softmax
             elif layer.activation.__name__ == 'sigmoid':
-                s += sigmoid_template % tmp_name
+                s += templates.sigmoid.render(input=tmp_name)
             elif layer.activation.__name__ == 'linear':
                 s += '\t//linear activation requires no action\n'
             else:
@@ -168,56 +173,79 @@ class Enclave(Sequential):
 
         elif type(layer) in [layers.SeparableConv1D]:
             if layer.padding != 'same':
-                raise NotImplementedError("Padding modes other than 'same' are not implemented")
+                raise NotImplementedError(
+                    "Padding modes other than 'same' are not implemented")
 
             _, steps, c = layer.input_shape
             f = layer.output_shape[-1]
 
             new_size = np.prod(layer.output_shape[1:])
-            new_buffer = tmp_buffer_template % tmp_index
+            new_buffer = templates.tmp_buffer.render(i=tmp_index)
             ks = layer.kernel_size[0]
 
             # from matutil:
             # num_depth = ks*c
             # num_point = c*f
             # num_bias = f
-            s += load_template % (ks*c+c*f+f)
+            s += templates.load.render(num_params=ks*c+c*f+f)
 
-            depth_kernels = parameter_offset_template % 0
-            point_kernels = parameter_offset_template % (ks*c)
-            biases = parameter_offset_template % (ks*c+c*f)
-            s += sep_conv1_template % (inputs, steps, c, f, depth_kernels, point_kernels, ks, biases, new_buffer)
+            depth_kernels = templates.parameter_offset.render(offset=0)
+            point_kernels = templates.parameter_offset.render(offset=ks*c)
+            biases = templates.parameter_offset.render(offset=ks*c+c*f)
+            s += templates.sep_conv1_template.render(
+                input=inputs,
+                steps=steps,
+                channels=c,
+                filters=f,
+                depth_kernels=depth_kernels,
+                point_kernels=point_kernels,
+                kernel_size=ks,
+                biases=biases,
+                ret=new_buffer)
 
             if layer.activation.__name__ == 'relu':
                 # relu
-                s += relu_template % (new_buffer, 1, new_size)
+                s += templates.relu.render(input=new_buffer, h=1, w=new_size)
             elif layer.activation.__name__ == 'linear':
-                s += "  // no activation function for layer {}".format(layer.name)
+                s += "  // no activation function for layer {}".format(
+                    layer.name)
             else:
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
-                        
+
         elif type(layer) in [layers.Conv2D]:
             if layer.padding != 'same':
-                raise NotImplementedError("Padding modes other than 'same' are not implemented")
-            
+                raise NotImplementedError(
+                    "Padding modes other than 'same' are not implemented")
+
             _, h, w, c = layer.input_shape
             f = layer.output_shape[-1]
             new_size = np.prod(layer.output_shape[1:])
-            new_buffer = tmp_buffer_template % tmp_index
+            new_buffer = templates.tmp_buffer.render(i=tmp_index)
             kh, kw = layer.kernel_size
 
-            s += load_template % (kw*kh*c*f + f) 
-            kernels = parameter_offset_template % 0
-            biases = parameter_offset_template % (kw*kh*c*f)
+            s += templates.load(num_params=kw*kh*c*f + f)
+            kernels = templates.parameter_offset(offset=0)
+            biases = templates.parameter_offset(offset=kw*kh*c*f)
 
-            s += conv2_template % (inputs, h, w, c, f, kernels, kh, kw, biases, new_buffer)
+            s += templates.conv2_template.render(
+                input=inputs,
+                h=h,
+                w=w,
+                channels=c,
+                filters=f,
+                kernels=kernels,
+                kernel_height=kh,
+                kernel_width=kw,
+                biases=biases,
+                ret=new_buffer)
 
             if layer.activation.__name__ == 'relu':
                 # relu
-                s += relu_template % (new_buffer, 1, new_size)
+                s += templates.relu.render(input=new_buffer, h=1, w=new_size)
             elif layer.activation.__name__ == 'linear':
-                s += "  // no activation function for layer {}".format(layer.name)
+                s += "  // no activation function for layer {}".format(
+                    layer.name)
             else:
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
@@ -228,63 +256,109 @@ class Enclave(Sequential):
             elif layer.padding == 'same':
                 padding = 'PADDING_SAME'
             else:
-                raise NotImplementedError(f"Padding {layer.padding} not implemented, requested for layer {layer}")
-            
+                raise NotImplementedError(
+                    f"Padding {layer.padding} not implemented, requested for layer {layer}")
+
             _, h, w, c = layer.input_shape
             f = layer.output_shape[-1]
             new_size = np.prod(layer.output_shape[1:])
-            new_buffer = tmp_buffer_template % tmp_index
+            new_buffer = templates.tmp_buffer.render(i=tmp_index)
             kh, kw = layer.kernel_size
 
-            s += load_template % (kw*kh*c*f + f) 
-            kernels = parameter_offset_template % 0
+            s += templates.load.render(num_params=kw*kh*c*f + f)
+            kernels = templates.parameter_offset.render(offset=0)
 
-            s += depthwise_conv2_template % (inputs, h, w, c, padding, kernels, kh, kw, new_buffer)
+            s += templates.depthwise_conv2.render(
+                input=inputs,
+                h=h,
+                w=w,
+                c=c,
+                padding=padding,
+                kernels=kernels,
+                kernel_height=kh,
+                kernel_width=kw,
+                ret=new_buffer)
 
             if layer.activation.__name__ == 'relu':
                 # relu
-                s += relu_template % (new_buffer, 1, new_size)
+                s += templates.relu.render(input=new_buffer, h=1, w=new_size)
             elif layer.activation.__name__ == 'linear':
-                s += "  // no activation function for layer {}".format(layer.name)
+                s += "  // no activation function for layer {}".format(
+                    layer.name)
             else:
                 raise NotImplementedError("Unknown activation function {} in layer {}".format(
                     layer.activation.__name__, layer.name))
 
         elif type(layer) in [layers.GlobalAveragePooling1D]:
+            tmp_buffer = templates.tmp_buffer.render(i=tmp_index)
             _, steps, c = layer.input_shape
-            s = global_average_pooling_1d_template % (inputs, steps, c, tmp_buffer_template % tmp_index)
-            
+            s = templates.global_average_pooling_1d.render(
+                input=inputs,
+                steps=steps,
+                channels=c,
+                ret=tmp_buffer)
+
         elif type(layer) in [layers.GlobalAveragePooling2D]:
+            tmp_buffer = templates.tmp_buffer.render(i=tmp_index)
             _, h, w, c = layer.input_shape
-            s = global_average_pooling_2d_template % (inputs, h, w, c, tmp_buffer_template % tmp_index)
+            s = templates.global_average_pooling_2d.render(
+                input=inputs,
+                h=h,
+                w=w,
+                channels=c,
+                tmp_buffer=tmp_buffer)
 
         elif type(layer) in [layers.MaxPooling1D]:
+            tmp_buffer = templates.tmp_buffer(i=tmp_index)
             _, steps, c = layer.input_shape
-            s = max_pooling_1d_template % (inputs, steps, c, layer.pool_size[0], tmp_buffer_template % tmp_index)
+            s = templates.max_pooling_1d.render(
+                input=inputs,
+                steps=steps,
+                channels=c,
+                pool_size=layer.pool_size[0],
+                ret=tmp_buffer)
+
         elif type(layer) in [layers.MaxPooling2D]:
+            tmp_buffer = templates.tmp_buffer(i=tmp_index)
             _, h, w, c = layer.input_shape
             pool_size = layer.pool_size[0]
             if layer.pool_size[0] != layer.pool_size[1]:
-                raise NotImplementedError("Non-square pooling is not implemented")
+                raise NotImplementedError(
+                    "Non-square pooling is not implemented")
 
             new_size = np.prod(layer.output_shape[1:])
-            s = max_pooling_2d_template % (inputs, h, w, c, pool_size, tmp_buffer_template % tmp_index)
+            s = templates.max_pooling_2d.render(
+                input=inputs,
+                h=h,
+                w=w,
+                channels=c,
+                pool_size=pool_size,
+                ret=tmp_buffer)
 
         elif type(layer) in [layers.ZeroPadding2D]:
             _, h, w, c = layer.input_shape
             padding = layer.padding
             if len(padding) != 2:
-                raise NotImplementedError("Asymmetrical padding is not implemented")
-            new_buffer = tmp_buffer_template % tmp_index
-            
-            s = zero_pad2_template % (inputs, h, w, c, padding[0][0], padding[0][1],
-                    padding[1][0], padding[1][1], new_buffer)
+                raise NotImplementedError(
+                    "Asymmetrical padding is not implemented")
+            new_buffer = templates.tmp_buffer.render(i=tmp_index)
+
+            s = templates.zero_pad2.render(
+                input=inputs,
+                h=h,
+                w=w,
+                channels=c,
+                top_pad=padding[0][0],
+                bottom_pad=padding[0][1],
+                left_pad=padding[1][0],
+                right_pad=padding[1][1],
+                ret=new_buffer)
 
         elif type(layer) in [layers.ReLU]:
             size = np.prod(layer.output_shape[1:])
 
             # relu
-            s += relu_template % (inputs, 1, size)
+            s += templates.relu.render(input=inputs, h=1, w=size)
 
             added_ops = False
 

@@ -12,11 +12,11 @@ extern "C" {
 
     int matutil_teardown();
 
-    void matutil_get_new_dimensions(int r1, int c1, int r2, int c2, int *rr, int *cr);
+    void matutil_get_new_dimensions(int h1, int w1, int h2, int w2, int *rr, int *cr);
 
-    int matutil_multiply(float *m1, int r1, int c1, float *m2, int r2, int c2, float *ret);
+    int matutil_multiply(float *m1, int h1, int w1, float *m2, int h2, int w2, float *ret);
 
-    int matutil_add(float *m1, int r1, int c1, float *m2, int r2, int c2, float *ret);
+    int matutil_add(float *m1, int h1, int w1, float *m2, int h2, int w2, float *ret); // TODO: this doesn't need 2 dimensions
 
     int matutil_sep_conv1(float *input, int steps, int c, int f, float *depth_kernels, float *point_kernels, int ks, float *biases, float *ret);
 
@@ -24,7 +24,7 @@ extern "C" {
 
     int matutil_depthwise_conv2(float *input, int h, int w, int c, int padding, float *kernels, int kh, int kw, float *ret);
 
-    void matutil_relu(float *m, int r, int c); // TODO: This doesn't need 2 dimensions
+    void matutil_relu(float *m, int h, int w); // TODO: This doesn't need 2 dimensions
 
     void matutil_global_average_pooling_1d(float *m, int steps, int c, float *ret);
 
