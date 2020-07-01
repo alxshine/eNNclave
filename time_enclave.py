@@ -20,6 +20,7 @@ import rotten_tomatoes_prepare_data
 import imdb_prepare_data
 import amazon_prepare_data
 import flowers_prepare_data
+import mnist_prepare_data
 
 def time_from_file(model_path, samples):
     model = load_model(model_path, custom_objects={'EnclaveLayer': EnclaveLayer})
@@ -164,9 +165,7 @@ if __name__ == '__main__':
         x_test, y_test = mit_prepare_data.load_test_set()
         sample_index = 20
     elif dataset == 'mnist':
-        test_ds = tfds.load('mnist', split=tfds.Split.TEST, as_supervised=True)
-        test_ds = test_ds.map(utils.preprocess_mnist)
-        x_test = np.array([x.numpy() for x,_ in test_ds])
+        x_test, y_test = mnist_prepare_data.load_test_set()
     elif dataset == 'rotten':
         _, _, x_test, y_test, _ = rotten_tomatoes_prepare_data.load_rotten_tomatoes('./datasets')
     elif dataset == 'imdb':

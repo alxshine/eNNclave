@@ -23,23 +23,22 @@ RUN \
 COPY --chown=ennclave:ennclave requirements_cpu.txt /eNNclave/requirements.txt
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt
 
+USER ennclave
+RUN mkdir -p datasets/mnist
+COPY --chown=ennclave:ennclave datasets/mnist datasets/mnist
+
 COPY --chown=ennclave:ennclave docker/run_unit_tests.sh docker/run_integration_tests.sh setup_ld_path.sh /eNNclave/
 COPY --chown=ennclave:ennclave inc /eNNclave/inc
 COPY --chown=ennclave:ennclave lib /eNNclave/lib
 COPY --chown=ennclave:ennclave interop /eNNclave/interop
 COPY --chown=ennclave:ennclave Makefile *.py *.sh /eNNclave/
 
-
-USER ennclave
 ENV MODE=SIM
 
 RUN make clean
+RUN mkdir timing_logs
 
 COPY --chown=ennclave:ennclave models /eNNclave/models
 
-# COPY --chown=ennclave:ennclave parameters.bin /eNNclave/
-
-# RUN pip3 install \
-#   tensorflow pandas numpy
-
 CMD ["bash", "./run_integration_tests.sh"]
+# CMD ["bash"]

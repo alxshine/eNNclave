@@ -4,10 +4,9 @@ from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as layers
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 import tensorflow as tf
-import tensorflow_datasets as tfds
-
 import pandas as pd
 
+import mnist_prepare_data
 import utils
 
 # hyperparameters
@@ -15,7 +14,7 @@ MODEL_FILE = 'models/mnist.h5'
 HIST_FILE = 'hist_mnist.csv'
 HIDDEN_NEURONS = 128
 DROPOUT_RATIO = 0.4
-NUM_EPOCHS = 20
+NUM_EPOCHS = 3
 STEPS_PER_EPOCH = 10
 VALIDATION_STEPS = 2
 BATCH_SIZE = 32
@@ -26,15 +25,8 @@ INPUT_SHAPE = (28, 28, 1)
 
 tf.compat.v1.set_random_seed(1337)
 
-train_ds, test_ds = tfds.load('mnist',
-                              split=[tfds.Split.TRAIN, tfds.Split.TEST],
-                              as_supervised=True)
-train_ds = train_ds.map(utils.preprocess_mnist)
-train_ds = train_ds.shuffle(buffer_size=2*BATCH_SIZE).repeat().batch(
-    BATCH_SIZE).prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-
-test_ds = test_ds.map(utils.preprocess_mnist)
-test_ds = test_ds.batch(BATCH_SIZE)
+x_train, y_train = mnist_prepare_data.load_train_set()
+x_test, y_test = mnist_prepare_data.load_test_set()
 
 model = Sequential([
     layers.Input(INPUT_SHAPE),
@@ -52,14 +44,13 @@ model.compile(optimizer='adam',
               loss=sparse_categorical_crossentropy,
               metrics=['accuracy'])
 
-history = model.fit(train_ds,
+history = model.fit(x_train, y_train,
                     epochs=NUM_EPOCHS,
-                    steps_per_epoch=STEPS_PER_EPOCH,
-                    validation_data=test_ds,
+                    validation_data=(x_test, y_test),
                     validation_steps=VALIDATION_STEPS,
                     )
 
-loss0, accuracy0 = model.evaluate(test_ds)
+loss0, accuracy0 = model.evaluate(x_test, y_test)
 
 print("loss: {:.2f}".format(loss0))
 print("accuracy: {:.2f}".format(accuracy0))
