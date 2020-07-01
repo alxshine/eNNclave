@@ -1,4 +1,6 @@
-preamble_template = """
+from jinja2 import Template
+
+preamble = Template("""
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -11,11 +13,11 @@ preamble_template = """
 #include "native_nn.h"
 #include "output.h"
 
-int %s_f(float *m, int s, int *label) {
+int {{ mode }}_f(float *m, int s, int *label) {
     int sts;
 
     open_parameters();
-"""
+""")
 postamble = """
     close_parameters();
     return 0;
@@ -23,25 +25,26 @@ postamble = """
 """
 
 tmp_buffer_template = "tmp%d"
-buffer_declaration_template = """
-    float *tmp0 = (float*) malloc(%d*sizeof(float));
+buffer_declaration = Template("""
+    float *tmp0 = (float*) malloc({{ tmp1_size }}*sizeof(float));
     if(tmp0 == NULL){
-        print_err("\\n\\nENCLAVE ERROR:Could not allocate tmp0 of size %d\\n\\n\\n");
+        print_err("\\n\\nENCLAVE ERROR:Could not allocate tmp0 of size {{ tmp1_size }}\\n\\n\\n");
         return 1;
     }
 
-    float *tmp1 = (float*) malloc(%d*sizeof(float));
+    float *tmp1 = (float*) malloc({{ tmp2_size }}*sizeof(float));
     if(tmp1 == NULL){
-        print_err("\\n\\nENCLAVE ERROR:Could not allocate tmp1 of size %d\\n\\n\\n");
+        print_err("\\n\\nENCLAVE ERROR:Could not allocate tmp1 of size {{ tmp2_size }}\\n\\n\\n");
         return 1;
     }
 
-    float *params = (float*) malloc(%d*sizeof(float));
+    float *params = (float*) malloc({{ param_size }}*sizeof(float));
     if(params == NULL){
-        print_err("\\n\\nENCLAVE ERROR:Could not allocate params of size %d\\n\\n\\n");
+        print_err("\\n\\nENCLAVE ERROR:Could not allocate params of size {{ param_size }}\\n\\n\\n");
         return 1;
     }
-"""
+""")
+
 release_template = """
     free(tmp0);
     free(tmp1);

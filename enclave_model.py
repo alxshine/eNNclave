@@ -83,7 +83,7 @@ class Enclave(Sequential):
         expected_c = self.layers[0].input_shape[1]
 
         parent_dir = target_dir.split('/')[-1]
-        forward_file.write(preamble_template % parent_dir)
+        forward_file.write(preamble.render(mode = parent_dir))
         # declare tmp buffers
         output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
         output_sizes.sort(reverse = True)
@@ -91,7 +91,7 @@ class Enclave(Sequential):
         # get required size for weight buffer
         param_numbers = [np.sum([np.prod(w.shape) for w in l.get_weights()]) for l in all_layers]
         max_size = max(param_numbers)
-        forward_file.write(buffer_declaration_template % (output_sizes[0], output_sizes[0], output_sizes[0], output_sizes[0], max_size, max_size))
+        forward_file.write(buffer_declaration.render(tmp1_size = output_sizes[0], tmp2_size = output_sizes[0], param_size = max_size))
 
         tmp_index = 0
         inputs = 'm'

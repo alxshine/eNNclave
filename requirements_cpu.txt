@@ -50,3 +50,4 @@ tqdm==4.46.0
 urllib3==1.25.7
 Werkzeug==0.16.0
 wrapt==1.11.2
+Jinja2==2.11.2
