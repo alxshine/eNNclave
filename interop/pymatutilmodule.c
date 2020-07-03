@@ -6,40 +6,43 @@
 
 static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
-  int s;
+  int s, rs;
 
-  if (!PyArg_ParseTuple(args, "Si", &b, &s))
+  if (!PyArg_ParseTuple(args, "Sii", &b, &s, &rs))
     return NULL;
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
-  int label;
+  float ret[rs];
   printf("Native NN forward\n");
-  int sts = native_nn_forward(m, s, &label);
+  
+  int sts = native_nn_forward(m, s, ret, rs);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error during native forward");
     return NULL; // TODO: do some error handling
   }
 
-  return PyLong_FromLong(label);
+  return Py_BuildValue("y#", ret, rs*sizeof(float));
 }
 
 static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
-  int s;
+  int s,rs;
 
-  if (!PyArg_ParseTuple(args, "Si", &b, &s))
+  if (!PyArg_ParseTuple(args, "Sii", &b, &s, &rs))
     return NULL;
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
-  int label = -1;
+  float ret[rs];
   printf("Enclave NN forward\n");
-  int sts = enclave_nn_forward(m, s, &label);
+
+  int sts = enclave_nn_forward(m, s, ret, rs);
   if (sts){
     PyErr_SetString(PyExc_IOError, "Error in enclave");
     return NULL; // TODO: do some error handling
   }
 
-  return PyLong_FromLong(label);
+
+  return Py_BuildValue("y#", ret, rs*sizeof(float));
 }
 
 static PyObject *pymatutil_forward(PyObject *self, PyObject *args){

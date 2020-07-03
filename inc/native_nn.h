@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-  int native_nn_forward(float *m, int s, int *label);
+  int native_nn_forward(float *m, int s, float *ret, int rs);
 
 #if defined(__cplusplus)
 }

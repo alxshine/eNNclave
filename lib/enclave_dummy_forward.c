@@ -1,6 +1,9 @@
 #include "forward.h"
 
-int enclave_f(float *m, int size, int *label){
+#include "output.h"
 
+int enclave_f(float *m, int size, float *ret, int rs)
+{
+  print_out("Enclave forward\n");
   return 0;
 }

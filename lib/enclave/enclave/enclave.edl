@@ -3,7 +3,7 @@ enclave {
 
     trusted {
         public void test();
-		public int enclave_f([in, count=s] float *m, int s, [out] int *label);
+		public int enclave_f([in, count=s] float *m, int s, [out, count=rs] float *label, int rs);
 
 		public void open_encrypted_parameters();
 		public int encrypt_parameters([in, count=num_elements] float *target_buffer, int num_elements);

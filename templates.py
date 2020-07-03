@@ -13,7 +13,7 @@ preamble = Template("""
 #include "native_nn.h"
 #include "output.h"
 
-int {{ mode }}_f(float *m, int s, int *label) {
+int {{ mode }}_f(float *m, int s, float *ret, int rs) {
     int sts;
 
     open_parameters();
@@ -50,10 +50,14 @@ release_buffers = """
     free(tmp1);
     free(params);
 """
+return_results = Template("""
+  for(int i=0; i<rs; ++i)
+    ret[i] = {{input}}[i];
+  """)
 
 handle_error = Template("""  if ((sts = {{expression}}))
     return sts;
-""")
+""") # TODO: is this really necessary or useful?
 load = Template("   load_parameters(params, {{num_params}});\n")
 parameter_offset = Template("params+{{offset}}")
 add = Template("matutil_add({{m1}}, {{h1}}, {{w1}}, {{m2}}, {{h2}}, {{w2}}, {{ret}})")
@@ -69,16 +73,18 @@ softmax = Template("""
   for (int i = 1; i < {{num_labels}}; ++i)
     max_index = {{input}}[i] > {{input}}[max_index] ? i : max_index;
 
-  *label = max_index;
-""")
+  for(int i=0; i< {{num_labels}}; ++i)
+    {{input}}[i] = i == max_index ? 1 : 0;
+""") # TODO: make this single pass
 sigmoid = Template("""
   // fake sigmoid
-  *label = {{input}}[0] > 0.5;""")
+  ret[0] = {{input}}[0] > 0.5;""")
 global_average_pooling_1d = Template("  matutil_global_average_pooling_1d({{input}}, {{steps}}, {{channels}}, {{ret}});\n")
 global_average_pooling_2d = Template("  matutil_global_average_pooling_2d({{input}}, {{h}}, {{w}}, {{channels}}, {{ret}});\n")
 max_pooling_1d = Template("  matutil_max_pooling_1d({{input}}, {{steps}}, {{channels}}, {{pool_size}}, {{ret}});\n")
 max_pooling_2d = Template("  matutil_max_pooling_2d({{input}}, {{h}}, {{w}}, {{channels}}, {{pool_size}}, {{ret}});\n")
-unknown_layer_template = "  //No call method generated for layer %s of type %s\n"
+dump = Template("  matutil_dump_matrix({{inputs}}, {{h}}, {{w}});")
+dump3 = Template("  matutil_dump_matrix3({{inputs}}, {{h}}, {{w}}, {{channels}});")
 
 config = Template("""
 <EnclaveConfiguration>

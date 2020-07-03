@@ -110,6 +110,8 @@ class Enclave(Sequential):
                 tmp_index = 1-tmp_index
                 tmp_name = templates.tmp_buffer.render(i=tmp_index)
 
+        # set result buffer
+        forward_file.write(templates.return_results.render(input=inputs))
         # free tmp buffers
         forward_file.write(templates.release_buffers)
         forward_file.write(templates.postamble)

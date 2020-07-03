@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-int enclave_f(float *m, int s, int *label);
+int enclave_f(float *m, int s, float *ret, int rs);
 int print_error(const char* fmt, ...);
 int print(const char* fmt, ...);
 

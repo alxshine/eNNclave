@@ -17,9 +17,9 @@ void ocall_stderr_string(const char *str){
 }
 
 int enclave_nn_start(){
-    sgx_status_t ret = sgx_create_enclave(enclave_filename, SGX_DEBUG_FLAG, NULL, NULL, &enclave_id, NULL);
-    if( ret != SGX_SUCCESS){
-        print_error_message(ret);
+    sgx_status_t sts = sgx_create_enclave(enclave_filename, SGX_DEBUG_FLAG, NULL, NULL, &enclave_id, NULL);
+    if( sts != SGX_SUCCESS){
+        print_error_message(sts);
         return 1;
     }
     return 0;
@@ -29,23 +29,22 @@ int enclave_nn_end(){
     sgx_destroy_enclave(enclave_id);
 }
 
-int enclave_nn_forward(float *m, int s, int *label){
-    // sgx_status_t ret = test(enclave_id);
+int enclave_nn_forward(float *m, int s, float *ret, int rs){
     printf("This is the enclave wrapper\n");
     int return_value;
-    sgx_status_t ret = enclave_f(enclave_id, &return_value, m, s, label);
-    if(ret != SGX_SUCCESS){
-        print_error_message(ret);
+    sgx_status_t sts = enclave_f(enclave_id, &return_value, m, s, ret, rs);
+    if(sts != SGX_SUCCESS){
+        print_error_message(sts);
         return 1;
     }
     return 0;
 };
 
 int encrypt_parameter_file(const char* path){
-    sgx_status_t ret = open_encrypted_parameters(enclave_id);
-    if (ret != SGX_SUCCESS){
+    sgx_status_t sts = open_encrypted_parameters(enclave_id);
+    if (sts != SGX_SUCCESS){
         perror("Could not open encrypted parameter file");
-        print_error_message(ret);
+        print_error_message(sts);
         return 1;
     }
 
@@ -63,16 +62,16 @@ int encrypt_parameter_file(const char* path){
             break;
 
         int num_wrote;
-        ret = encrypt_parameters(enclave_id, &num_wrote, buffer, num_read);
-        if (ret != SGX_SUCCESS){
-            print_error_message(ret);
+        sts = encrypt_parameters(enclave_id, &num_wrote, buffer, num_read);
+        if (sts != SGX_SUCCESS){
+            print_error_message(sts);
             close_encrypted_parameters(enclave_id);
             return 1;
         }
     } while(num_read = 1024);
 
-    ret = close_encrypted_parameters(enclave_id);
-    if (ret != SGX_SUCCESS){
+    sts = close_encrypted_parameters(enclave_id);
+    if (sts != SGX_SUCCESS){
         close_encrypted_parameters(enclave_id);
         return 1;
     }

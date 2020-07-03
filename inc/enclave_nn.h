@@ -7,7 +7,7 @@ extern "C" {
 
   int enclave_nn_start();
   int enclave_nn_end();
-  int enclave_nn_forward(float *m, int s, int *label);
+  int enclave_nn_forward(float *m, int s, float *ret, int rs);
 
 #if defined(__cplusplus)
 }
