@@ -20,6 +20,20 @@ def get_new_filename(model_path):
     
     return target_file
 
+def generate_enclave(enclave):
+    # build cpp and bin files for enclave
+    enclave.generate_state()
+    enclave.generate_forward(target_dir='lib/enclave/enclave')
+    enclave.generate_config(target_dir='lib/enclave/enclave/')
+    # same for regular C
+    enclave.generate_state()
+    enclave.generate_forward(target_dir='lib/native')
+
+def compile_enclave():
+    make_result = subprocess.run(["make", "lib", "Build_Mode=HW_PRERELEASE"])
+    if make_result.returncode != 0:
+        raise OSError(make_result.stderr)
+
 def build_enclave(model_file, n, conn=None):
     print('Loading model from %s' % model_file)
     model = load_model(model_file, custom_objects={'Enclave': Enclave})
@@ -36,14 +50,7 @@ def build_enclave(model_file, n, conn=None):
 
     enclave_input_shape = all_layers[-n].input_shape
     enclave.build(input_shape=enclave_input_shape)
-
-    # build cpp and bin files for enclave
-    enclave.generate_state()
-    enclave.generate_forward(target_dir='lib/enclave/enclave')
-    enclave.generate_config(target_dir='lib/enclave/enclave/')
-    # same for regular C
-    enclave.generate_state()
-    enclave.generate_forward(target_dir='lib/native')
+    generate_enclave(enclave)
 
     # build replacement layer for original model
     enclave_model = Sequential(all_layers[:-n])
@@ -61,11 +68,7 @@ def build_enclave(model_file, n, conn=None):
     print('Saving model to {}'.format(new_filename))
     enclave_model.save(new_filename)
 
-    # compile the enclave
-    print("Compiling enclave")
-    make_result = subprocess.run(["make", "lib", "Build_Mode=HW_PRERELEASE"])
-    if make_result.returncode != 0:
-        raise OSError(make_result.stderr)
+    compile_enclave()
     
     print("Success!")
 
