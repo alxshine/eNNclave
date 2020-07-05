@@ -1,7 +1,7 @@
 ###########################################################
 #                Testing Environment                      #
 ###########################################################
-FROM ubuntu:18.04 as sgx-tester
+FROM ubuntu:18.04 as sgx-base
 
 RUN apt-get update && apt-get install -y \
   make
@@ -27,7 +27,7 @@ USER ennclave
 RUN mkdir -p datasets/mnist
 COPY --chown=ennclave:ennclave datasets/mnist datasets/mnist
 
-COPY --chown=ennclave:ennclave docker/run_unit_tests.sh docker/run_integration_tests.sh setup_ld_path.sh /eNNclave/
+COPY --chown=ennclave:ennclave setup_ld_path.sh /eNNclave/
 COPY --chown=ennclave:ennclave inc /eNNclave/inc
 COPY --chown=ennclave:ennclave lib /eNNclave/lib
 COPY --chown=ennclave:ennclave interop /eNNclave/interop
@@ -40,5 +40,10 @@ RUN mkdir timing_logs
 
 COPY --chown=ennclave:ennclave models /eNNclave/models
 
-CMD ["bash", "./run_integration_tests.sh"]
-# CMD ["bash"]
+
+FROM sgx-base AS tester
+
+COPY --chown=ennclave:ennclave docker/run_tests.sh /eNNclave/
+COPY --chown=ennclave:ennclave tests /eNNclave/tests/
+
+CMD ["bash", "./run_tests.sh"]
