@@ -54,26 +54,29 @@ all: $(wrapper_name) $(app_name) $(signed_enclave_name) parameters
 
 # generate code files
 edger8r: enclave/enclave.edl
+	@echo "Generating SGX edger8r files"
 	@sgx_edger8r --trusted --untrusted --trusted-dir enclave/ --untrusted-dir app/ --search-path enclave/ enclave/enclave.edl --search-path $(SGX_SDK)/include/
 
 # Wrapper stuf
 $(wrapper_name): app/enclave_u.o app/wrapper.o app/utils.o
-	$(CC) $(app_includes) $(C_FLAGS) -shared $^ -o $@ $(link_flags)
-	ln -sf enclave/$@ ../
+	@echo "Compiling wrapper library"
+	@$(CC) $(app_includes) $(C_FLAGS) -shared $^ -o $@ $(link_flags)
+	@ln -sf enclave/$@ ../
 
 # App stuff
 $(app_name): app/enclave_u.o app/app.o app/utils.o
-	$(CC) $(app_includes) $(C_FLAGS) $^ -o $@ $(link_flags) -L$(CURDIR) -lenclave
+	@echo "Building encryption utility"
+	@$(CC) $(app_includes) $(C_FLAGS) $^ -o $@ $(link_flags) -L$(CURDIR) -lenclave
 
 app/enclave_u.h: edger8r
 
 app/enclave_u.c: app/enclave_u.h
 
 app/enclave_u.o: app/enclave_u.c
-	$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(link_flags)
+	@$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(link_flags)
 	
 app/%.o: app/%.c
-	$(CC) $(app_includes) $(C_FLAGS) $^ -c -o $@
+	@$(CC) $(app_includes) $(C_FLAGS) $^ -c -o $@
 
 # Enclave stuff
 enclave/enclave_t.h: edger8r
@@ -81,7 +84,8 @@ enclave/enclave_t.h: edger8r
 enclave/enclave_t.c: enclave/enclave_t.h
 
 enclave/enclave_t.o: enclave/enclave_t.c
-	$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(enclave_link_flags)
+	@echo "Compiling enclave"
+	@$(CC) $(enclave_includes) $(C_FLAGS) $^ -c -o $@ $(enclave_link_flags)
 
 $(signed_enclave_name): $(enclave_name)
 	@echo "Signing enclave"

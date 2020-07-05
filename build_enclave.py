@@ -29,8 +29,15 @@ def generate_enclave(enclave):
     enclave.generate_state()
     enclave.generate_forward(target_dir='lib/native')
 
-def compile_enclave():
-    make_result = subprocess.run(["make", "lib", "Build_Mode=HW_PRERELEASE"])
+def compile_enclave(verbose=False):
+    if verbose:
+        out=subprocess.STDOUT
+        err=subprocess.STDERR
+    else:
+        out=subprocess.DEVNULL
+        err=subprocess.DEVNULL
+
+    make_result = subprocess.run(["make", "lib", "Build_Mode=HW_PRERELEASE"], stdout=out, stderr=err)
     if make_result.returncode != 0:
         raise OSError(make_result.stderr)
 

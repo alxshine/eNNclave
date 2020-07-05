@@ -24,10 +24,10 @@ class Enclave(Sequential):
         num_heap_blocks += 1000  # for tolerance
         heap_size = num_heap_blocks * 0x1000
 
-        print("Max required heap size: %s MB" % (heap_size/1024/1024))
+        # print("Max required heap size: %s MB" % (heap_size/1024/1024))
         # override for now
         mb_size = 126
-        print("Configuring heap size for %d MB for now" % mb_size)
+        # print("Configuring heap size for %d MB for now" % mb_size)
         heap_size = mb_size*1024*1024
         config_path = os.path.join(target_dir, 'config.xml')
         config = templates.config.render(
