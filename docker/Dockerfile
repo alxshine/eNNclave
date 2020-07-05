@@ -38,7 +38,7 @@ ENV MODE=SIM
 RUN make clean
 RUN mkdir timing_logs
 
-COPY --chown=ennclave:ennclave models /eNNclave/models
+# COPY --chown=ennclave:ennclave models /eNNclave/models
 
 
 FROM sgx-base AS tester
