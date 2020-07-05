@@ -17,7 +17,8 @@ enclave:
 	@ln -sf lib/enclave.signed.so ../
 
 test: test_matutil.c $(TEST_FILES) native
-	gcc -g $< $(TEST_FILES) -I$(INC) -L$(LIB) -lnative -o test_matutil
+	@echo "Building matutil test"
+	@gcc -g $< $(TEST_FILES) -I$(INC) -L$(LIB) -lnative -o test_matutil
 
 .PHONY: clean native enclave
 clean:
