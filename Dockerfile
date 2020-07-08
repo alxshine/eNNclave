@@ -1,3 +1,4 @@
+## -*- docker-image-name: "ennclave" -*-
 ###########################################################
 #                Testing Environment                      #
 ###########################################################
@@ -38,7 +39,7 @@ ENV MODE=SIM
 RUN make clean
 RUN mkdir timing_logs
 
-# COPY --chown=ennclave:ennclave models /eNNclave/models
+COPY --chown=ennclave:ennclave models /eNNclave/models
 
 
 FROM sgx-base AS tester
@@ -46,4 +47,5 @@ FROM sgx-base AS tester
 COPY --chown=ennclave:ennclave docker/run_tests.sh /eNNclave/
 COPY --chown=ennclave:ennclave tests /eNNclave/tests/
 
+# CMD ["bash"]
 CMD ["bash", "./run_tests.sh"]
