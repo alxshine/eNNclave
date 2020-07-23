@@ -25,8 +25,6 @@ COPY --chown=ennclave:ennclave requirements.txt /eNNclave/requirements.txt
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt
 
 USER ennclave
-RUN mkdir -p datasets/mnist
-COPY --chown=ennclave:ennclave datasets/mnist datasets/mnist
 
 COPY --chown=ennclave:ennclave setup_ld_path.sh /eNNclave/
 COPY --chown=ennclave:ennclave inc /eNNclave/inc
@@ -38,8 +36,6 @@ ENV MODE=SIM
 
 RUN make clean
 RUN mkdir timing_logs
-
-COPY --chown=ennclave:ennclave models /eNNclave/models
 
 FROM sgx-base AS tester
 
