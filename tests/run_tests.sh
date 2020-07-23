@@ -11,4 +11,4 @@ source setup_ld_path.sh
 (cd lib && make test && ./test_matutil)
 
 # test python code
-make interop >/dev/null 2>&1 && python3 -m unittest discover tests
+make interop >/dev/null 2>&1 && python3 -m unittest discover

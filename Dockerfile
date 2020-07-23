@@ -40,7 +40,7 @@ RUN mkdir timing_logs
 FROM sgx-base AS tester
 
 COPY --chown=ennclave:ennclave tests/run_tests.sh /eNNclave/
-COPY --chown=ennclave:ennclave tests/*.py /eNNclave/tests/
+COPY --chown=ennclave:ennclave tests/*.py /eNNclave/
 
 # CMD ["bash"]
 CMD ["bash", "./run_tests.sh"]

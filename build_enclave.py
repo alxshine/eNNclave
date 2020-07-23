@@ -39,7 +39,13 @@ def compile_enclave(verbose=False):
 
     make_result = subprocess.run(["make", "lib", "Build_Mode=HW_PRERELEASE"], stdout=out, stderr=err)
     if make_result.returncode != 0:
-        raise OSError(make_result.stderr)
+        output = ""
+        if make_result.stdout is not None:
+            output += make_result.stdout + "\n"
+        if make_result.stderr is not None:
+            output += make_result.stderr
+        
+        raise OSError(output)
 
 def build_enclave(model_file, n, conn=None):
     print('Loading model from %s' % model_file)

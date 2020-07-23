@@ -294,7 +294,7 @@ class Enclave(Sequential):
         return ret
 
     @staticmethod
-    def generate_depthwise_conv_2d(layer, inputs, tmp_name):
+    def generate_depthwise_conv_2d(inputs, layer, tmp_name):
         if layer.padding == 'valid':
             padding = 'PADDING_VALID'
         elif layer.padding == 'same':
@@ -316,7 +316,7 @@ class Enclave(Sequential):
             input=inputs,
             h=h,
             w=w,
-            c=c,
+            channels=c,
             padding=padding,
             kernels=kernels,
             kernel_height=kh,
