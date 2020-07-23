@@ -49,4 +49,4 @@ class SepConv1dTest(TensorFlowTestCase):
         common(100, 5, 10)
 
     def testHuge(self):
-        common(500, 64, 64) # TODO: find out why this segfaults
+        common(500, 64, 64)
