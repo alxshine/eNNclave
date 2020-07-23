@@ -1,0 +1,10 @@
+name: eNNclave
+dependencies:
+    - python>=3.7
+    - pip
+    - cudatoolkit=10.1.168
+    - cudnn=7.6.5
+    - pip:
+        - Jinja2
+        - pandas
+        - tensorflow-gpu

@@ -1,7 +1,0 @@
-tensorflow>=2.1.0
-numpy
-pandas
-sklearn
-scikit-learn
-Jinja2
-pytest
