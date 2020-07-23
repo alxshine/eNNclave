@@ -51,7 +51,7 @@ class DepthwiseConv2dTests(TensorFlowTestCase):
 
     def testHuge(self):
         raise AssertionError("Causes a segfault in C")
-        common(500, 500, 64, 64)  # TODO: find out why this segfaults
+        common(500, 500, 64, 64)
 
 if __name__ == "__main__":
     unittest.main()

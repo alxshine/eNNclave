@@ -49,5 +49,6 @@ class Conv2dTests(TensorFlowTestCase):
     def testLarge(self):
         common(100, 100, 5, 10)
 
-    # def testHuge(self):
-    #     testConv2dLayer(500, 500, 64, 64) # TODO: find out why this segfaults
+    def testHuge(self):
+        raise AssertionError("Causes a segfault in C")
+        testConv2dLayer(500, 500, 64, 64)
