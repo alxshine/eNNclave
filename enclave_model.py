@@ -138,7 +138,7 @@ class Enclave(Sequential):
             s += Enclave.generate_dense(layer, inputs, tmp_name)
 
         elif type(layer) in [layers.SeparableConv1D]:
-            s += generate_separable_conv1d(layer)
+            s += Enclave.generate_separable_conv1d(layer, inputs, tmp_name)
 
         elif type(layer) in [layers.Conv2D]:
             s += Enclave.generate_conv_2d(inputs, layer, tmp_name)
@@ -279,7 +279,7 @@ class Enclave(Sequential):
         depth_kernels = templates.parameter_offset.render(offset=0)
         point_kernels = templates.parameter_offset.render(offset=ks*c)
         biases = templates.parameter_offset.render(offset=ks*c+c*f)
-        ret += templates.sep_conv1_template.render(
+        ret += templates.sep_conv1.render(
             input=inputs,
             steps=steps,
             channels=c,

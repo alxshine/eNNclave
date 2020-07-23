@@ -10,7 +10,7 @@ import interop.pymatutil as pymatutil
 import unittest
 
 
-def conv2d_common(h, w, channels, filters, kernel_size=3):
+def common(h, w, channels, filters, kernel_size=3):
     # TODO: seed with current date (for consistent results within a day)
     rng = np.random.default_rng()
 
@@ -41,13 +41,13 @@ def conv2d_common(h, w, channels, filters, kernel_size=3):
 
 class Conv2dTests(TensorFlowTestCase):
     def testSmall(self):
-        conv2d_common(5, 5, 3, 3)
+        common(5, 5, 3, 3)
 
     def testMedium(self):
-        conv2d_common(10, 10, 5, 5)
+        common(10, 10, 5, 5)
 
     def testLarge(self):
-        conv2d_common(100, 100, 5, 10)
+        common(100, 100, 5, 10)
 
     # def testHuge(self):
     #     testConv2dLayer(500, 500, 64, 64) # TODO: find out why this segfaults
