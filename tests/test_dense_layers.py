@@ -1,3 +1,4 @@
+from tensorflow.python.framework.test_util import TensorFlowTestCase
 from tensorflow.keras.models import load_model, Sequential
 import tensorflow.keras.layers as layers
 import numpy as np
@@ -9,7 +10,7 @@ import interop.pymatutil as pymatutil
 import unittest
 
 
-def testDenseLayer(size, output_size):
+def dense_common(size, output_size):
     # TODO: seed with current date (for consistent results within a day)
     rng = np.random.default_rng()
 
@@ -35,19 +36,19 @@ def testDenseLayer(size, output_size):
     pymatutil.teardown()
 
 
-class DenseTests(unittest.TestCase):
+class DenseTests(TensorFlowTestCase):
     def testSmall(self):
-        testDenseLayer(5, 5)
+        dense_common(5, 5)
 
     def testMedium(self):
-        testDenseLayer(10, 10)
+        dense_common(10, 10)
 
 
     def testLarge(self):
-        testDenseLayer(100, 100)
+        dense_common(100, 100)
 
     def testHuge(self):
-        testDenseLayer(1000, 1000)
+        dense_common(1000, 1000)
 
 
 if __name__ == "__main__":

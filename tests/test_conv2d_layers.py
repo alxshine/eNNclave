@@ -1,3 +1,4 @@
+from tensorflow.python.framework.test_util import TensorFlowTestCase
 from tensorflow.keras.models import load_model, Sequential
 import tensorflow.keras.layers as layers
 import numpy as np
@@ -9,7 +10,7 @@ import interop.pymatutil as pymatutil
 import unittest
 
 
-def testConv2dLayer(h, w, channels, filters, kernel_size=3):
+def conv2d_common(h, w, channels, filters, kernel_size=3):
     # TODO: seed with current date (for consistent results within a day)
     rng = np.random.default_rng()
 
@@ -38,15 +39,15 @@ def testConv2dLayer(h, w, channels, filters, kernel_size=3):
     pymatutil.teardown()
 
 
-class Conv2dTests(unittest.TestCase):
+class Conv2dTests(TensorFlowTestCase):
     def testSmall(self):
-        testConv2dLayer(5, 5, 3, 3)
+        conv2d_common(5, 5, 3, 3)
 
     def testMedium(self):
-        testConv2dLayer(10, 10, 5, 5)
+        conv2d_common(10, 10, 5, 5)
 
     def testLarge(self):
-        testConv2dLayer(100, 100, 5, 10)
+        conv2d_common(100, 100, 5, 10)
 
     # def testHuge(self):
     #     testConv2dLayer(500, 500, 64, 64) # TODO: find out why this segfaults
