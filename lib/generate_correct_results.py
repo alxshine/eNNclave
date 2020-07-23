@@ -125,6 +125,35 @@ def generate_conv2(h=3, w=3, channels=3, filters=3, kernel_size=3, mode='full'):
     dump_array_flatten('biases', biases)
     dump_array_flatten('expected', results)
 
+def generate_depthwise_conv2(h=3, w=3, channels=3, kernel_size=3, mode='full'):
+    print(f"int h = {h};")
+    print(f"int w = {w};")
+    print(f"int channels = {channels};")
+    print(f"int kernel_size = {kernel_size};")
+    print()
+
+    inputs = np.random.rand(1, h, w, channels)
+
+    if mode == 'zeros':
+        layer = tf.keras.layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False, bias_initializer='zeros', kernel_initializer='zeros')
+    elif mode == 'sequential':
+        inputs = np.arange(
+            h*w*channels, dtype=np.float).reshape((1, h, w, channels))
+        layer = tf.keras.layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False, bias_initializer='zeros', kernel_initializer='ones')
+    elif mode == 'full':
+        layer = tf.keras.layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False, bias_initializer='glorot_uniform', kernel_initializer='glorot_uniform')
+    else:
+        print("Unknown test mode")
+        sys.exit(1)
+
+    dump_array_flatten('inputs', inputs)
+
+    results = layer(inputs).numpy()
+    params = layer.get_weights()
+    kernels = params[0]
+    dump_array_flatten('kernels', kernels)
+    dump_array_flatten('expected', results)
+
 
 def generate_relu(size=10):
     print(f"int size = {size};")
@@ -241,4 +270,4 @@ def generate_zero_pad2(h=3, w=3, channels=3, top_pad=1, bottom_pad=1, left_pad=1
 
 
 if __name__ == "__main__":
-    generate_mul(h=7, w=7, mode='full')
+    generate_depthwise_conv2(h=3, w=3, channels=3)

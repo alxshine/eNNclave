@@ -11,6 +11,7 @@
 #include "test/add.h"
 #include "test/sep_conv1.h"
 #include "test/conv2.h"
+#include "test/depthwise_conv2.h"
 #include "test/relu.h"
 #include "test/global_average_pooling1.h"
 #include "test/global_average_pooling2.h"
@@ -36,6 +37,9 @@ int main(void)
 
     print_separator();
     test_conv2(&correct_cases, &total_cases);
+
+    print_separator();
+    test_depthwise_conv2(&correct_cases, &total_cases);
 
     print_separator();
     test_relu(&correct_cases, &total_cases);
