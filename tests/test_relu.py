@@ -10,21 +10,18 @@ import interop.pymatutil as pymatutil
 import unittest
 
 
-def common(h, w, channels, filters, kernel_size=3):
+def common(size):
     # TODO: seed with current date (for consistent results within a day)
     rng = np.random.default_rng()
 
-    inputs = rng.normal(loc=0., scale=2., size=(h, w, channels)).reshape(
-        1, h, w, channels).astype(np.float32)
-    size = np.prod(inputs.shape)
+    inputs = rng.normal(loc=0., scale=2., size=size).reshape(
+        1, size).astype(np.float32)
 
     test_model = Sequential()
-    test_model.add(layers.Input(shape=(h, w, channels), dtype="float32"))
-    test_model.add(layers.Conv2D(filters, activation='linear',
-                                 kernel_size=kernel_size, padding='same'))
+    test_model.add(layers.Input(shape=size, dtype="float32"))
+    test_model.add(layers.Dense(size, activation='relu', kernel_initializer='identity'))
 
     expected_result = test_model(inputs).numpy().flatten()
-    output_size = np.prod(expected_result.shape)
 
     enclave_model = Enclave(test_model.layers)
     generate_enclave(enclave_model)
@@ -32,23 +29,30 @@ def common(h, w, channels, filters, kernel_size=3):
 
     pymatutil.initialize()
     enclave_bytes = pymatutil.enclave_forward(
-        inputs.tobytes(), size, output_size)
+        inputs.tobytes(), size, size)
     enclave_result = np.frombuffer(enclave_bytes, dtype=np.float32)
+    for n in enclave_result.flatten():
+        if n < 0:
+            raise AssertionError("ReLu returned negative result")
     np.testing.assert_almost_equal(enclave_result, expected_result,
                                    err_msg="Enclave output is not the same as TensorFlow output")
     pymatutil.teardown()
 
 
-class Conv2dTests(TensorFlowTestCase):
+class ReLuTests(TensorFlowTestCase):
     def testSmall(self):
-        common(5, 5, 3, 3)
+        common(5)
 
     def testMedium(self):
-        common(10, 10, 5, 5)
+        common(10)
+
 
     def testLarge(self):
-        common(100, 100, 5, 10)
+        common(100)
 
     def testHuge(self):
-        raise AssertionError("Causes a segfault in C")
-        common(500, 500, 64, 64)
+        common(1000)
+
+
+if __name__ == "__main__":
+    unittest.main()
