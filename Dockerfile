@@ -22,7 +22,7 @@ RUN \
   adduser --disabled-password --gecos "" ennclave && chown ennclave:ennclave -R /eNNclave
 
 COPY --chown=ennclave:ennclave requirements.txt /eNNclave/requirements.txt
-RUN python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt
+RUN python3.8 -m pip install --upgrade pip && python3.8 -m pip install -r requirements.txt
 
 USER ennclave
 
@@ -39,8 +39,7 @@ RUN mkdir timing_logs
 
 FROM sgx-base AS tester
 
-COPY --chown=ennclave:ennclave tests/run_tests.sh /eNNclave/
-COPY --chown=ennclave:ennclave tests/*.py /eNNclave/
+COPY --chown=ennclave:ennclave tests/* /eNNclave/tests/
 
-# CMD ["bash"]
-CMD ["bash", "./run_tests.sh"]
+CMD ["bash"]
+# CMD ["bash", "./run_tests.sh"]
