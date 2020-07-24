@@ -20,3 +20,4 @@ sbatch_*.sh
 **/_build
 datasets
 .vscode
+**/cmake-build*
