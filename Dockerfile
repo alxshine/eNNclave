@@ -15,7 +15,7 @@ RUN sh -c 'echo yes | ./sgx_linux_x64_sdk_*.bin'
 
 # build requisites
 RUN apt-get update && apt-get install -y \
-  build-essential python3.7-dev python3-pip
+  build-essential python3.8-dev python3-pip
 
 WORKDIR /eNNclave
 RUN \
