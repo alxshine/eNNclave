@@ -1,5 +1,5 @@
 #define PY_SSIZE_T_CLEAN
-#include <python3.7m/Python.h>
+#include <Python.h>
 
 #include "native_nn.h"
 #include "enclave_nn.h"
@@ -24,6 +24,7 @@ static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
   return Py_BuildValue("y#", ret, rs*sizeof(float));
 }
 
+#ifdef SGX_MODE
 static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
   int s,rs;
@@ -45,10 +46,6 @@ static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
   return Py_BuildValue("y#", ret, rs*sizeof(float));
 }
 
-static PyObject *pymatutil_forward(PyObject *self, PyObject *args){
-  return pymatutil_enclave_forward(self, args);
-}
-
 static PyObject *enclave_initialize(PyObject *self, PyObject *args){
   enclave_nn_start();
   return Py_None;
@@ -58,11 +55,14 @@ static PyObject *enclave_teardown(PyObject *self, PyObject *args){
   enclave_nn_end();
   return Py_None;
 }
+#endif
 
 static PyMethodDef PymatutilMethods[] = {
+#ifdef SGX_MODE
     {"initialize", enclave_initialize, METH_VARARGS, "Initialize matutil"},
     {"teardown", enclave_teardown, METH_VARARGS, "Teardown matutil"},
     {"enclave_forward", pymatutil_enclave_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
+#endif
     {"native_forward", pymatutil_native_forward, METH_VARARGS, "Execute forward pass of enclave layers in native C"},
     {NULL, NULL, 0, NULL} // Sentinel
 };

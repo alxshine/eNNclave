@@ -4,7 +4,11 @@ LIB=${ROOT}/lib
 
 TEST_FILES=$(wildcard test/*.c)
 
+ifeq ($(SGX_MODE),)
+all: native
+else
 all: native enclave
+endif
 
 native:
 	@printf "\n\nMaking library in native mode\n\n\n"
