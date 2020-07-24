@@ -18,7 +18,7 @@ class Enclave(Sequential):
         output_sizes.sort(reverse=True)
         # get max tmp_buffer size
         max_size = output_sizes[0]
-        total_tmp_size = 2*max_size*4
+        total_tmp_size = 2 * max_size * 4
         # align to 4kB
         num_heap_blocks = int(np.ceil(total_tmp_size / 0x1000))
         num_heap_blocks += 1000  # for tolerance
@@ -28,7 +28,7 @@ class Enclave(Sequential):
         # override for now
         mb_size = 126
         # print("Configuring heap size for %d MB for now" % mb_size)
-        heap_size = mb_size*1024*1024
+        heap_size = mb_size * 1024 * 1024
         config_path = os.path.join(target_dir, 'config.xml')
         config = templates.config.render(
             heapInitSize=hex(heap_size), heapMaxSize=hex(heap_size))
@@ -107,7 +107,7 @@ class Enclave(Sequential):
             # if the function generated a call, it switched tmp buffers
             if generated_ops:
                 inputs = tmp_name
-                tmp_index = 1-tmp_index
+                tmp_index = 1 - tmp_index
                 tmp_name = templates.tmp_buffer.render(i=tmp_index)
 
         # set result buffer
@@ -116,7 +116,6 @@ class Enclave(Sequential):
         forward_file.write(templates.release_buffers)
         forward_file.write(templates.postamble)
         forward_file.close()
-
 
     @staticmethod
     def get_call_string(inputs, layer, tmp_name):
@@ -161,7 +160,7 @@ class Enclave(Sequential):
                 h=h,
                 w=w,
                 channels=c,
-                tmp_buffer=tmp_name)
+                ret=tmp_name)
 
         elif type(layer) in [layers.MaxPooling1D]:
             _, steps, c = layer.input_shape
@@ -274,11 +273,11 @@ class Enclave(Sequential):
         # num_depth = ks*c
         # num_point = c*f
         # num_bias = f
-        ret += templates.load.render(num_params=ks*c+c*f+f)
+        ret += templates.load.render(num_params=ks * c + c * f + f)
 
         depth_kernels = templates.parameter_offset.render(offset=0)
-        point_kernels = templates.parameter_offset.render(offset=ks*c)
-        biases = templates.parameter_offset.render(offset=ks*c+c*f)
+        point_kernels = templates.parameter_offset.render(offset=ks * c)
+        biases = templates.parameter_offset.render(offset=ks * c + c * f)
         ret += templates.sep_conv1.render(
             input=inputs,
             steps=steps,
@@ -309,7 +308,7 @@ class Enclave(Sequential):
         new_size = np.prod(layer.output_shape[1:])
         kh, kw = layer.kernel_size
 
-        ret += templates.load.render(num_params=kw*kh*c*f + f)
+        ret += templates.load.render(num_params=kw * kh * c * f + f)
         kernels = templates.parameter_offset.render(offset=0)
 
         ret += templates.depthwise_conv2.render(
@@ -339,9 +338,9 @@ class Enclave(Sequential):
         new_size = np.prod(layer.output_shape[1:])
         kh, kw = layer.kernel_size
 
-        ret += templates.load.render(num_params=kw*kh*c*f + f)
+        ret += templates.load.render(num_params=kw * kh * c * f + f)
         kernels = templates.parameter_offset.render(offset=0)
-        biases = templates.parameter_offset.render(offset=kw*kh*c*f)
+        biases = templates.parameter_offset.render(offset=kw * kh * c * f)
 
         ret += templates.conv2.render(
             input=inputs,
@@ -377,4 +376,3 @@ class Enclave(Sequential):
         else:
             raise NotImplementedError("Unknown activation function {} in layer {}".format(
                 layer.activation.__name__, layer.name))
-

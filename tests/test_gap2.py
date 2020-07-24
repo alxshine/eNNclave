@@ -61,3 +61,6 @@ class GlobalAveragePooling2DTest(TensorFlowTestCase):
             layers.GlobalAveragePooling2D(input_shape=(1000, 1000, 64))
         ])
         common_test_basis(model, True)
+
+if __name__ == "__main__":
+    unittest.main()
