@@ -13,7 +13,6 @@ static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   float ret[rs];
-  printf("Native NN forward\n");
   
   int sts = native_nn_forward(m, s, ret, rs);
   if (sts){

@@ -41,5 +41,5 @@ FROM sgx-base AS tester
 
 COPY --chown=ennclave:ennclave tests/* /eNNclave/tests/
 
-CMD ["bash"]
-# CMD ["bash", "./run_tests.sh"]
+# CMD ["bash"]
+CMD ["bash", "tests/run_tests.sh"]
