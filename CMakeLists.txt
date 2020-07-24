@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(eNNclavePythonModule)
+project(frontend_python)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -12,31 +12,33 @@ if (DEFINED $ENV{SGX_SDK})
     add_compile_definitions(SGX_SDK)
 endif ()
 
-add_library(eNNclavePythonModule SHARED
+add_library(frontend_python SHARED
         interop/pymatutilmodule.c)
+set_target_properties(frontend_python PROPERTIES
+        PREFIX "")
 
 if (DEFINED $ENV{SGX_SDK})
-    add_dependencies(eNNclavePythonModule eNNclaveSgx)
+    add_dependencies(frontend_python eNNclaveSgx)
 endif ()
 
 
-project(eNNclaveNative)
+project(backend_native)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(inc)
-add_library(eNNclaveNative SHARED
+add_library(backend_native SHARED
         lib/native/forward.c
         lib/native/native_nn.c
         lib/native/output.c
         lib/native/parameters.c
         lib/common/matutil.c)
 
-project(eNNclaveLibraryTest)
+project(core_test)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(inc)
 
-add_executable(eNNclaveLibraryTest
+add_executable(core_test
         lib/test_matutil.c
         lib/test/assert.c
         lib/test/util.c
@@ -52,5 +54,5 @@ add_executable(eNNclaveLibraryTest
         lib/test/max_pool2.c
         lib/test/zero_pad2.c)
 
-add_dependencies(eNNclaveLibraryTest eNNclaveNative)
-target_link_libraries(eNNclaveLibraryTest eNNclaveNative)
+add_dependencies(core_test backend_native)
+target_link_libraries(core_test backend_native)
