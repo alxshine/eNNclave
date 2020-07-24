@@ -4,7 +4,7 @@ LIB=${ROOT}/lib
 
 TEST_FILES=$(wildcard test/*.c)
 
-ifeq ($(SGX_MODE),)
+ifeq ($(SGX_SDK),)
 all: native
 else
 all: native enclave

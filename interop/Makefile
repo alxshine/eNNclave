@@ -2,7 +2,7 @@ ROOT=${HOME}/Projects/nn-sgx
 INC=${ROOT}/inc
 LIB=${ROOT}/lib
 
-ifeq ($(SGX_MODE),)
+ifeq ($(SGX_SDK),)
 USER_LIBS:=-lnative
 else
 USER_LIBS:=-lnative -lenclave

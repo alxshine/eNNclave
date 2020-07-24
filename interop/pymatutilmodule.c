@@ -24,7 +24,7 @@ static PyObject *pymatutil_native_forward(PyObject *self, PyObject *args) {
   return Py_BuildValue("y#", ret, rs*sizeof(float));
 }
 
-#ifdef SGX_MODE
+#ifdef SGX_SDK
 static PyObject *pymatutil_enclave_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
   int s,rs;
@@ -58,7 +58,7 @@ static PyObject *enclave_teardown(PyObject *self, PyObject *args){
 #endif
 
 static PyMethodDef PymatutilMethods[] = {
-#ifdef SGX_MODE
+#ifdef SGX_SDK
     {"initialize", enclave_initialize, METH_VARARGS, "Initialize matutil"},
     {"teardown", enclave_teardown, METH_VARARGS, "Teardown matutil"},
     {"enclave_forward", pymatutil_enclave_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
