@@ -8,3 +8,4 @@ dependencies:
         - Jinja2
         - pandas
         - tensorflow-gpu
+        - numpy

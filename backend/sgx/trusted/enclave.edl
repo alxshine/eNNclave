@@ -1,0 +1,16 @@
+enclave {
+    from "sgx_tprotected_fs.edl" import *;	
+
+    trusted {
+		public int enclave_forward([in, count=s] float *m, int s, [out, count=rs] float *label, int rs);
+
+		// public void open_encrypted_parameters();
+		// public int encrypt_parameters([in, count=num_elements] float *target_buffer, int num_elements);
+		// public void close_encrypted_parameters();
+    };
+
+    untrusted {
+        void ocall_stdout_string([in, string] const char *str);
+        void ocall_stderr_string([in, string] const char *str);
+    };
+};

@@ -1,3 +1,0 @@
-[submodule "linux-sgx"]
-	path = linux-sgx
-	url = git@github.com:intel/linux-sgx
