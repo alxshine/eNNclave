@@ -56,3 +56,4 @@ if __name__ == '__main__':
     test_model = Sequential(layers.Dense(5, input_shape=test_shape))
     test_model(test_input)
     common_test_basis(test_model, False)
+    print("Generated code returns the same result :)")

@@ -25,15 +25,6 @@ add_library(frontend_python SHARED
 set_target_properties(frontend_python PROPERTIES
         PREFIX "")
 
-if (DEFINED $ENV{SGX_SDK})
-    add_dependencies(frontend_python backend_sgx)
-    target_link_libraries(frontend_python backend_sgx)
-endif ()
-add_dependencies(frontend_python backend_native)
-target_link_libraries(frontend_python backend_native)
-
-
-
 
 project(core_test)
 include_directories(inc backend/native/tests)

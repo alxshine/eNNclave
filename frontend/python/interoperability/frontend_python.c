@@ -1,12 +1,9 @@
 #define PY_SSIZE_T_CLEAN
 
 #include <Python.h>
+#include <dlfcn.h>
+#include <stdio.h>
 
-#include "backend_native.h"
-
-#ifdef SGX_SDK
-#include "backend_sgx.h"
-#endif
 
 // TODO: document methods
 
@@ -20,11 +17,26 @@ static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
     float* m = (float*) PyBytes_AsString((PyObject*) b);
     float ret[rs];
 
+    void* native_backend_handle = dlopen("libbackend_native.so", RTLD_LAZY);
+    if (!native_backend_handle) {
+        printf("Could not open native library\n");
+        return NULL;
+    }
+    dlerror();
+
+    int (* native_forward)(float*, int, float*, int) = dlsym(native_backend_handle, "native_forward");
+    if (dlerror()) {
+        printf("Could not find native forward function in library\n");
+        return NULL;
+    }
+
     int sts = native_forward(m, s, ret, rs);
     if (sts) {
         PyErr_SetString(PyExc_IOError, "Error during native forward");
         return NULL; // TODO: do some error handling
     }
+
+    dlclose(native_backend_handle);
 
     return Py_BuildValue("y#", ret, rs * sizeof(float));
 }
