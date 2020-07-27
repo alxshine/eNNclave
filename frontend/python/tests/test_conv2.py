@@ -1,12 +1,11 @@
 from tensorflow.python.framework.test_util import TensorFlowTestCase
-from tensorflow.keras.models import load_model, Sequential
+from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as layers
 
-import numpy as np
 import os
 
 import unittest
-from .common import common_test_basis
+from common import common_test_basis
 
 
 class Conv2dTests(TensorFlowTestCase):
@@ -56,7 +55,6 @@ class Conv2dTests(TensorFlowTestCase):
         ])
         common_test_basis(model, True)
 
-    
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testHugeEnclave(self):
         raise AssertionError("Causes a segfault in C")
