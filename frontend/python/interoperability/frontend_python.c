@@ -2,7 +2,6 @@
 
 #include <Python.h>
 #include <dlfcn.h>
-#include <stdio.h>
 
 
 // TODO: document methods
@@ -19,14 +18,14 @@ static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
 
     void* native_backend_handle = dlopen("libbackend_native.so", RTLD_LAZY);
     if (!native_backend_handle) {
-        printf("Could not open native library\n");
+        PyErr_SetString(PyExc_IOError, "Could not open native backend library");
         return NULL;
     }
     dlerror();
 
     int (* native_forward)(float*, int, float*, int) = dlsym(native_backend_handle, "native_forward");
     if (dlerror()) {
-        printf("Could not find native forward function in library\n");
+        PyErr_SetString(PyExc_IOError, "Could not find native_forward in library");
         return NULL;
     }
 
