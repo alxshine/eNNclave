@@ -21,7 +21,7 @@ if (DEFINED $ENV{SGX_SDK})
 endif ()
 
 add_library(frontend_python SHARED
-        frontend/python/interop/frontend_python.c)
+        frontend/python/interoperability/frontend_python.c)
 set_target_properties(frontend_python PROPERTIES
         PREFIX "")
 

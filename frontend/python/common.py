@@ -1,11 +1,24 @@
 from tensorflow.keras.models import Sequential
+import tensorflow.keras.layers as layers
 import numpy as np
+from invoke.context import Context
 
-from enclave_model import Enclave
+from frontend.python.enclave_model import Enclave
 import frontend_python as ennclave
 
 
-def common_test_basis(model: Sequential, use_enclave: bool):
+def build_library(model: Enclave, mode: str, target_dir="backend/generated"):
+    model.generate_state(target_dir)
+    model.generate_forward(mode, target_dir)
+    if mode == 'sgx':
+        model.generate_config(target_dir)
+
+    context = Context()
+    with context.cd("cmake-build-debug"):  # TODO: make more robust
+        context.run(f"make backend_{mode}")
+
+
+def common_test_basis(model: Sequential, use_sgx: bool):
     # TODO: seed with current date (for consistent results within a day)
     rng = np.random.default_rng()
 
@@ -18,11 +31,10 @@ def common_test_basis(model: Sequential, use_enclave: bool):
     expected_result = model(inputs).numpy().flatten()
     output_size = np.prod(expected_result.shape)
 
-    test_model = Enclave(model.layers)
-    # generate_enclave(test_model)
-    # compile_enclave()
+    ennclave_model = Enclave(model.layers)
+    build_library(ennclave_model, "sgx" if use_sgx else "native")
 
-    if use_enclave:
+    if use_sgx:
         ennclave.initialize()
         test_bytes = ennclave.enclave_forward(
             inputs.tobytes(), size, output_size)
@@ -33,5 +45,14 @@ def common_test_basis(model: Sequential, use_enclave: bool):
     test_result = np.frombuffer(test_bytes, dtype=np.float32)
     np.testing.assert_almost_equal(test_result, expected_result)
 
-    if use_enclave:
+    if use_sgx:
         ennclave.teardown()
+
+
+if __name__ == '__main__':
+    test_shape = (1, 5)
+
+    test_input = np.arange(test_shape[1]).reshape((1,) + test_shape)
+    test_model = Sequential(layers.Dense(5, input_shape=test_shape))
+    test_model(test_input)
+    common_test_basis(test_model, False)

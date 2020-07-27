@@ -5,7 +5,7 @@ import tensorflow.keras.layers as layers
 import os
 
 import unittest
-from common import common_test_basis
+from frontend.python.common import common_test_basis
 
 
 class Conv2dTests(TensorFlowTestCase):
@@ -29,10 +29,10 @@ class Conv2dTests(TensorFlowTestCase):
 
     def testHugeNative(self):
         raise AssertionError("Causes a segfault in C")
-        model = Sequential([
-            layers.Conv2D(64, 5, input_shape=(500, 500, 64), padding='same')
-        ])
-        common_test_basis(model, False)
+        # model = Sequential([
+        #     layers.Conv2D(64, 5, input_shape=(500, 500, 64), padding='same')
+        # ])
+        # common_test_basis(model, False)
 
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testSmallEnclave(self):
@@ -59,10 +59,10 @@ class Conv2dTests(TensorFlowTestCase):
     def testHugeEnclave(self):
         raise AssertionError("Causes a segfault in C")
 
-        model = Sequential([
-            layers.Conv2D(64, 5, input_shape=(500, 500, 64), padding='same')
-        ])
-        common_test_basis(model, True)
+        # model = Sequential([
+        #     layers.Conv2D(64, 5, input_shape=(500, 500, 64), padding='same')
+        # ])
+        # common_test_basis(model, True)
 
 
 if __name__ == "__main__":

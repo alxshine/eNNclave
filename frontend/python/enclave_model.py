@@ -1,6 +1,6 @@
 from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as layers
-import templates, utils
+from frontend.python import templates, utils
 import numpy as np
 import os
 
