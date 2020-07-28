@@ -1,26 +1,20 @@
 from jinja2 import Template
 
 preamble = Template("""
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
-
+#include <cstdlib>
 #include "backend_{{ backend }}.h"
 
-#include "nn.h"
-#include "parameters.h"
+#include "nxx.h"
+#include "{{PascalCaseBackend}}ParameterLoader.h"
 #include "output.h"
 
 #ifdef _cplusplus
 extern "C" {
 #endif
 int {{ backend }}_forward(float *m, int s, float *ret, int rs) {
-    int sts;
-
-    open_parameters();
+    auto parameterLoader = getParameterLoader("backend/generated/parameters.bin");
 """)
 postamble = """
-    close_parameters();
     return 0;
 }
 #ifdef _cplusplus
@@ -59,36 +53,10 @@ return_results = Template("""
     ret[i] = {{input}}[i];
   """)
 
-handle_error = Template("""  if ((sts = {{expression}}))
-    return sts;
-""") # TODO: is this really necessary or useful?
-load = Template("   load_parameters(params, {{num_params}});\n")
+load = Template("parameterLoader->LoadParameters(params, {{num_params}});\n")
 parameter_offset = Template("params+{{offset}}")
-add = Template("matutil_add({{m1}}, {{h1}}, {{w1}}, {{m2}}, {{h2}}, {{w2}}, {{ret}})")
-multiply = Template("matutil_multiply({{m1}}, {{h1}}, {{w1}}, {{m2}}, {{h2}}, {{w2}}, {{ret}})")
-sep_conv1 = Template("  matutil_sep_conv1({{input}}, {{steps}}, {{channels}}, {{filters}}, {{depth_kernels}}, {{point_kernels}}, {{kernel_size}}, {{biases}}, {{ret}});\n")
-conv2 = Template("  matutil_conv2({{input}}, {{h}}, {{w}}, {{channels}}, {{filters}}, {{kernels}}, {{kernel_height}}, {{kernel_width}}, {{biases}}, {{ret}});\n")
-depthwise_conv2 = Template("  matutil_depthwise_conv2({{input}}, {{h}}, {{w}}, {{channels}}, {{padding}}, {{kernels}}, {{kernel_height}}, {{kernel_width}}, {{ret}});\n")
-relu = Template("  matutil_relu({{m}}, {{h}}, {{w}});\n")
-zero_pad2 = Template("  matutil_zero_pad2({{input}}, {{h}}, {{w}}, {{c}}, {{top_pad}}, {{bottom_pad}}, {{left_pad}}, {{right_pad}}, {{ret}});\n")
-softmax = Template("""
-  // get maximum for label
-  int max_index = 0;
-  for (int i = 1; i < {{num_labels}}; ++i)
-    max_index = {{input}}[i] > {{input}}[max_index] ? i : max_index;
+dense = Template("dense({{input}}, {{h}}, {{w}}, {{weights}}, {{neurons}}, {{biases}}, {{ret}});\n")
 
-  for(int i=0; i< {{num_labels}}; ++i)
-    {{input}}[i] = i == max_index ? 1 : 0;
-""") # TODO: make this single pass
-sigmoid = Template("""
-  // fake sigmoid
-  ret[0] = {{input}}[0] > 0.5;""")
-global_average_pooling_1d = Template("  matutil_global_average_pooling_1d({{input}}, {{steps}}, {{channels}}, {{ret}});\n")
-global_average_pooling_2d = Template("  matutil_global_average_pooling_2d({{input}}, {{h}}, {{w}}, {{channels}}, {{ret}});\n")
-max_pooling_1d = Template("  matutil_max_pooling_1d({{input}}, {{steps}}, {{channels}}, {{pool_size}}, {{ret}});\n")
-max_pooling_2d = Template("  matutil_max_pooling_2d({{input}}, {{h}}, {{w}}, {{channels}}, {{pool_size}}, {{ret}});\n")
-dump = Template("  matutil_dump_matrix({{inputs}}, {{h}}, {{w}});")
-dump3 = Template("  matutil_dump_matrix3({{inputs}}, {{h}}, {{w}}, {{channels}});")
 
 config = Template("""
 <EnclaveConfiguration>

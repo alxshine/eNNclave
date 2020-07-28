@@ -217,33 +217,34 @@ class Enclave(Sequential):
         return s, added_ops
 
     @staticmethod
-    def generate_dense(layer, inputs, tmp_name):
-        # the output of the dense layer will be a
-        # row vector with ncols(w) elements
+    def generate_dense(layer: layers.Dense, inputs, tmp_name):
         ret = ''
 
         parameters = layer.get_weights()
         num_params = [np.prod(p.shape) for p in parameters]
         ret += templates.load.render(num_params=np.sum(num_params))
-        w = parameters[0]
-
+        weights = parameters[0]
         weight_name = templates.parameter_offset.render(offset=0)
-        mult = templates.multiply.render(
-            m1=inputs, h1=1, w1=w.shape[0], m2=weight_name, h2=w.shape[0], w2=w.shape[1],
-            ret=tmp_name)
-        ret += templates.handle_error.render(expression=mult)
+        h = 1
+        w = layer.input_shape[0]
+        neurons = weights.shape[1]
 
         if len(parameters) > 1:
-            # add bias
-            b = parameters[1]
             bias_name = templates.parameter_offset.render(
                 offset=num_params[0])
-            add = templates.add.render(
-                m1=tmp_name, h1=1, w1=w.shape[1], m2=bias_name, h2=1, w2=b.shape[0],
-                ret=tmp_name)
-            ret += templates.handle_error.render(expression=add)
+        else:
+            bias_name = "nullptr"
 
-        ret += Enclave.generate_activation(layer, tmp_name, w.shape[1])
+        ret += templates.dense.render(
+            input=inputs,
+            h=h,
+            w=w,
+            weights=weight_name,
+            neurons=neurons,
+            biases=bias_name,
+            ret=tmp_name)
+
+        ret += Enclave.generate_activation(layer, tmp_name, neurons)
 
         return ret
 

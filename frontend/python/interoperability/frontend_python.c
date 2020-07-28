@@ -17,7 +17,7 @@ static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
     float* m = (float*) PyBytes_AsString((PyObject*) b);
     float ret[rs];
 
-    void* native_backend_handle = dlopen("libbackend_native.so", RTLD_LAZY);
+    void* native_backend_handle = dlopen("libbackend_cxx.so", RTLD_LAZY);
     if (!native_backend_handle) {
         PyErr_SetString(PyExc_IOError, "Could not open native backend library");
         return NULL;
