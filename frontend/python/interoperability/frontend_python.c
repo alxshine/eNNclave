@@ -3,6 +3,7 @@
 #include <Python.h>
 #include <dlfcn.h>
 
+#include "backend_native.h"
 
 // TODO: document methods
 
@@ -23,13 +24,13 @@ static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
     }
     dlerror();
 
-    int (* native_forward)(float*, int, float*, int) = dlsym(native_backend_handle, "native_forward");
+    NATIVE_FORWARD_T* native_forward = dlsym(native_backend_handle, "native_forward");
     if (dlerror()) {
         PyErr_SetString(PyExc_IOError, "Could not find native_forward in library");
         return NULL;
     }
 
-    int sts = native_forward(m, s, ret, rs);
+    int sts = (*native_forward)(m, s, ret, rs);
     if (sts) {
         PyErr_SetString(PyExc_IOError, "Error during native forward");
         return NULL; // TODO: do some error handling

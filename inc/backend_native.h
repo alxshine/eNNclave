@@ -5,10 +5,12 @@
 extern "C" {
 #endif
 
-  int native_forward(float *m, int s, float *ret, int rs);
+typedef int NATIVE_FORWARD_T(float*, int, float*, int);
+
+NATIVE_FORWARD_T native_forward;
 
 #if defined(__cplusplus)
 }
 #endif
-    
+
 #endif /* NATIVE_H */
