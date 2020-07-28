@@ -11,6 +11,9 @@ preamble = Template("""
 #include "parameters.h"
 #include "output.h"
 
+#ifdef _cplusplus
+extern "C" {
+#endif
 int {{ backend }}_forward(float *m, int s, float *ret, int rs) {
     int sts;
 
@@ -20,6 +23,9 @@ postamble = """
     close_parameters();
     return 0;
 }
+#ifdef _cplusplus
+}
+#endif
 """
 
 tmp_buffer = Template("tmp{{i}}")
