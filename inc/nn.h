@@ -1,44 +1,48 @@
-#ifndef MATUTIL_H
-#define MATUTIL_H
+//
+// Created by alex on 28.07.20.
+//
 
-#define PADDING_VALID 0
-#define PADDING_SAME 1
+#ifndef NN_H
+#define NN_H
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace eNNclave {
+    enum class Padding {
+        SAME,
+        VALID
+    };
 
-int matutil_multiply(float* m1, int h1, int w1, float* m2, int h2, int w2, float* ret);
+    void dense(const float* input, int h, int w, const float* weights, int neurons, const float* biases, float* ret);
 
-int
-matutil_add(float* m1, int h1, int w1, float* m2, int h2, int w2, float* ret); // TODO: this doesn't need 2 dimensions
+    void sep_conv1(const float* input, int steps, int c, int f, const float* depth_kernels, const float* point_kernels,
+                   int ks,
+                   const float* biases, float* ret);
 
-int matutil_sep_conv1(float* input, int steps, int c, int f, float* depth_kernels, float* point_kernels, int ks,
-                      float* biases, float* ret);
+    void
+    conv2(const float* input, int h, int w, int c, int f, const float* kernels, int kh, int kw, const float* biases,
+          float* ret);
 
-int matutil_conv2(float* input, int h, int w, int c, int f, float* kernels, int kh, int kw, float* biases, float* ret);
+    void depthwise_conv2(const float* input, int h, int w, int c, Padding padding, const float* kernels, int kh, int kw,
+                         float* ret);
 
-int matutil_depthwise_conv2(float* input, int h, int w, int c, int padding, float* kernels, int kh, int kw, float* ret);
+    void relu(const float* m, int size, float* ret);
 
-void matutil_relu(float* m, int h, int w); // TODO: This doesn't need 2 dimensions
+    void global_average_pooling_1d(const float* m, int steps, int c, float* ret);
 
-void matutil_global_average_pooling_1d(float* m, int steps, int c, float* ret);
+    void global_average_pooling_2d(const float* m, int h, int w, int c, float* ret);
 
-void matutil_global_average_pooling_2d(float* m, int h, int w, int c, float* ret);
+    void max_pooling_1d(const float* m, int steps, int c, int pool_size, float* ret);
 
-void matutil_max_pooling_1d(float* m, int steps, int c, int pool_size, float* ret);
+    void max_pooling_2d(const float* m, int h, int w, int c, int pool_size, float* ret);
 
-void matutil_max_pooling_2d(float* m, int h, int w, int c, int pool_size, float* ret);
+    void zero_pad2(const float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad,
+                   float* ret);
 
-void
-matutil_zero_pad2(float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad, float* ret);
+    void softmax(const float* input, float* ret);
 
-void matutil_dump_matrix(float* m, int r, int c);
+    void sigmoid(const float* input, float* ret);
 
-void matutil_dump_matrix3(float* m, int h, int w, int c);
+    void dump_matrix(float* m, int r, int c);
 
-#if defined(__cplusplus)
+    void dump_matrix3(float* m, int h, int w, int c);
 }
-#endif
-
-#endif /* MATUTIL_H */
+#endif //NN_H

@@ -2,7 +2,7 @@
 // Created by alex on 28.07.20.
 //
 
-#include "nxx.h"
+#include "nn.h"
 #include "output.h"
 
 #include <iostream>
