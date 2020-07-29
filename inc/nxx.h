@@ -6,21 +6,25 @@
 #define NXX_H
 
 namespace eNNclave {
-    enum class Padding{
+    enum class Padding {
         SAME,
         VALID
     };
 
     void dense(const float* input, int h, int w, const float* weights, int neurons, const float* biases, float* ret);
 
-    void sep_conv1(const float* input, int steps, int c, int f, const float* depth_kernels, const float* point_kernels, int ks,
+    void sep_conv1(const float* input, int steps, int c, int f, const float* depth_kernels, const float* point_kernels,
+                   int ks,
                    const float* biases, float* ret);
 
-    void conv2(const float* input, int h, int w, int c, int f, const float* kernels, int kh, int kw, const float* biases, float* ret);
+    void
+    conv2(const float* input, int h, int w, int c, int f, const float* kernels, int kh, int kw, const float* biases,
+          float* ret);
 
-    void depthwise_conv2(const float* input, int h, int w, int c, Padding padding, const float* kernels, int kh, int kw, float* ret);
+    void depthwise_conv2(const float* input, int h, int w, int c, Padding padding, const float* kernels, int kh, int kw,
+                         float* ret);
 
-    void relu(float* m, int size);
+    void relu(const float* m, int size, float* ret);
 
     void global_average_pooling_1d(const float* m, int steps, int c, float* ret);
 
@@ -28,9 +32,14 @@ namespace eNNclave {
 
     void max_pooling_1d(const float* m, int steps, int c, int pool_size, float* ret);
 
-    void max_pooling_2d(float* m, int h, int w, int c, int pool_size, float* ret);
+    void max_pooling_2d(const float* m, int h, int w, int c, int pool_size, float* ret);
 
-    void zero_pad2(float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad, float* ret);
+    void zero_pad2(const float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad,
+                   float* ret);
+
+    void softmax(const float* input, float* ret);
+
+    void sigmoid(const float* input, float* ret);
 
     void dump_matrix(float* m, int r, int c);
 

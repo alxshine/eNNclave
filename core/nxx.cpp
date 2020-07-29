@@ -9,6 +9,9 @@
 
 // TODO: make as much compile-time as possible
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnusedGlobalDeclarationInspection"
+
 void
 eNNclave::dense(const float* input, int h, int w, const float* weights, int neurons, const float* biases, float* ret) {
     for (int i = 0; i < h; ++i) {
@@ -86,10 +89,10 @@ eNNclave::conv2(const float* input, int h, int w, int c, int f, const float* ker
     }
 }
 
-void eNNclave::relu(float* m, int size) {
+void eNNclave::relu(const float* m, int size, float* ret) {
     for (int i = 0; i < size; i++)
         if (m[i] < 0)
-            m[i] = 0;
+            ret[i] = 0;
 }
 
 void
@@ -127,7 +130,8 @@ eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding paddi
                         int input_j = j - min_col_offset + kj;
 
                         // zero padding // TODO: make this data independent
-                        if (input_i < 0 || input_i >= h || input_j < 0 || input_j >= w)
+                        if (input_i < row_start || input_i >= row_end
+                            || input_j < col_start || input_j >= col_end)
                             continue;
 
                         ret[i * w * c + j * c + ci] +=
@@ -189,7 +193,7 @@ void eNNclave::max_pooling_1d(const float* m, int steps, int c, int pool_size, f
     }
 }
 
-void eNNclave::max_pooling_2d(float* m, int h, int w, int c, int pool_size, float* ret) {
+void eNNclave::max_pooling_2d(const float* m, int h, int w, int c, int pool_size, float* ret) {
     int ret_h = h / pool_size;
     int ret_w = w / pool_size;
 
@@ -216,7 +220,7 @@ void eNNclave::max_pooling_2d(float* m, int h, int w, int c, int pool_size, floa
     }
 }
 
-void eNNclave::zero_pad2(float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad,
+void eNNclave::zero_pad2(const float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad,
                          float* ret) {
     int new_width = w + left_pad + right_pad;
 

@@ -32,7 +32,7 @@ def common_test_basis(model: Sequential, use_sgx: bool):
     output_size = np.prod(expected_result.shape)
 
     ennclave_model = Enclave(model.layers)
-    build_library(ennclave_model, "sgx" if use_sgx else "native")
+    build_library(ennclave_model, "sgx" if use_sgx else "cxx")
 
     if use_sgx:
         ennclave.initialize()

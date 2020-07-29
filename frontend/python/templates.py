@@ -56,7 +56,20 @@ return_results = Template("""
 load = Template("parameterLoader->LoadParameters(params, {{num_params}});\n")
 parameter_offset = Template("params+{{offset}}")
 dense = Template("dense({{input}}, {{h}}, {{w}}, {{weights}}, {{neurons}}, {{biases}}, {{ret}});\n")
-
+global_average_pooling_1d = Template("global_average_pooling_1d({{input}}, {{steps}}, {{channels}}, {{ret}});\n")
+global_average_pooling_2d = Template("global_average_pooling_2d({{input}}, {{h}}, {{w}}, {{channels}}, {{ret}});\n")
+max_pooling_1d = Template("max_pooling_1d({{input}}, {{steps}}, {{channels}}, {{pool_size}}, {{ret}});\n")
+max_pooling_2d = Template("max_pooling_2d({{input}}, {{h}}, {{w}}, {{channels}}, {{pool_size}}, {{ret}});\n")
+zero_pad2 = Template(
+    """zero_pad2({{input}}, {{h}}, {{w}}, {{channels}}, {{top_pad}}, {{bottom_pad}},
+    {{left_pad}}, {{right_pad}}, {{ret}});\n""")
+relu = Template("relu({{input}}, {{size}}, {{ret}});\n")
+sep_conv1 = Template("""sep_conv_1({{input}}, {{steps}}, {{channels}}, {{filters}}, {{depth_kernels}},
+    {{point_kernels}}, {{kernel_size}}, {{biases}}, {{ret}});\n""")
+depthwise_conv2 = Template("""depthwise_conv2({{input}}, {{h}}, {{w}}, {{channels}}, {{padding}}, {{kernels}},
+    {{kernel_height}}, {{kernel_width}}, {{ret}});\n""")
+conv2 = Template("""conv2({{input}}, {{h}}, {{w}}, {{channels}}, {{filters}}, {{kernels}}, {{kernel_height}},
+    {{kernel_width}}, {{biases}}, {{ret}});\n""")
 
 config = Template("""
 <EnclaveConfiguration>

@@ -1,5 +1,5 @@
 from tensorflow.keras.models import Sequential
-import tensorflow.keras.layers as layers
+import tensorflow.keras.layers as tf_layers
 from frontend.python import templates, utils
 import numpy as np
 import os
@@ -38,7 +38,7 @@ class Enclave(Sequential):
         bf = open(bin_file, 'w+b')
 
         for i, l in enumerate(self.layers):
-            if type(l) in [layers.Dense, layers.Conv2D]:
+            if type(l) in [tf_layers.Dense, tf_layers.Conv2D]:
                 parameters = l.get_weights()
 
                 if len(parameters) > 0:
@@ -49,21 +49,21 @@ class Enclave(Sequential):
                     b = parameters[1]
                     bf.write(b.astype(np.float32).tobytes())
 
-            elif type(l) in [layers.SeparableConv1D]:
+            elif type(l) in [tf_layers.SeparableConv1D]:
                 depth_kernels, point_kernels, biases = l.get_weights()
 
                 bf.write(depth_kernels.astype(np.float32).tobytes())
                 bf.write(point_kernels.astype(np.float32).tobytes())
                 bf.write(biases.astype(np.float32).tobytes())
 
-            elif type(l) in [layers.DepthwiseConv2D]:
+            elif type(l) in [tf_layers.DepthwiseConv2D]:
                 depth_kernels = l.get_weights()[0]
 
                 bf.write(depth_kernels.astype(np.float32).tobytes())
 
-            elif type(l) in [layers.Dropout, layers.GlobalAveragePooling1D, layers.GlobalAveragePooling2D,
-                             layers.MaxPooling1D, layers.MaxPooling2D, layers.Flatten, layers.ZeroPadding2D,
-                             layers.ReLU]:
+            elif type(l) in [tf_layers.Dropout, tf_layers.GlobalAveragePooling1D, tf_layers.GlobalAveragePooling2D,
+                             tf_layers.MaxPooling1D, tf_layers.MaxPooling2D, tf_layers.Flatten, tf_layers.ZeroPadding2D,
+                             tf_layers.ReLU]:
                 # these layers are either not used during inference or have no parameters
                 continue
             else:
@@ -127,19 +127,19 @@ class Enclave(Sequential):
 
         added_ops = True
         s = ''
-        if type(layer) in [layers.Dense]:
+        if type(layer) in [tf_layers.Dense]:
             s += Enclave.generate_dense(layer, inputs, tmp_name)
 
-        elif type(layer) in [layers.SeparableConv1D]:
+        elif type(layer) in [tf_layers.SeparableConv1D]:
             s += Enclave.generate_separable_conv1d(layer, inputs, tmp_name)
 
-        elif type(layer) in [layers.Conv2D]:
+        elif type(layer) in [tf_layers.Conv2D]:
             s += Enclave.generate_conv_2d(inputs, layer, tmp_name)
 
-        elif type(layer) in [layers.DepthwiseConv2D]:
+        elif type(layer) in [tf_layers.DepthwiseConv2D]:
             s += Enclave.generate_depthwise_conv_2d(inputs, layer, tmp_name)
 
-        elif type(layer) in [layers.GlobalAveragePooling1D]:
+        elif type(layer) in [tf_layers.GlobalAveragePooling1D]:
             _, steps, c = layer.input_shape
             s = templates.global_average_pooling_1d.render(
                 input=inputs,
@@ -147,7 +147,7 @@ class Enclave(Sequential):
                 channels=c,
                 ret=tmp_name)
 
-        elif type(layer) in [layers.GlobalAveragePooling2D]:
+        elif type(layer) in [tf_layers.GlobalAveragePooling2D]:
             _, h, w, c = layer.input_shape
             s = templates.global_average_pooling_2d.render(
                 input=inputs,
@@ -156,7 +156,7 @@ class Enclave(Sequential):
                 channels=c,
                 ret=tmp_name)
 
-        elif type(layer) in [layers.MaxPooling1D]:
+        elif type(layer) in [tf_layers.MaxPooling1D]:
             _, steps, c = layer.input_shape
             s = templates.max_pooling_1d.render(
                 input=inputs,
@@ -165,7 +165,7 @@ class Enclave(Sequential):
                 pool_size=layer.pool_size[0],
                 ret=tmp_name)
 
-        elif type(layer) in [layers.MaxPooling2D]:
+        elif type(layer) in [tf_layers.MaxPooling2D]:
             _, h, w, c = layer.input_shape
             pool_size = layer.pool_size[0]
             if layer.pool_size[0] != layer.pool_size[1]:
@@ -180,7 +180,7 @@ class Enclave(Sequential):
                 pool_size=pool_size,
                 ret=tmp_name)
 
-        elif type(layer) in [layers.ZeroPadding2D]:
+        elif type(layer) in [tf_layers.ZeroPadding2D]:
             _, h, w, c = layer.input_shape
             padding = layer.padding
             if len(padding) != 2:
@@ -198,13 +198,11 @@ class Enclave(Sequential):
                 right_pad=padding[1][1],
                 ret=tmp_name)
 
-        elif type(layer) in [layers.ReLU]:
+        elif type(layer) in [tf_layers.ReLU]:
             size = np.prod(layer.output_shape[1:])
             s += templates.relu.render(input=inputs, h=1, w=size)
 
-            added_ops = False
-
-        elif type(layer) in [layers.Dropout, layers.Flatten]:
+        elif type(layer) in [tf_layers.Dropout, tf_layers.Flatten]:
             # these layers are inactive during inference, so they can be skipped
             s = "//Layer {} skipped\n".format(layer.name)
             return s, False
@@ -217,7 +215,7 @@ class Enclave(Sequential):
         return s, added_ops
 
     @staticmethod
-    def generate_dense(layer: layers.Dense, inputs, tmp_name):
+    def generate_dense(layer: tf_layers.Dense, inputs, tmp_name):
         ret = ''
 
         parameters = layer.get_weights()
@@ -287,9 +285,9 @@ class Enclave(Sequential):
     @staticmethod
     def generate_depthwise_conv_2d(inputs, layer, tmp_name):
         if layer.padding == 'valid':
-            padding = 'PADDING_VALID'
+            padding = 'Padding::VALID'
         elif layer.padding == 'same':
-            padding = 'PADDING_SAME'
+            padding = 'Padding::SAME'
         else:
             raise NotImplementedError(
                 f"Padding {layer.padding} not implemented, requested for layer {layer}")
@@ -357,12 +355,14 @@ class Enclave(Sequential):
                 m=target_buffer, h=1, w=input_size)
             return relu
         elif layer.activation.__name__ == 'softmax':
+            raise NotImplementedError("Softmax currently not implemented")
             # here we compute the actual label
-            softmax = templates.softmax.render(
-                num_labels=input_size, input=target_buffer)
-            return softmax
+            # softmax = templates.softmax.render(
+            #     num_labels=input_size, input=target_buffer)
+            # return softmax
         elif layer.activation.__name__ == 'sigmoid':
-            return templates.sigmoid.render(input=target_buffer)
+            raise NotImplementedError("Sigmoid currently not implemented")
+            # return templates.sigmoid.render(input=target_buffer)
         elif layer.activation.__name__ == 'linear':
             return '\t//linear activation requires no action\n'
         else:
