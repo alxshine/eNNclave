@@ -253,24 +253,3 @@ void eNNclave::zero_pad2(const float* m, int h, int w, int c, int top_pad, int b
             for (int ci = 0; ci < c; ++ci)
                 ret[(top_pad + h + i) * new_width * c + j * c + ci] = 0;
 }
-
-void eNNclave::dump_matrix(float* m, int r, int c) {
-    for (int i = 0; i < r; ++i) {
-        for (int j = 0; j < c; ++j) {
-            print_out("%.09f, ", m[i * c + j]);
-        }
-        print_out("\n");
-    }
-}
-
-void eNNclave::dump_matrix3(float* m, int h, int w, int c) {
-    for (int ci = 0; ci < c; ++ci) {
-        print_out("Ci=%d:\n", ci);
-        for (int i = 0; i < h; ++i) {
-            for (int j = 0; j < w; ++j) {
-                print_out("%.07f, ", m[i * w * c + j * c + ci]);
-            }
-            print_out("\n");
-        }
-    }
-}

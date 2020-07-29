@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void print_out(const char* fmt, ...) {
+void eNNclave::print_out(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
@@ -31,7 +31,7 @@ void print_out(const char* fmt, ...) {
     va_end(args);
 }
 
-void print_err(const char* fmt, ...) {
+void eNNclave::print_err(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
@@ -51,4 +51,25 @@ void print_err(const char* fmt, ...) {
     }
 
     va_end(args);
+}
+
+void eNNclave::dump_matrix(float* m, int r, int c) {
+    for (int i = 0; i < r; ++i) {
+        for (int j = 0; j < c; ++j) {
+            print_out("%.09f, ", m[i * c + j]);
+        }
+        print_out("\n");
+    }
+}
+
+void eNNclave::dump_matrix3(float* m, int h, int w, int c) {
+    for (int ci = 0; ci < c; ++ci) {
+        print_out("Ci=%d:\n", ci);
+        for (int i = 0; i < h; ++i) {
+            for (int j = 0; j < w; ++j) {
+                print_out("%.07f, ", m[i * w * c + j * c + ci]);
+            }
+            print_out("\n");
+        }
+    }
 }

@@ -40,9 +40,5 @@ namespace eNNclave {
     void softmax(const float* input, float* ret);
 
     void sigmoid(const float* input, float* ret);
-
-    void dump_matrix(float* m, int r, int c);
-
-    void dump_matrix3(float* m, int h, int w, int c);
 }
 #endif //NN_H
