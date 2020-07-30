@@ -93,6 +93,8 @@ void eNNclave::relu(const float* m, int size, float* ret) {
     for (int i = 0; i < size; i++)
         if (m[i] < 0)
             ret[i] = 0;
+        else
+            ret[i] = m[i];
 }
 
 void
