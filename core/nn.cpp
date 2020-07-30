@@ -32,6 +32,9 @@ eNNclave::sep_conv1(const float* input, int steps, int c, int f, const float* de
         ret[i] = 0;
 
     int min_offset = ks / 2;
+    if (ks % 2 == 0)
+        min_offset -= 1;
+
     for (int i = 0; i < steps; ++i) {
         for (int di = 0; di < ks; ++di) {
             int input_i = i - min_offset + di;
@@ -41,7 +44,7 @@ eNNclave::sep_conv1(const float* input, int steps, int c, int f, const float* de
             for (int ci = 0; ci < c; ++ci)
                 for (int fi = 0; fi < f; ++fi)
                     ret[i * f + fi] +=
-                            input[input_i * c + ci] * depth_kernels[di * c + ci] * point_kernels[ci * f + fi];
+                            input[input_i * c + ci] * depth_kernels[di * c + ci] * point_kernels[fi];
         }
 
         for (int fi = 0; fi < f; ++fi)
@@ -59,7 +62,11 @@ eNNclave::conv2(const float* input, int h, int w, int c, int f, const float* ker
     }
 
     int min_row_offset = kh / 2;
+    if (kh % 2 == 0)
+        min_row_offset -= 1;
     int min_col_offset = kw / 2;
+    if (kw % 2 == 0)
+        min_col_offset -= 1;
 
     for (int i = 0; i < h; ++i) {
         for (int j = 0; j < w; ++j) {
