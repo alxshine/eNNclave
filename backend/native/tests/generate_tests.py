@@ -128,7 +128,6 @@ def generate_conv2(test_name='small', h=3, w=3, channels=3, filters=3, kernel_si
                     parameter_template.render(name='kernel_size', value=kernel_size)]
 
     inputs = np.random.rand(1, h, w, channels)
-    declarations.append(generate_array('inputs', inputs))
 
     if mode == 'zeros':
         layer = tf_layers.Conv2D(
@@ -146,6 +145,7 @@ def generate_conv2(test_name='small', h=3, w=3, channels=3, filters=3, kernel_si
             bias_initializer='glorot_uniform', kernel_initializer='glorot_uniform')
     else:
         raise NotImplementedError("Unknown test mode")
+    declarations.append(generate_array('inputs', inputs))
 
     results = layer(inputs).numpy()
     params = layer.get_weights()
