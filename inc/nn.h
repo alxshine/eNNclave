@@ -26,7 +26,7 @@ namespace eNNclave {
 
     void relu(const float* m, int size, float* ret);
 
-    void global_average_pooling_1d(const float* m, int steps, int c, float* ret);
+    void global_average_pooling_1d(const float* input, int steps, int c, float* ret);
 
     void global_average_pooling_2d(const float* m, int h, int w, int c, float* ret);
 

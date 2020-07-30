@@ -154,16 +154,16 @@ eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding paddi
     }
 }
 
-void eNNclave::global_average_pooling_1d(const float* m, int steps, int c, float* ret) {
+void eNNclave::global_average_pooling_1d(const float* input, int steps, int c, float* ret) {
     for (int ci = 0; ci < c; ++ci) {
         ret[ci] = 0;
     }
 
     auto fsteps = static_cast<float>(steps);
 
-    for (int i = 1; i < steps; ++i) {
+    for (int i = 0; i < steps; ++i) {
         for (int ci = 0; ci < c; ++ci) {
-            ret[ci] += m[i * c + ci] / fsteps;
+            ret[ci] += input[i * c + ci] / fsteps;
         }
     }
 }
