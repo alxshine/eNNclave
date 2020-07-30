@@ -233,6 +233,7 @@ void eNNclave::max_pooling_2d(const float* m, int h, int w, int c, int pool_size
 void eNNclave::zero_pad2(const float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad,
                          float* ret) {
     int new_width = w + left_pad + right_pad;
+    int new_height = h + top_pad + bottom_pad;
 
     //top pad
     for (int i = 0; i < top_pad; ++i)
@@ -241,25 +242,29 @@ void eNNclave::zero_pad2(const float* m, int h, int w, int c, int top_pad, int b
                 ret[i * new_width * c + j * c + ci] = 0;
 
     //copy contents
-    for (int i = 0; i < h; ++i) {
+    auto content_top = top_pad;
+    auto content_bottom = h + top_pad;
+    auto content_left = left_pad;
+    auto content_right = w + left_pad;
+    for (int i = content_top, input_i = 0; i < content_bottom; ++i, ++input_i) {
         //left pad
         for (int lj = 0; lj < left_pad; ++lj)
             for (int ci = 0; ci < c; ++ci)
                 ret[i * new_width * c + lj * c + ci] = 0;
 
-        for (int j = 0; j < w; ++j)
+        for (int j = content_left, input_j = 0; j < content_right; ++j, ++input_j)
             for (int ci = 0; ci < c; ++ci)
-                ret[i * new_width * c + (left_pad + j) * c + ci] = m[i * w * c + j * c + ci];
+                ret[i * new_width * c + j * c + ci] = m[input_i * w * c + input_j * c + ci];
 
         //right pad
-        for (int rj = 0; rj < left_pad; ++rj)
+        for (int rj = content_right; rj < new_width; ++rj)
             for (int ci = 0; ci < c; ++ci)
-                ret[i * new_width * c + (left_pad + w + rj) * c + ci] = 0;
+                ret[i * new_width * c + rj * c + ci] = 0;
     }
 
     //bottom pad
-    for (int i = 0; i < bottom_pad; ++i)
+    for (int i = content_bottom; i < new_height; ++i)
         for (int j = 0; j < new_width; ++j)
             for (int ci = 0; ci < c; ++ci)
-                ret[(top_pad + h + i) * new_width * c + j * c + ci] = 0;
+                ret[i * new_width * c + j * c + ci] = 0;
 }
