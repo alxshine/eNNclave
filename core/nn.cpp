@@ -64,16 +64,17 @@ eNNclave::conv2(const float* input, int h, int w, int c, int f, const float* ker
     for (int i = 0; i < h; ++i) {
         for (int j = 0; j < w; ++j) {
             for (int ki = 0; ki < kh; ++ki) {
+                int input_i = i - min_row_offset + ki;
+                if (input_i < 0 || input_i >= h)
+                    continue;
+
                 for (int kj = 0; kj < kw; ++kj) {
+                    int input_j = j - min_col_offset + kj;
+                    if (input_j < 0 || input_j >= w)
+                        continue;
+
                     for (int ci = 0; ci < c; ++ci) {
                         for (int fi = 0; fi < f; ++fi) {
-                            int input_i = i - min_row_offset + ki;
-                            int input_j = j - min_col_offset + kj;
-
-                            // zero padding // TODO: make this data independent
-                            if (input_i < 0 || input_i >= h || input_j < 0 || input_j >= w)
-                                continue;
-
                             ret[i * w * f + j * f + fi] +=
                                     input[input_i * w * c + input_j * c + ci] *
                                     kernels[ki * kw * c * f + kj * c * f + ci * f + fi];
