@@ -38,7 +38,7 @@ TEST({{test.suite}}, {{test.name}}){
     {{declaration}}{% endfor %}
         
     {{test.operator}}
-    ASSERT_THAT(ret, Pointwise(FloatNear(1e-7), expected));
+    ASSERT_THAT(ret, Pointwise(FloatNear(1e-5), expected));
 } 
 {% endfor %}
  """)
