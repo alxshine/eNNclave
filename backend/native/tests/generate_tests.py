@@ -400,7 +400,7 @@ if __name__ == "__main__":
         generate_zero_pad2()
     ]
 
-    with open("core_tests.cpp", 'w') as test_file:
+    with open("../../generated/core_tests.cpp", 'w') as test_file:
         test_code = testing_template.render(tests=tests)
         test_file.write(test_code)
         test_file.flush()

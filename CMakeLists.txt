@@ -54,6 +54,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
         EXCLUDE_FROM_ALL)
 
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(core_tests backend/native/tests/core_tests.cpp core/nn.cpp)
+add_executable(core_tests backend/generated/core_tests.cpp core/nn.cpp)
 target_link_libraries(core_tests gmock_main)
 #add_test(NAME core_test COMMAND core_tests)
