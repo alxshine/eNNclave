@@ -338,18 +338,18 @@ if __name__ == "__main__":
         generate_dense('identity', 10, 10, 10, mode='identity'),
         generate_dense('small', 5, 5, 5),
         generate_dense('medium', 20, 20, 20),
-        generate_dense('large', 100, 100, 100),
+        generate_dense('large', 50, 50, 50),
 
         generate_sep_conv1('zeros', 10, 10, 10, mode='zeros'),
         generate_sep_conv1('small', 5, 5, 5, 2),
-        generate_sep_conv1('medium', 50, 50, 50, 3),
-        generate_sep_conv1('large', 100, 100, 100, 5),
+        generate_sep_conv1('medium', 20, 20, 20, 3),
+        generate_sep_conv1('large', 50, 50, 50, 5),
 
         generate_conv2('zeros', 10, 10, 10, mode='zeros'),
         generate_conv2('sequential', 10, 10, 10, mode='sequential'),
         generate_conv2('small', 5, 5, 5, 3, 3),
         generate_conv2('medium', 10, 10, 10, 3, 3),
-        generate_conv2('large', 100, 100, 50, 10, 5),
+        generate_conv2('large', 50, 50, 50, 10, 5),
 
         generate_depthwise_conv2('zeros', 10, 10, 10, mode='zeros'),
         generate_depthwise_conv2('sequential', 10, 10, 10, mode='sequential'),
@@ -362,22 +362,22 @@ if __name__ == "__main__":
         generate_relu('large', 50),
 
         generate_global_average_pooling_1d('small', 10, 3),
-        generate_global_average_pooling_1d('medium', 50, 3),
-        generate_global_average_pooling_1d('large', 100, 10),
+        generate_global_average_pooling_1d('medium', 20, 3),
+        generate_global_average_pooling_1d('large', 50, 10),
 
         generate_global_average_pooling_2d('small', 5, 5, 3),
         generate_global_average_pooling_2d('medium', 20, 20, 5),
-        generate_global_average_pooling_2d('large', 100, 100, 10),
+        generate_global_average_pooling_2d('large', 50, 50, 10),
 
         generate_max_pooling1d('sequential', 10, 5, 3, mode='sequential'),
         generate_max_pooling1d('small', 10, 3, 3),
-        generate_max_pooling1d('medium', 50, 5, 3),
-        generate_max_pooling1d('large', 100, 10, 5),
+        generate_max_pooling1d('medium', 20, 5, 3),
+        generate_max_pooling1d('large', 50, 10, 5),
 
         generate_max_pooling2d('sequential', 10, 10, 3, 3, mode='sequential'),
         generate_max_pooling2d('small', 5, 5, 3, 3),
         generate_max_pooling2d('medium', 20, 20, 5, 3),
-        generate_max_pooling2d('large', 100, 100, 10, 5),
+        generate_max_pooling2d('large', 50, 50, 10, 5),
 
         generate_zero_pad2()
     ]
