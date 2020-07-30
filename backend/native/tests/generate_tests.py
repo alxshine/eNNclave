@@ -83,19 +83,33 @@ def generate_dense(test_name='small', h=5, w=5, neurons=5, mode='full'):
     return {'suite': 'dense', 'name': test_name, 'declarations': declarations, 'operator': operator}
 
 
-def generate_sep_conv1(test_name="small", steps=3, channels=3, filters=3, kernel_size=2, mode='full'):
+def generate_sep_conv1(test_name="small", steps=3, channels=3, filters=3, kernel_size=3, mode='full'):
     declarations = [parameter_template.render(name='steps', value=steps),
                     parameter_template.render(name='channels', value=channels),
                     parameter_template.render(name='filters', value=filters),
                     parameter_template.render(name='kernel_size', value=kernel_size)]
 
     inputs = np.random.rand(1, steps, channels)
-    declarations.append(generate_array('inputs', inputs))
 
     if mode == 'zeros':
         layer = tf_layers.SeparableConv1D(
             filters, kernel_size, strides=1, input_shape=inputs.shape, padding='same', use_bias=True,
             bias_initializer='zeros', depthwise_initializer='zeros', pointwise_initializer='zeros')
+    elif mode == 'ones':
+        inputs = np.ones((1, steps, channels))
+        layer = tf_layers.SeparableConv1D(filters, kernel_size, strides=1, input_shape=inputs.shape,
+                                          padding='same', use_bias=True, bias_initializer='zeros',
+                                          depthwise_initializer='ones', pointwise_initializer='ones')
+    elif mode == 'sequential':
+        inputs = np.arange(steps * channels, dtype=np.float).reshape((1, steps, channels))
+        layer = tf_layers.SeparableConv1D(filters, kernel_size, strides=1, input_shape=inputs.shape,
+                                          padding='same', use_bias=True, bias_initializer='zeros',
+                                          depthwise_initializer='ones', pointwise_initializer='ones')
+    elif mode == 'no_bias':
+        layer = tf_layers.SeparableConv1D(
+            filters, kernel_size, strides=1, input_shape=inputs.shape, padding='same', use_bias=True,
+            bias_initializer='zeros', depthwise_initializer='glorot_uniform',
+            pointwise_initializer='glorot_uniform')
     elif mode == 'full':
         layer = tf_layers.SeparableConv1D(
             filters, kernel_size, strides=1, input_shape=inputs.shape, padding='same', use_bias=True,
@@ -103,6 +117,7 @@ def generate_sep_conv1(test_name="small", steps=3, channels=3, filters=3, kernel
             pointwise_initializer='glorot_uniform')
     else:
         raise NotImplementedError("Unknown tests mode")
+    declarations.append(generate_array('inputs', inputs))
 
     results = layer(inputs).numpy()
     params = layer.get_weights()
@@ -120,7 +135,7 @@ def generate_sep_conv1(test_name="small", steps=3, channels=3, filters=3, kernel
     return {'suite': 'sep_conv1', 'name': test_name, 'declarations': declarations, 'operator': operator}
 
 
-def generate_conv2(test_name='small', h=3, w=3, channels=3, filters=3, kernel_size=3, mode='full'):
+def generate_conv2(test_name='small', h=3, w=3, channels=3, filters=3, kernel_size=4, mode='full'):
     declarations = [parameter_template.render(name='h', value=h),
                     parameter_template.render(name='w', value=w),
                     parameter_template.render(name='channels', value=channels),
@@ -340,7 +355,10 @@ if __name__ == "__main__":
         generate_dense('medium', 20, 20, 20),
         generate_dense('large', 50, 50, 50),
 
-        generate_sep_conv1('zeros', 10, 10, 10, mode='zeros'),
+        generate_sep_conv1('zeros', 10, 10, 3, mode='zeros'),
+        generate_sep_conv1('ones', 4, 1, 1, kernel_size=4, mode='ones'),
+        generate_sep_conv1('sequential', 4, 1, 1, kernel_size=4, mode='sequential'),
+        generate_sep_conv1('no_bias', 5, 5, 5, 2, mode='no_bias'),
         generate_sep_conv1('small', 5, 5, 5, 2),
         generate_sep_conv1('medium', 20, 20, 20, 3),
         generate_sep_conv1('large', 50, 50, 50, 5),
