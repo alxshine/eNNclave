@@ -38,7 +38,7 @@ TEST({{test.suite}}, {{test.name}}){
     {{declaration}}{% endfor %}
         
     {{test.operator}}
-    ASSERT_THAT(ret, Pointwise(FloatEq(), expected));
+    ASSERT_THAT(ret, Pointwise(FloatNear(1e-7), expected));
 } 
 {% endfor %}
  """)
@@ -48,7 +48,7 @@ def generate_array(name, a):
     content = ''
     array = a.flatten()
     for i in range(array.shape[0]):
-        content += f'{array[i]:.03}'
+        content += f'{array[i]}'
         if i < array.shape[0] - 1:
             content += ','
     return array_template.render(name=name, content=content)
