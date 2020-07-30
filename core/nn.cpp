@@ -44,7 +44,7 @@ eNNclave::sep_conv1(const float* input, int steps, int c, int f, const float* de
             for (int ci = 0; ci < c; ++ci)
                 for (int fi = 0; fi < f; ++fi)
                     ret[i * f + fi] +=
-                            input[input_i * c + ci] * depth_kernels[di * c + ci] * point_kernels[fi];
+                            input[input_i * c + ci] * depth_kernels[di * c + ci] * point_kernels[ci * f + fi];
         }
 
         for (int fi = 0; fi < f; ++fi)
