@@ -59,7 +59,7 @@ def generate_dense(test_name='small', h=5, w=5, neurons=5, mode='full'):
                     parameter_template.render(name='w', value=w),
                     parameter_template.render(name='neurons', value=neurons)]
 
-    inputs = np.random.rand(1, h, w)
+    inputs = rng.uniform(-1, 1, (1, h, w))
     declarations.append(generate_array('inputs', inputs))
 
     if mode == 'zeros':
@@ -89,7 +89,7 @@ def generate_sep_conv1(test_name="small", steps=3, channels=3, filters=3, kernel
                     parameter_template.render(name='filters', value=filters),
                     parameter_template.render(name='kernel_size', value=kernel_size)]
 
-    inputs = np.random.rand(1, steps, channels)
+    inputs = rng.uniform(-1, 1, (1, steps, channels))
 
     if mode == 'zeros':
         layer = tf_layers.SeparableConv1D(
@@ -142,7 +142,7 @@ def generate_conv2(test_name='small', h=3, w=3, channels=3, filters=3, kernel_si
                     parameter_template.render(name='filters', value=filters),
                     parameter_template.render(name='kernel_size', value=kernel_size)]
 
-    inputs = np.random.rand(1, h, w, channels)
+    inputs = rng.uniform(-1, 1, (1, h, w, channels))
 
     if mode == 'zeros':
         layer = tf_layers.Conv2D(
@@ -182,16 +182,17 @@ def generate_depthwise_conv2(test_name='small', h=3, w=3, channels=3, kernel_siz
                     parameter_template.render(name='channels', value=channels),
                     parameter_template.render(name='kernel_size', value=kernel_size)]
 
-    inputs = np.random.rand(1, h, w, channels)
+    inputs = rng.uniform(-1, 1, (1, h, w, channels))
+    padding = 'Padding::SAME'
 
     if mode == 'zeros':
         layer = tf_layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False, bias_initializer='zeros',
-                                          kernel_initializer='zeros')
+                                          depthwise_initializer='zeros')
     elif mode == 'sequential':
         inputs = np.arange(
             h * w * channels, dtype=np.float).reshape((1, h, w, channels))
         layer = tf_layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False, bias_initializer='zeros',
-                                          kernel_initializer='ones')
+                                          depthwise_initializer='ones')
     elif mode == 'full':
         layer = tf_layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False,
                                           bias_initializer='glorot_uniform', kernel_initializer='glorot_uniform')
@@ -206,9 +207,9 @@ def generate_depthwise_conv2(test_name='small', h=3, w=3, channels=3, kernel_siz
     kernels = params[0]
     declarations.append(generate_array('kernels', kernels))
     declarations.append(generate_array('expected', results))
-    declarations.append(ret_template.render(size=h * w * channels))
+    declarations.append(ret_template.render(size=np.prod(results.shape)))
 
-    operator = "depthwise_conv2(inputs, h, w, channels, Padding::SAME, kernels, kernel_size, kernel_size, ret);"
+    operator = f"depthwise_conv2(inputs, h, w, channels, {padding}, kernels, kernel_size, kernel_size, ret);"
 
     return {'suite': 'depthwise_conv2', 'name': test_name, 'declarations': declarations, 'operator': operator}
 
@@ -216,7 +217,7 @@ def generate_depthwise_conv2(test_name='small', h=3, w=3, channels=3, kernel_siz
 def generate_relu(test_name='small', size=10):
     declarations = [parameter_template.render(name='size', value=size)]
 
-    inputs = np.random.rand(1, size)
+    inputs = rng.uniform(-1, 1, (1, size))
     declarations.append(generate_array('inputs', inputs))
 
     layer = tf_layers.ReLU(input_shape=inputs)
