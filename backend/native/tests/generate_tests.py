@@ -186,6 +186,7 @@ def generate_depthwise_conv2(test_name='small', h=3, w=3, channels=3, kernel_siz
     padding = 'Padding::SAME'
 
     if mode == 'zeros':
+        inputs = np.ones((1, h, w, channels))
         layer = tf_layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False, bias_initializer='zeros',
                                           depthwise_initializer='zeros')
     elif mode == 'sequential':
@@ -195,7 +196,13 @@ def generate_depthwise_conv2(test_name='small', h=3, w=3, channels=3, kernel_siz
                                           depthwise_initializer='ones')
     elif mode == 'full':
         layer = tf_layers.DepthwiseConv2D(kernel_size, padding='same', use_bias=False,
-                                          bias_initializer='glorot_uniform', kernel_initializer='glorot_uniform')
+                                          bias_initializer='glorot_uniform', depthwise_initializer='glorot_uniform')
+    elif mode == 'valid_padding':
+        inputs = np.arange(
+            h * w * channels, dtype=np.float).reshape((1, h, w, channels))
+        layer = tf_layers.DepthwiseConv2D(kernel_size, padding='valid', use_bias=False, bias_initializer='zeros',
+                                          depthwise_initializer='ones')
+        padding = 'Padding::VALID'
     else:
         print("Unknown tests mode")
         sys.exit(1)
@@ -370,8 +377,9 @@ if __name__ == "__main__":
         generate_conv2('medium', 10, 10, 10, 3, 3),
         generate_conv2('large', 50, 50, 50, 10, 5),
 
-        generate_depthwise_conv2('zeros', 10, 10, 10, mode='zeros'),
-        generate_depthwise_conv2('sequential', 10, 10, 10, mode='sequential'),
+        generate_depthwise_conv2('zeros', 10, 10, 3, mode='zeros'),
+        generate_depthwise_conv2('sequential', 10, 10, 3, mode='sequential'),
+        generate_depthwise_conv2('valid_padding', 5, 5, 3, kernel_size=2, mode='valid_padding'),
         generate_depthwise_conv2('small', 5, 5, 5, 3),
         generate_depthwise_conv2('medium', 10, 10, 10, 3),
         generate_depthwise_conv2('large', 50, 50, 50, 5),
