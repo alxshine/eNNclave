@@ -108,12 +108,12 @@ void eNNclave::relu(const float* m, int size, float* ret) {
 void
 eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding padding, const float* kernels, int kh,
                           int kw, float* ret) {
-    int len_ret = h * w * c;
-    for (int i = 0; i < len_ret; ++i)
-        ret[i] = 0;
-
     int min_row_offset = kh / 2;
+    if (kh % 2 == 0)
+        min_row_offset -= 1;
     int min_col_offset = kw / 2;
+    if (kw % 2 == 0)
+        min_col_offset -= 1;
 
     int row_start, row_end, col_start, col_end;
     if (padding == Padding::SAME) {
@@ -123,28 +123,34 @@ eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding paddi
         col_end = w;
     } else if (padding == Padding::VALID) {
         row_start = min_row_offset;
-        row_end = h - min_row_offset;
+        row_end = h - min_row_offset - !(kh % 2); // fix offset in case size is even
         col_start = min_col_offset;
-        col_end = h - min_col_offset;
+        col_end = h - min_col_offset - !(kw % 2);
     } else {
         std::cerr << "Unhandled padding type" << std::endl;
         return;
     }
+    int new_height = row_end - row_start;
+    int new_width = col_end - col_start;
 
-    for (int i = 0; i < h; ++i) {
-        for (int j = 0; j < w; ++j) {
+    int len_ret = new_height * new_width * c;
+    for (int i = 0; i < len_ret; ++i)
+        ret[i] = 0;
+
+    for (int i = row_start; i < row_end; ++i) {
+        int output_i = i - row_start;
+        for (int j = col_start; j < col_end; ++j) {
+            int output_j = j - col_start;
             for (int ki = 0; ki < kh; ++ki) {
+                int input_i = i - min_row_offset + ki;
+                if (input_i < 0 || input_i >= h)
+                    continue;
                 for (int kj = 0; kj < kw; ++kj) {
+                    int input_j = j - min_col_offset + kj;
+                    if (input_j < 0 || input_j >= w)
+                        continue;
                     for (int ci = 0; ci < c; ++ci) {
-                        int input_i = i - min_row_offset + ki;
-                        int input_j = j - min_col_offset + kj;
-
-                        // zero padding // TODO: make this data independent
-                        if (input_i < row_start || input_i >= row_end
-                            || input_j < col_start || input_j >= col_end)
-                            continue;
-
-                        ret[i * w * c + j * c + ci] +=
+                        ret[output_i * new_width * c + output_j * c + ci] +=
                                 input[input_i * w * c + input_j * c + ci] *
                                 kernels[ki * kw * c + kj * c + ci];
                     }
