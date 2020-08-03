@@ -9,24 +9,28 @@ from frontend.python.common import common_test_basis
 
 
 class Conv2dTests(TensorFlowTestCase):
-    def testSmallNative(self):
+    @staticmethod
+    def testSmallNative():
         model = Sequential([
             layers.Conv2D(3, 3, input_shape=(5, 5, 3), padding='same')
         ])
         common_test_basis(model, False)
 
-    def testMediumNative(self):
+    @staticmethod
+    def testMediumNative():
         model = Sequential([
             layers.Conv2D(5, 3, input_shape=(10, 10, 5), padding='same')
         ])
         common_test_basis(model, False)
 
-    def testLargeNative(self):
+    @staticmethod
+    def testLargeNative():
         model = Sequential([
             layers.Conv2D(10, 4, input_shape=(100, 100, 5), padding='same')
         ])
         common_test_basis(model, False)
 
+    @unittest.skip
     def testHugeNative(self):
         raise AssertionError("Causes a segfault in C")
         # model = Sequential([

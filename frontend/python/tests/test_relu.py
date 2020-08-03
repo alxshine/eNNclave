@@ -9,16 +9,18 @@ from frontend.python.common import common_test_basis
 
 
 class ReLuTests(TensorFlowTestCase):
-    def testSmallNative(self):
+    @staticmethod
+    def testSmallNative():
         model = Sequential([
             layers.Dense(5,
                          activation='relu',
                          kernel_initializer='identity',
-                         input_shape=(5,))
+                         input_shape=(1, 5))
         ])
         common_test_basis(model, False)
 
-    def testMediumNative(self):
+    @staticmethod
+    def testMediumNative():
         model = Sequential([
             layers.Dense(10,
                          activation='relu',
@@ -27,7 +29,8 @@ class ReLuTests(TensorFlowTestCase):
         ])
         common_test_basis(model, False)
 
-    def testLargeNative(self):
+    @staticmethod
+    def testLargeNative():
         model = Sequential([
             layers.Dense(100,
                          activation='relu',
@@ -36,7 +39,8 @@ class ReLuTests(TensorFlowTestCase):
         ])
         common_test_basis(model, False)
 
-    def testHugeNative(self):
+    @staticmethod
+    def testHugeNative():
         model = Sequential([
             layers.Dense(1000,
                          activation='relu',

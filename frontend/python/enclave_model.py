@@ -72,19 +72,19 @@ class Enclave(Sequential):
 
         bf.close()
 
-    def generate_forward(self, backend, target_dir='backend/generated'):
-        target_file = os.path.join(target_dir, f'{backend}_forward.c')
+    def generate_forward(self, backend: str, target_dir='backend/generated'):
+        target_file = os.path.join(target_dir, f'{backend}_forward.cpp')
         forward_file = open(target_file, 'w+')
         all_layers = utils.get_all_layers(self)
 
         forward_file.write(templates.preamble.render(backend=backend))
         # declare tmp buffers
-        output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
+        output_sizes = [np.prod(layer.output_shape[1:]) for layer in all_layers]
         output_sizes.sort(reverse=True)
 
         # get required size for weight buffer
         param_numbers = [np.sum([np.prod(w.shape)
-                                 for w in l.get_weights()]) for l in all_layers]
+                                 for w in layer.get_weights()]) for layer in all_layers]
         max_size = max(param_numbers)
         forward_file.write(templates.buffer_declaration.render(
             tmp1_size=output_sizes[0], tmp2_size=output_sizes[0], param_size=max_size))
@@ -200,7 +200,8 @@ class Enclave(Sequential):
 
         elif type(layer) in [tf_layers.ReLU]:
             size = np.prod(layer.output_shape[1:])
-            s += templates.relu.render(input=inputs, h=1, w=size)
+            s += Enclave.generate_activation(layer, inputs, size)
+            added_ops = False
 
         elif type(layer) in [tf_layers.Dropout, tf_layers.Flatten]:
             # these layers are inactive during inference, so they can be skipped
@@ -215,7 +216,7 @@ class Enclave(Sequential):
         return s, added_ops
 
     @staticmethod
-    def generate_dense(layer: tf_layers.Dense, inputs, tmp_name):
+    def generate_dense(layer: tf_layers.Dense, inputs: str, tmp_name: str):
         ret = ''
 
         parameters = layer.get_weights()
@@ -223,8 +224,8 @@ class Enclave(Sequential):
         ret += templates.load.render(num_params=np.sum(num_params))
         weights = parameters[0]
         weight_name = templates.parameter_offset.render(offset=0)
-        h = 1
-        w = layer.input_shape[0]
+        h = layer.input_shape[1]
+        w = layer.input_shape[2]
         neurons = weights.shape[1]
 
         if len(parameters) > 1:
@@ -352,7 +353,7 @@ class Enclave(Sequential):
     def generate_activation(layer, target_buffer, input_size):
         if layer.activation.__name__ == 'relu':
             relu = templates.relu.render(
-                m=target_buffer, h=1, w=input_size)
+                m=target_buffer, size=input_size)
             return relu
         elif layer.activation.__name__ == 'softmax':
             raise NotImplementedError("Softmax currently not implemented")

@@ -9,55 +9,59 @@ from frontend.python.common import common_test_basis
 
 
 class DenseTests(TensorFlowTestCase):
-    def testSmallNative(self):
+    @staticmethod
+    def testSmallNative():
         model = Sequential([
-            layers.Dense(5, input_shape=(1,5))
+            layers.Dense(5, input_shape=(1, 5))
         ])
         common_test_basis(model, False)
 
-    def testMediumNative(self):
+    @staticmethod
+    def testMediumNative():
         model = Sequential([
-            layers.Dense(10, input_shape=(1,10))
+            layers.Dense(10, input_shape=(1, 10))
         ])
         common_test_basis(model, False)
 
-    def testLargeNative(self):
+    @staticmethod
+    def testLargeNative():
         model = Sequential([
-            layers.Dense(100, input_shape=(1,100))
+            layers.Dense(100, input_shape=(1, 100))
         ])
         common_test_basis(model, False)
 
+    @unittest.skip
     def testHugeNative(self):
         model = Sequential([
-            layers.Dense(1000, input_shape=(1,1000))
+            layers.Dense(1000, input_shape=(1, 1000))
         ])
         common_test_basis(model, False)
 
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testSmallEnclave(self):
         model = Sequential([
-            layers.Dense(5, input_shape=(1,5))
+            layers.Dense(5, input_shape=(1, 5))
         ])
         common_test_basis(model, True)
 
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testMediumEnclave(self):
         model = Sequential([
-            layers.Dense(10, input_shape=(1,10))
+            layers.Dense(10, input_shape=(1, 10))
         ])
         common_test_basis(model, True)
 
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testLargeEnclave(self):
         model = Sequential([
-            layers.Dense(100, input_shape=(1,100))
+            layers.Dense(100, input_shape=(1, 100))
         ])
         common_test_basis(model, True)
 
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testHugeEnclave(self):
         model = Sequential([
-            layers.Dense(1000, input_shape=(1,1000))
+            layers.Dense(1000, input_shape=(1, 1000))
         ])
         common_test_basis(model, True)
 

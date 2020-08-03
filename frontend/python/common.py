@@ -43,7 +43,7 @@ def common_test_basis(model: Sequential, use_sgx: bool):
             inputs.tobytes(), size, output_size)
 
     test_result = np.frombuffer(test_bytes, dtype=np.float32)
-    np.testing.assert_almost_equal(test_result, expected_result)
+    np.testing.assert_almost_equal(test_result, expected_result, decimal=5)
 
     if use_sgx:
         ennclave.teardown()

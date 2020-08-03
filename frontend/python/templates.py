@@ -4,9 +4,11 @@ preamble = Template("""
 #include <cstdlib>
 #include "backend_{{ backend }}.h"
 
-#include "nxx.h"
-#include "{{PascalCaseBackend}}ParameterLoader.h"
+#include "nn.h"
+#include "{{backend}}ParameterLoader.h"
 #include "output.h"
+
+using namespace eNNclave;
 
 #ifdef _cplusplus
 extern "C" {
@@ -41,7 +43,7 @@ buffer_declaration = Template("""
         print_err("\\n\\nENCLAVE ERROR:Could not allocate params of size {{ param_size }}\\n\\n\\n");
         return 1;
     }
-""")
+""") # TODO: make this nice C++
 
 release_buffers = """
     free(tmp0);
@@ -63,8 +65,8 @@ max_pooling_2d = Template("max_pooling_2d({{input}}, {{h}}, {{w}}, {{channels}},
 zero_pad2 = Template(
     """zero_pad2({{input}}, {{h}}, {{w}}, {{channels}}, {{top_pad}}, {{bottom_pad}},
     {{left_pad}}, {{right_pad}}, {{ret}});\n""")
-relu = Template("relu({{input}}, {{size}}, {{ret}});\n")
-sep_conv1 = Template("""sep_conv_1({{input}}, {{steps}}, {{channels}}, {{filters}}, {{depth_kernels}},
+relu = Template("relu({{m}}, {{size}});\n")
+sep_conv1 = Template("""sep_conv1({{input}}, {{steps}}, {{channels}}, {{filters}}, {{depth_kernels}},
     {{point_kernels}}, {{kernel_size}}, {{biases}}, {{ret}});\n""")
 depthwise_conv2 = Template("""depthwise_conv2({{input}}, {{h}}, {{w}}, {{channels}}, {{padding}}, {{kernels}},
     {{kernel_height}}, {{kernel_width}}, {{ret}});\n""")
