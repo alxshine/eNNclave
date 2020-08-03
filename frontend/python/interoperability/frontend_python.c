@@ -17,7 +17,7 @@ static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
     float* m = (float*) PyBytes_AsString((PyObject*) b);
     float ret[rs];
 
-    void* native_backend_handle = dlopen("libbackend_cxx.so", RTLD_LAZY);
+    void* native_backend_handle = dlopen("libbackend_native.so", RTLD_LAZY);
     if (!native_backend_handle) {
         PyErr_SetString(PyExc_IOError, "Could not open native backend library");
         return NULL;
@@ -80,7 +80,7 @@ static PyMethodDef frontend_methods[] = {
         {"teardown", enclave_teardown, METH_VARARGS, "Teardown matutil"},
         {"enclave_forward", frontend_enclave_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
 #endif
-        {"native_forward", frontend_native_forward, METH_VARARGS, "Execute forward pass of sgx layers in native C"},
+        {"native_forward", frontend_native_forward, METH_VARARGS, "Execute forward pass of enclave layers in native C"},
         {NULL, NULL, 0, NULL} // Sentinel
 };
 

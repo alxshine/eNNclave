@@ -7,8 +7,8 @@ add_library(backend_native SHARED
         backend/generated/native_forward.cpp
         inc/nn.h backend/native/src/output.cpp
         inc/IParameterLoader.h
-        backend/native/src/CxxParameterLoader.cpp
-        backend/native/inc/CxxParameterLoader.h
+        backend/native/src/nativeParameterLoader.cpp
+        backend/native/inc/nativeParameterLoader.h
         core/nn.cpp)
 set_target_properties(backend_native PROPERTIES
         CXX_STANDARD 14)
