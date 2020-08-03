@@ -225,14 +225,13 @@ def generate_relu(test_name='small', size=10):
     declarations = [parameter_template.render(name='size', value=size)]
 
     inputs = rng.uniform(-1, 1, (1, size))
-    declarations.append(generate_array('inputs', inputs))
+    declarations.append(generate_array('ret', inputs))  # Generate inputs in bc assertion is static
 
     layer = tf_layers.ReLU(input_shape=inputs)
     results = layer(inputs).numpy()
     declarations.append(generate_array('expected', results))
-    declarations.append(ret_template.render(size=size))
 
-    operator = 'relu(inputs, size, ret);'
+    operator = 'relu(ret, size);'
 
     return {'suite': 'relu', 'name': test_name, 'declarations': declarations, 'operator': operator}
 
