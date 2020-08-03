@@ -2,6 +2,9 @@
 // Created by alex on 28.07.20.
 //
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnusedGlobalDeclarationInspection"
+
 #ifndef NN_H
 #define NN_H
 
@@ -24,7 +27,7 @@ namespace eNNclave {
     void depthwise_conv2(const float* input, int h, int w, int c, Padding padding, const float* kernels, int kh, int kw,
                          float* ret);
 
-    void relu(const float* m, int size, float* ret);
+    void relu(float* m, int size);
 
     void global_average_pooling_1d(const float* input, int steps, int c, float* ret);
 
@@ -42,3 +45,5 @@ namespace eNNclave {
     void sigmoid(const float* input, float* ret);
 }
 #endif //NN_H
+
+#pragma clang diagnostic pop

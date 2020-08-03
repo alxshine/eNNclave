@@ -97,12 +97,10 @@ eNNclave::conv2(const float* input, int h, int w, int c, int f, const float* ker
     }
 }
 
-void eNNclave::relu(const float* m, int size, float* ret) {
+void eNNclave::relu(float* m, int size) {
     for (int i = 0; i < size; i++)
         if (m[i] < 0)
-            ret[i] = 0;
-        else
-            ret[i] = m[i];
+            m[i] = 0;
 }
 
 void
