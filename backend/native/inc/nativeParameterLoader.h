@@ -15,7 +15,7 @@ namespace eNNclave {
     public:
         explicit NativeParameterLoader(const std::string& parameterPath);
 
-        virtual ~NativeParameterLoader() noexcept;
+        ~NativeParameterLoader() noexcept override;
 
         void LoadParameters(float* targetBuffer, int numElements) override;
 

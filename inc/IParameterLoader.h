@@ -12,6 +12,8 @@ namespace eNNclave {
     class IParameterLoader {
     public:
         virtual void LoadParameters(float* targetBuffer, int numElements) = 0;
+
+        virtual ~IParameterLoader() = default;
     };
 
     std::unique_ptr<IParameterLoader> getParameterLoader(const std::string &parameterFile);
