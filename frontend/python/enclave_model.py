@@ -26,7 +26,7 @@ class Enclave(Sequential):
         mb_size = 126
         # print("Configuring heap size for %d MB for now" % mb_size)
         heap_size = mb_size * 1024 * 1024
-        config_path = os.path.join(target_dir, 'config.xml')
+        config_path = os.path.join(target_dir, 'sgx_config.xml')
         config = templates.config.render(
             heapInitSize=hex(heap_size), heapMaxSize=hex(heap_size))
 

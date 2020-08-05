@@ -35,26 +35,31 @@ if (DEFINED ENV{SGX_SDK})
         set(SERVICE "sgx_tservice_sim")
         set(URTS "sgx_urts_sim")
         set(ENCLAVE_LINK_SCRIPT "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.lds")
+        set(SGX_EDL "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl")
         
-        find_library(TRTS_SIM sgx_trts_sim $ENV{SGX_SDK}/lib64)
-        find_library(STD_C sgx_tstdc $ENV{SGX_SDK}/lib64)
+        find_library(TRTS_SIM sgx_trts_sim ${SGX_LIB64})
+        find_library(STD_C sgx_tstdc ${SGX_LIB64})
         #TODO: exit with error if libraries not found
         # find_library(URTS_SIM sgx_urts_sim $ENV{SGX_SDK}/sdk_libs/)
 
         find_program(EDGER8R sgx_edger8r)
+        add_custom_target(backend_sgx_generated COMMAND ${EDGER8R} --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl
+        BYPRODUCTS sgx/trusted/enclave_t.c;sgx/trusted/enclave_t.h;sgx/untrusted/enclave_u.c;sgx/untrusted/enclave_u.h
+        MAIN_DEPENDENCY ${SGX_EDL})
         find_program(SIGN sgx_sign)
         # TODO: exit with error if programs not found
         
         # edger8r must be executed at configure time to generate files, and at compile time to update files
-        execute_process(COMMAND ${EDGER8R} --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ 
-        --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include 
-        ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl)
+        # execute_process(COMMAND ${EDGER8R} --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ 
+        # --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include 
+        # ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl)
 
         add_library(backend_sgx_trusted SHARED
                 ${CMAKE_BINARY_DIR}/sgx/trusted/enclave_t.c
                 backend/generated/sgx_forward.cpp
                 backend/sgx/trusted/src/sgxParameterLoader.cpp
                 backend/sgx/trusted/src/output.cpp)
+        add_dependencies(backend_sgx_trusted backend_sgx_generated)
         target_include_directories(backend_sgx_trusted PUBLIC
                 inc)
         target_include_directories(backend_sgx_trusted PRIVATE 
@@ -64,30 +69,23 @@ if (DEFINED ENV{SGX_SDK})
                 $ENV{SGX_SDK}/include/tlibc
                 backend/sgx/trusted/inc)
 
-        add_custom_command(TARGET backend_sgx_trusted PRE_BUILD
-                COMMAND ${EDGER8R} ARGS --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ 
-                --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include 
-                ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl)
         set_target_properties(backend_sgx_trusted PROPERTIES
                 POSITION_INDEPENDENT_CODE ON
                 CXX_STANDARD 14
                 COMPILE_FLAGS "-nostdinc++ -nostdinc"
                 LINK_DEPENDS ${ENCLAVE_LINK_SCRIPT}
-                LINK_FLAGS "-Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L${SGX_LIB64} \
-                -Wl,--whole-archive -l${TRTS} -Wl,--no-whole-archive \
-                -Wl,--start-group -l${TSTDC} -l${TCXX} -l${CRYPTO} -l${SERVICE} -Wl,--end-group \
-                -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
-                -Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
-                -Wl,--defsym,__ImageBase=0 -Wl,--gc-sections   \
-                -Wl,--version-script=${ENCLAVE_LINK_SCRIPT}")
+                CXX_LINK_FLAGS "-Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L${SGX_LIB64} \
+-Wl,--whole-archive -l${TRTS} -Wl,--no-whole-archive \
+-Wl,--start-group -l${TSTDC} -l${TCXX} -l${CRYPTO} -l${SERVICE} -Wl,--end-group \
+-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
+-Wl,-pie,-eenclave_entry -Wl,--export-dynamic \
+-Wl,--defsym,__ImageBase=0 -Wl,--gc-sections \
+-Wl,--version-script=${ENCLAVE_LINK_SCRIPT}")
 
-        add_custom_command(TARGET backend_sgx_trusted
-        POST_BUILD
-        COMMAND ${SIGN} ARGS sign 
-        -key ${CMAKE_SOURCE_DIR}/Enclave/Enclave_private_test.pem 
-        -enclave $<TARGET_FILE:backend_sgx_trusted> 
-        -out $<TARGET_FILE_DIR:backend_sgx_trusted>/libbackend_sgx_trusted_signed.so # TODO: use generator for filename
-        -config ${CMAKE_SOURCE_DIR}/Enclave/Enclave.config.xml)
+        add_custom_target(backend_sgx_signed
+        DEPENDS backend_sgx_trusted
+        COMMAND ${SIGN} sign -key ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/debug_signing_key.pem -enclave $<TARGET_FILE:backend_sgx_trusted> -out ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libbackend_sgx_trusted.signed.so -config ${CMAKE_SOURCE_DIR}/backend/generated/sgx_config.xml
+        BYPRODUCTS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libbackend_sgx_trusted.signed.so)
 
         # add_executable(app
         # App/App.cpp
