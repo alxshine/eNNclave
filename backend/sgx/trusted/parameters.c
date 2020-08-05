@@ -1,5 +1,7 @@
 #include "parameters.h"
 
+#include "sgx_tprotected_fs.h"
+
 SGX_FILE *param_file;
 
 void open_parameters(){

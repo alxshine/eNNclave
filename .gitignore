@@ -5,3 +5,5 @@ cmake-build*
 .vscode
 **/__pycache__
 build
+CMakeCache.txt
+cmake_install.cmake

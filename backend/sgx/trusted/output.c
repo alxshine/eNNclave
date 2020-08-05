@@ -3,6 +3,8 @@
 //
 #include "output.h"
 
+#include "stdio.h"
+
 void print_out(const char* fmt, ...)
 {
     char buf[BUFSIZ] = { '\0' };
