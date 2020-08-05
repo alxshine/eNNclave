@@ -36,16 +36,18 @@ if (DEFINED ENV{SGX_SDK})
         set(URTS "sgx_urts_sim")
         set(ENCLAVE_LINK_SCRIPT "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.lds")
         set(SGX_EDL "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl")
+        set(ENCLAVE_C_FLAGS "-nostdinc -fvisibility=hidden -fpie -ffunction-sections -fdata-sections")
+        set(ENCLAVE_LINK_FLAGS "-Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L${SGX_LIB64} -Wl,--whole-archive -l${TRTS} -Wl,--no-whole-archive -Wl,--start-group -l${TSTDC} -l${TCXX} -l${CRYPTO} -l${SERVICE} -Wl,--end-group -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined -Wl,-pie,-eenclave_entry -Wl,--export-dynamic -Wl,--defsym,__ImageBase=0 -Wl,--gc-sections -Wl,--version-script=${ENCLAVE_LINK_SCRIPT}")
         
         find_library(TRTS_SIM sgx_trts_sim ${SGX_LIB64})
         find_library(STD_C sgx_tstdc ${SGX_LIB64})
+        find_library(SGX_FS sgx_tprotected_fs ${SGX_LIB64})
         #TODO: exit with error if libraries not found
         # find_library(URTS_SIM sgx_urts_sim $ENV{SGX_SDK}/sdk_libs/)
 
         find_program(EDGER8R sgx_edger8r)
         add_custom_target(backend_sgx_generated COMMAND ${EDGER8R} --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl
-        BYPRODUCTS sgx/trusted/enclave_t.c;sgx/trusted/enclave_t.h;sgx/untrusted/enclave_u.c;sgx/untrusted/enclave_u.h
-        MAIN_DEPENDENCY ${SGX_EDL})
+        BYPRODUCTS sgx/trusted/enclave_t.c;sgx/trusted/enclave_t.h;sgx/untrusted/enclave_u.c;sgx/untrusted/enclave_u.h)
         find_program(SIGN sgx_sign)
         # TODO: exit with error if programs not found
         
@@ -54,33 +56,42 @@ if (DEFINED ENV{SGX_SDK})
         # --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include 
         # ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl)
 
-        add_library(backend_sgx_trusted SHARED
-                ${CMAKE_BINARY_DIR}/sgx/trusted/enclave_t.c
+        add_library(backend_sgx_enclave_t OBJECT
+                ${CMAKE_BINARY_DIR}/sgx/trusted/enclave_t.c)
+        target_include_directories(backend_sgx_enclave_t PRIVATE
+        ${CMAKE_BINARY_DIR}/sgx/trusted
+        $ENV{SGX_SDK}/include
+        $ENV{SGX_SDK}/include/tlibc
+        $ENV{SGX_SDK}/include/libcxx)
+        set_target_properties(backend_sgx_enclave_t PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        C_STANDARD 99
+        COMPILE_FLAGS ${ENCLAVE_C_FLAGS})
+
+        add_library(backend_sgx_trusted MODULE
                 backend/generated/sgx_forward.cpp
                 backend/sgx/trusted/src/sgxParameterLoader.cpp
-                backend/sgx/trusted/src/output.cpp)
+                backend/sgx/trusted/src/output.cpp
+                $<TARGET_OBJECTS:backend_sgx_enclave_t>
+                core/nn.cpp)
         add_dependencies(backend_sgx_trusted backend_sgx_generated)
         target_include_directories(backend_sgx_trusted PUBLIC
                 inc)
         target_include_directories(backend_sgx_trusted PRIVATE 
                 ${CMAKE_BINARY_DIR}/sgx/trusted/
                 $ENV{SGX_SDK}/include
-                $ENV{SGX_SDK}/include/libcxx
                 $ENV{SGX_SDK}/include/tlibc
+                $ENV{SGX_SDK}/include/libcxx
                 backend/sgx/trusted/inc)
 
         set_target_properties(backend_sgx_trusted PROPERTIES
                 POSITION_INDEPENDENT_CODE ON
                 CXX_STANDARD 14
-                COMPILE_FLAGS "-nostdinc++ -nostdinc"
-                LINK_DEPENDS ${ENCLAVE_LINK_SCRIPT}
-                CXX_LINK_FLAGS "-Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L${SGX_LIB64} \
--Wl,--whole-archive -l${TRTS} -Wl,--no-whole-archive \
--Wl,--start-group -l${TSTDC} -l${TCXX} -l${CRYPTO} -l${SERVICE} -Wl,--end-group \
--Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
--Wl,-pie,-eenclave_entry -Wl,--export-dynamic \
--Wl,--defsym,__ImageBase=0 -Wl,--gc-sections \
--Wl,--version-script=${ENCLAVE_LINK_SCRIPT}")
+                COMPILE_FLAGS "${ENCLAVE_C_FLAGS} -nostdinc++"
+                LINK_DEPENDS ${ENCLAVE_LINK_SCRIPT})
+        target_link_libraries(backend_sgx_trusted
+        -Wl,--no-undefined;-nostdlib;-nodefaultlibs;-nostartfiles;-L${SGX_LIB64};-Wl,--whole-archive;${TRTS_SIM};-Wl,--no-whole-archive;-Wl,--start-group;-l${TSTDC};-l${TCXX};-l${CRYPTO};-l${SERVICE};${SGX_FS};-Wl,--end-group;-Wl,-Bstatic;-Wl,-Bsymbolic;-Wl,--no-undefined;-Wl,-pie,-eenclave_entry;-Wl,--export-dynamic;-Wl,--defsym,__ImageBase=0;-Wl,--gc-sections;-Wl,--version-script=${ENCLAVE_LINK_SCRIPT})
+        # TODO: replace libraries with find_library
 
         add_custom_target(backend_sgx_signed
         DEPENDS backend_sgx_trusted
