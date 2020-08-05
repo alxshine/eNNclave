@@ -2,7 +2,7 @@ from jinja2 import Template
 
 preamble = Template("""
 #include <cstdlib>
-#include "backend_{{ backend }}.h"
+#include "backends.h"
 
 #include "nn.h"
 #include "{{backend}}ParameterLoader.h"
