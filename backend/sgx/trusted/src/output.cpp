@@ -2,8 +2,12 @@
 // Created by alex on 26.07.20.
 //
 #include "output.h"
+#include "enclave_t.h"
 
-#include "stdio.h"
+#include <cstdarg>
+#include <cstdio>
+
+using namespace std;
 
 void print_out(const char* fmt, ...)
 {

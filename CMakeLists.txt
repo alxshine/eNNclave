@@ -29,6 +29,7 @@ if (DEFINED ENV{SGX_SDK})
 
         set(SGX_LIB64 $ENV{SGX_SDK}/lib64)
         set(TSTDC "sgx_tstdc")
+        set(TCXX "sgx_tcxx")
         set(TRTS "sgx_trts_sim")
         set(CRYPTO "sgx_tcrypto")
         set(SERVICE "sgx_tservice_sim")
@@ -51,12 +52,17 @@ if (DEFINED ENV{SGX_SDK})
 
         add_library(backend_sgx_trusted SHARED
                 ${CMAKE_BINARY_DIR}/sgx/trusted/enclave_t.c
-                backend/generated/sgx_forward.cpp)
-                target_include_directories(backend_sgx_trusted PRIVATE 
+                backend/generated/sgx_forward.cpp
+                backend/sgx/trusted/src/sgxParameterLoader.cpp
+                backend/sgx/trusted/src/output.cpp)
+        target_include_directories(backend_sgx_trusted PUBLIC
+                inc)
+        target_include_directories(backend_sgx_trusted PRIVATE 
                 ${CMAKE_BINARY_DIR}/sgx/trusted/
                 $ENV{SGX_SDK}/include
+                $ENV{SGX_SDK}/include/libcxx
                 $ENV{SGX_SDK}/include/tlibc
-                ${CMAKE_SOURCE_DIR}/Include)
+                backend/sgx/trusted/inc)
 
         add_custom_command(TARGET backend_sgx_trusted PRE_BUILD
                 COMMAND ${EDGER8R} ARGS --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ 
@@ -64,10 +70,12 @@ if (DEFINED ENV{SGX_SDK})
                 ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl)
         set_target_properties(backend_sgx_trusted PROPERTIES
                 POSITION_INDEPENDENT_CODE ON
+                CXX_STANDARD 14
+                COMPILE_FLAGS "-nostdinc++ -nostdinc"
                 LINK_DEPENDS ${ENCLAVE_LINK_SCRIPT}
                 LINK_FLAGS "-Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L${SGX_LIB64} \
                 -Wl,--whole-archive -l${TRTS} -Wl,--no-whole-archive \
-                -Wl,--start-group -l${TSTDC} -l${CRYPTO} -l${SERVICE} -Wl,--end-group \
+                -Wl,--start-group -l${TSTDC} -l${TCXX} -l${CRYPTO} -l${SERVICE} -Wl,--end-group \
                 -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
                 -Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
                 -Wl,--defsym,__ImageBase=0 -Wl,--gc-sections   \
@@ -121,5 +129,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(core_tests backend/generated/core_tests.cpp core/nn.cpp)
+target_include_directories(core_tests PRIVATE inc)
 target_link_libraries(core_tests gmock_main)
 #add_test(NAME core_test COMMAND core_tests)

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "backend_sgx.h"
+#include "backends.h"
 #include "enclave_u.h"
 #include "print_error.h"
 #include "sgx_urts.h"

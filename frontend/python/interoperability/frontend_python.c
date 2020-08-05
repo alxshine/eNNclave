@@ -51,25 +51,26 @@ static PyObject *frontend_enclave_forward(PyObject *self, PyObject *args) {
 
   float *m = (float *)PyBytes_AsString((PyObject *)b);
   float ret[rs];
+  return NULL;
   // printf("Enclave NN forward\n");
 
-  int sts = enclave_nn_forward(m, s, ret, rs);
-  if (sts){
-    PyErr_SetString(PyExc_IOError, "Error in sgx");
-    return NULL; // TODO: do some error handling
-  }
+  // int sts = enclave_nn_forward(m, s, ret, rs);
+  // if (sts){
+  //   PyErr_SetString(PyExc_IOError, "Error in sgx");
+  //   return NULL; // TODO: do some error handling
+  // }
 
 
-  return Py_BuildValue("y#", ret, rs*sizeof(float));
+  // return Py_BuildValue("y#", ret, rs*sizeof(float));
 }
 
 static PyObject *enclave_initialize(PyObject *self, PyObject *args){
-  enclave_nn_start();
+  // enclave_nn_start();
   return Py_None;
 }
 
 static PyObject *enclave_teardown(PyObject *self, PyObject *args){
-  enclave_nn_end();
+  // enclave_nn_end();
   return Py_None;
 }
 #endif
