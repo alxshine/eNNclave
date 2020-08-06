@@ -10,7 +10,7 @@ enclave {
     };
 
     untrusted {
-        void ocall_stdout_string([in, string] const char *str);
-        void ocall_stderr_string([in, string] const char *str);
+        void ocall_stdout([in, string] const char *str);
+        void ocall_stderr([in, string] const char *str);
     };
 };

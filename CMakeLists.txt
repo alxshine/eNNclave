@@ -28,33 +28,29 @@ if (DEFINED ENV{SGX_SDK})
         message(STATUS "Configuring SGX backend")
 
         set(SGX_LIB64 $ENV{SGX_SDK}/lib64)
-        set(TSTDC "sgx_tstdc")
-        set(TCXX "sgx_tcxx")
-        set(TRTS "sgx_trts_sim")
-        set(CRYPTO "sgx_tcrypto")
-        set(SERVICE "sgx_tservice_sim")
-        set(URTS "sgx_urts_sim")
         set(ENCLAVE_LINK_SCRIPT "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.lds")
         set(SGX_EDL "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl")
         set(ENCLAVE_C_FLAGS "-nostdinc -fvisibility=hidden -fpie -ffunction-sections -fdata-sections")
-        set(ENCLAVE_LINK_FLAGS "-Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L${SGX_LIB64} -Wl,--whole-archive -l${TRTS} -Wl,--no-whole-archive -Wl,--start-group -l${TSTDC} -l${TCXX} -l${CRYPTO} -l${SERVICE} -Wl,--end-group -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined -Wl,-pie,-eenclave_entry -Wl,--export-dynamic -Wl,--defsym,__ImageBase=0 -Wl,--gc-sections -Wl,--version-script=${ENCLAVE_LINK_SCRIPT}")
         
-        find_library(TRTS_SIM sgx_trts_sim ${SGX_LIB64})
-        find_library(STD_C sgx_tstdc ${SGX_LIB64})
-        find_library(SGX_FS sgx_tprotected_fs ${SGX_LIB64})
-        #TODO: exit with error if libraries not found
-        # find_library(URTS_SIM sgx_urts_sim $ENV{SGX_SDK}/sdk_libs/)
+        find_library(URTS_SIM sgx_urts_sim $ENV{SGX_SDK}/sdk_libs/)
+        find_library(TRTS_SIM sgx_trts_sim ${SGX_LIB64} REQUIRED)
+        find_library(SGX_STD_C sgx_tstdc ${SGX_LIB64} REQUIRED)
+        find_library(SGX_STD_CXX sgx_tcxx ${SGX_LIB64} REQUIRED)
+        find_library(SGX_TFS sgx_tprotected_fs ${SGX_LIB64} REQUIRED)
+        find_library(SGX_UFS sgx_uprotected_fs ${SGX_LIB64} REQUIRED)
+        find_library(SGX_CRYPTO sgx_tcrypto ${SGX_LIB64} REQUIRED)
+        find_library(SGX_SERVICE sgx_tservice_sim ${SGX_LIB64} REQUIRED)
 
         find_program(EDGER8R sgx_edger8r)
         add_custom_target(backend_sgx_generated COMMAND ${EDGER8R} --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl
         BYPRODUCTS sgx/trusted/enclave_t.c;sgx/trusted/enclave_t.h;sgx/untrusted/enclave_u.c;sgx/untrusted/enclave_u.h)
         find_program(SIGN sgx_sign)
         # TODO: exit with error if programs not found
-        
+
         # edger8r must be executed at configure time to generate files, and at compile time to update files
-        # execute_process(COMMAND ${EDGER8R} --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ 
-        # --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include 
-        # ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl)
+        execute_process(COMMAND ${EDGER8R} --trusted-dir ${CMAKE_BINARY_DIR}/sgx/trusted/ --untrusted-dir ${CMAKE_BINARY_DIR}/sgx/untrusted/ 
+        --search-path ${CMAKE_SOURCE_DIR}/backend/sgx/trusted --search-path $ENV{SGX_SDK}/include 
+        ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl)
 
         add_library(backend_sgx_enclave_t OBJECT
                 ${CMAKE_BINARY_DIR}/sgx/trusted/enclave_t.c)
@@ -68,7 +64,7 @@ if (DEFINED ENV{SGX_SDK})
         C_STANDARD 99
         COMPILE_FLAGS ${ENCLAVE_C_FLAGS})
 
-        add_library(backend_sgx_trusted MODULE
+        add_library(backend_sgx_trusted SHARED
                 backend/generated/sgx_forward.cpp
                 backend/sgx/trusted/src/sgxParameterLoader.cpp
                 backend/sgx/trusted/src/output.cpp
@@ -78,7 +74,7 @@ if (DEFINED ENV{SGX_SDK})
         add_dependencies(backend_sgx_trusted backend_sgx_generated)
         target_include_directories(backend_sgx_trusted PUBLIC
                 inc)
-        target_include_directories(backend_sgx_trusted PRIVATE 
+        target_include_directories(backend_sgx_trusted PRIVATE
                 ${CMAKE_BINARY_DIR}/sgx/trusted/
                 $ENV{SGX_SDK}/include
                 $ENV{SGX_SDK}/include/tlibc
@@ -91,8 +87,8 @@ if (DEFINED ENV{SGX_SDK})
                 CXX_STANDARD 14
                 COMPILE_FLAGS "${ENCLAVE_C_FLAGS} -nostdinc++"
                 LINK_DEPENDS ${ENCLAVE_LINK_SCRIPT})
-        target_link_libraries(backend_sgx_trusted
-        -Wl,--no-undefined;-nostdlib;-nodefaultlibs;-nostartfiles;-L${SGX_LIB64};-Wl,--whole-archive;${TRTS_SIM};-Wl,--no-whole-archive;-Wl,--start-group;-l${TSTDC};-l${TCXX};-l${CRYPTO};-l${SERVICE};${SGX_FS};-Wl,--end-group;-Wl,-Bstatic;-Wl,-Bsymbolic;-Wl,--no-undefined;-Wl,-pie,-eenclave_entry;-Wl,--export-dynamic;-Wl,--defsym,__ImageBase=0;-Wl,--gc-sections;-Wl,--version-script=${ENCLAVE_LINK_SCRIPT})
+        target_link_libraries(backend_sgx_trusted PRIVATE
+        -Wl,--no-undefined;-nostdlib;-nodefaultlibs;-nostartfiles;-L${SGX_LIB64};-Wl,--whole-archive;${TRTS_SIM};-Wl,--no-whole-archive;-Wl,--start-group;${SGX_STD_C};${SGX_STD_CXX};${SGX_CRYPTO};${SGX_SERVICE};${SGX_TFS};-Wl,--end-group;-Wl,-Bstatic;-Wl,-Bsymbolic;-Wl,--no-undefined;-Wl,-pie,-eenclave_entry;-Wl,--export-dynamic;-Wl,--defsym,__ImageBase=0;-Wl,--gc-sections;-Wl,--version-script=${ENCLAVE_LINK_SCRIPT})
         # TODO: replace libraries with find_library
 
         add_custom_target(backend_sgx_signed
@@ -100,17 +96,36 @@ if (DEFINED ENV{SGX_SDK})
         COMMAND ${SIGN} sign -key ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/debug_signing_key.pem -enclave $<TARGET_FILE:backend_sgx_trusted> -out ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libbackend_sgx_trusted.signed.so -config ${CMAKE_SOURCE_DIR}/backend/generated/sgx_config.xml
         BYPRODUCTS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libbackend_sgx_trusted.signed.so)
 
-        # add_executable(app
-        # App/App.cpp
-        # ${CMAKE_BINARY_DIR}/sgx/untrusted/Enclave_u.c)
-        # target_include_directories(app PRIVATE
-        # ${CMAKE_BINARY_DIR}/sgx/untrusted/
-        # $ENV{SGX_SDK}/include
-        # ${CMAKE_SOURCE_DIR}/Include
-        # ${CMAKE_SOURCE_DIR}/App)
-        # target_link_libraries(app backend_sgx_trusted ${URTS_SIM})
+        add_library(backend_sgx_enclave_u OBJECT
+                ${CMAKE_BINARY_DIR}/sgx/untrusted/enclave_u.c)
+        target_include_directories(backend_sgx_enclave_u PRIVATE
+                ${CMAKE_BINARY_DIR}/sgx/untrusted
+                $ENV{SGX_SDK}/include
+                $ENV{SGX_SDK}/include/tlibc
+                $ENV{SGX_SDK}/include/libcxx)
+        set_target_properties(backend_sgx_enclave_u PROPERTIES
+                POSITION_INDEPENDENT_CODE ON
+                C_STANDARD 99)
+
+        add_executable(backend_sgx_encryptor
+                backend/sgx/untrusted/src/encryptor.cpp
+                backend/sgx/untrusted/src/EnclaveHandler.cpp
+                backend/sgx/untrusted/src/ocalls.cpp
+                $<TARGET_OBJECTS:backend_sgx_enclave_u>)
+        target_include_directories(backend_sgx_encryptor PRIVATE
+                ${CMAKE_BINARY_DIR}/sgx/untrusted/
+                $ENV{SGX_SDK}/include
+                inc
+                backend/sgx/inc
+                backend/sgx/untrusted/inc)
+        set_target_properties(backend_sgx_encryptor PROPERTIES
+                POSITION_INDEPENDENT_CODE ON
+                CXX_STANDARD 14
+                THREADS_PREFER_PTHREAD_FLAG ON)
+        find_package(Threads REQUIRED)
+        target_link_libraries(backend_sgx_encryptor backend_sgx_trusted ${URTS_SIM} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
 else()
-        message(WARNING "SGX SDK not found, skipping")
+        message(WARNING "SGX SDK not found, skipping SGX backend")
 endif ()
 
 # Download and unpack googletest at configure time
@@ -139,7 +154,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
         EXCLUDE_FROM_ALL)
 
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(core_tests backend/generated/core_tests.cpp core/nn.cpp)
+add_executable(core_tests backend/generated/core_tests.cpp core/nn.cpp backend/native/src/output.cpp) # TODO: extract to special output.cpp?
 target_include_directories(core_tests PRIVATE inc)
 target_link_libraries(core_tests gmock_main)
 #add_test(NAME core_test COMMAND core_tests)

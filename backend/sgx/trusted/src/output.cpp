@@ -16,7 +16,7 @@ void eNNclave::print_out(const char* fmt, ...)
     va_start(ap, fmt);
     vsnprintf(buf, BUFSIZ, fmt, ap);
     va_end(ap);
-    ocall_stdout_string(buf);
+    ocall_stdout(buf);
 }
 
 void eNNclave::print_err(const char* fmt, ...)
@@ -26,7 +26,7 @@ void eNNclave::print_err(const char* fmt, ...)
     va_start(ap, fmt);
     vsnprintf(buf, BUFSIZ, fmt, ap);
     va_end(ap);
-    ocall_stdout_string(buf);
+    ocall_stdout(buf);
 }
 
 void eNNclave::dump_matrix(float* m, int r, int c) {

@@ -1,10 +1,13 @@
 #include "sgxParameterLoader.h"
 
+#include "output.h"
+
 using namespace eNNclave;
 using namespace std;
 
 SgxParameterLoader::SgxParameterLoader(const string &path, bool write=false): canWrite{write}{
-    auto openingMode = write ? "w" : "r";
+    auto openingMode = write ? "w+" : "r";
+    print_out("Opening file %s\n", path);
     parameterFile = sgx_fopen_auto_key(path.c_str(), openingMode); // TODO: handle potential file open error
 }
 

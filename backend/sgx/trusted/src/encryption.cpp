@@ -14,7 +14,7 @@ namespace
 
 void open_encrypted_parameters()
 {
-    parameterLoader = std::unique_ptr<SgxParameterLoader>(new SgxParameterLoader("parameters.bin.aes", true)); // TODO: handle potential exception
+    parameterLoader = std::unique_ptr<SgxParameterLoader>(new SgxParameterLoader("backend/generated/parameters.bin.aes", true)); // TODO: handle potential exception
 }
 
 int encrypt_parameters(float *target_buffer, int num_elements){
