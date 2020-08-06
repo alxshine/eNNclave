@@ -124,6 +124,18 @@ if (DEFINED ENV{SGX_SDK})
                 THREADS_PREFER_PTHREAD_FLAG ON)
         find_package(Threads REQUIRED)
         target_link_libraries(backend_sgx_encryptor backend_sgx_trusted ${URTS_SIM} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
+
+        add_library(backend_sgx MODULE
+                backend/sgx/untrusted/src/wrapper.cpp
+                backend/sgx/untrusted/src/EnclaveHandler.cpp)
+        target_include_directories(backend_sgx PRIVATE
+                ${CMAKE_BINARY_DIR}/sgx/untrusted/
+                $ENV{SGX_SDK}/include
+                inc
+                backend/sgx/inc
+                backend/sgx/untrusted/inc)
+        target_link_libraries(backend_sgx backend_sgx_trusted ${URTS_SIM} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
+
 else()
         message(WARNING "SGX SDK not found, skipping SGX backend")
 endif ()

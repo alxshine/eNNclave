@@ -14,7 +14,7 @@ using namespace eNNclave;
 extern "C" {
 #endif
 int {{ backend }}_forward(float *m, int s, float *ret, int rs) {
-    auto parameterLoader = getParameterLoader("backend/generated/parameters.bin");
+    auto parameterLoader = getParameterLoader("{{parameter_file}}");
 """)
 postamble = """
     return 0;
