@@ -72,6 +72,7 @@ if (DEFINED ENV{SGX_SDK})
                 backend/generated/sgx_forward.cpp
                 backend/sgx/trusted/src/sgxParameterLoader.cpp
                 backend/sgx/trusted/src/output.cpp
+                backend/sgx/trusted/src/encryption.cpp
                 $<TARGET_OBJECTS:backend_sgx_enclave_t>
                 core/nn.cpp)
         add_dependencies(backend_sgx_trusted backend_sgx_generated)
@@ -82,7 +83,8 @@ if (DEFINED ENV{SGX_SDK})
                 $ENV{SGX_SDK}/include
                 $ENV{SGX_SDK}/include/tlibc
                 $ENV{SGX_SDK}/include/libcxx
-                backend/sgx/trusted/inc)
+                backend/sgx/trusted/inc
+                backend/sgx/inc)
 
         set_target_properties(backend_sgx_trusted PROPERTIES
                 POSITION_INDEPENDENT_CODE ON

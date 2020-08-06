@@ -5,7 +5,7 @@ preamble = Template("""
 #include "backends.h"
 
 #include "nn.h"
-#include "{{backend}}ParameterLoader.h"
+#include "IParameterLoader.h"
 #include "output.h"
 
 using namespace eNNclave;
