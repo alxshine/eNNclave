@@ -53,14 +53,14 @@ static PyObject *frontend_sgx_forward(PyObject *self, PyObject *args) {
   float ret[rs];
   printf("Enclave NN forward\n");
 
-  void* native_backend_handle = dlopen("libbackend_sgx.so", RTLD_LAZY);
-    if (!native_backend_handle) {
+  void* sgx_backend_handle = dlopen("libbackend_sgx.so", RTLD_LAZY);
+    if (!sgx_backend_handle) {
         PyErr_SetString(PyExc_IOError, "Could not open native backend library");
         return NULL;
     }
     dlerror();
 
-    FORWARD_T* sgx_forward = dlsym(native_backend_handle, "sgx_forward");
+    FORWARD_T* sgx_forward = dlsym(sgx_backend_handle, "sgx_forward");
     if (dlerror()) {
         PyErr_SetString(PyExc_IOError, "Could not find sgx_forward in library");
         return NULL;
