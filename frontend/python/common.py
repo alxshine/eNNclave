@@ -5,7 +5,7 @@ import os
 from invoke.context import Context
 
 from frontend.python.enclave_model import Enclave
-import frontend_python as ennclave
+import lib.frontend_python as ennclave
 
 
 def build_library(model: Enclave, mode: str, target_dir="backend/generated"):
@@ -15,7 +15,6 @@ def build_library(model: Enclave, mode: str, target_dir="backend/generated"):
     if mode == 'sgx':
         model.generate_config(target_dir)
         context.run('build/backend_sgx_encryptor')
-        os.rename('parameters.bin.aes', 'backend/generated/parameters.bin.aes') # TODO: fix this
 
     with context.cd("build"):  # TODO: make more robust
         context.run(f"make backend_{mode}")
