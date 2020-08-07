@@ -1,20 +1,22 @@
 from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as layers
 import numpy as np
+import os
 from invoke.context import Context
 
 from frontend.python.enclave_model import Enclave
-import frontend_python as ennclave
+import lib.frontend_python as ennclave
 
 
 def build_library(model: Enclave, mode: str, target_dir="backend/generated"):
     model.generate_state(target_dir)
     model.generate_forward(mode, target_dir)
+    context = Context()
     if mode == 'sgx':
         model.generate_config(target_dir)
+        context.run('build/backend_sgx_encryptor')
 
-    context = Context()
-    with context.cd("cmake-build-debug"):  # TODO: make more robust
+    with context.cd("build"):  # TODO: make more robust
         context.run(f"make backend_{mode}")
 
 
@@ -35,8 +37,7 @@ def common_test_basis(model: Sequential, use_sgx: bool):
     build_library(ennclave_model, "sgx" if use_sgx else "native")
 
     if use_sgx:
-        ennclave.initialize()
-        test_bytes = ennclave.enclave_forward(
+        test_bytes = ennclave.sgx_forward(
             inputs.tobytes(), size, output_size)
     else:
         test_bytes = ennclave.native_forward(
@@ -44,9 +45,6 @@ def common_test_basis(model: Sequential, use_sgx: bool):
 
     test_result = np.frombuffer(test_bytes, dtype=np.float32)
     np.testing.assert_almost_equal(test_result, expected_result, decimal=5)
-
-    if use_sgx:
-        ennclave.teardown()
 
 
 if __name__ == '__main__':

@@ -2,24 +2,24 @@ from jinja2 import Template
 
 preamble = Template("""
 #include <cstdlib>
-#include "backend_{{ backend }}.h"
+#include "backends.h"
 
 #include "nn.h"
-#include "{{backend}}ParameterLoader.h"
+#include "IParameterLoader.h"
 #include "output.h"
 
 using namespace eNNclave;
 
-#ifdef _cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 int {{ backend }}_forward(float *m, int s, float *ret, int rs) {
-    auto parameterLoader = getParameterLoader("backend/generated/parameters.bin");
+    auto parameterLoader = getParameterLoader("{{parameter_file}}");
 """)
 postamble = """
     return 0;
 }
-#ifdef _cplusplus
+#if defined(__cplusplus)
 }
 #endif
 """

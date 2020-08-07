@@ -125,7 +125,7 @@ eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding paddi
         col_start = min_col_offset;
         col_end = h - min_col_offset - !(kw % 2);
     } else {
-        std::cerr << "Unhandled padding type" << std::endl;
+        print_err("Unhandled padding type\n");
         return;
     }
     int new_height = row_end - row_start;

@@ -26,7 +26,7 @@ class Enclave(Sequential):
         mb_size = 126
         # print("Configuring heap size for %d MB for now" % mb_size)
         heap_size = mb_size * 1024 * 1024
-        config_path = os.path.join(target_dir, 'config.xml')
+        config_path = os.path.join(target_dir, 'sgx_config.xml')
         config = templates.config.render(
             heapInitSize=hex(heap_size), heapMaxSize=hex(heap_size))
 
@@ -77,7 +77,15 @@ class Enclave(Sequential):
         forward_file = open(target_file, 'w+')
         all_layers = utils.get_all_layers(self)
 
-        forward_file.write(templates.preamble.render(backend=backend))
+        preamble_backend = backend
+
+        if backend == 'sgx':
+            parameter_file = "backend/generated/parameters.bin.aes"
+            preamble_backend = 'sgx_enclave'
+        else:
+            parameter_file = "backend/generated/parameters.bin"
+
+        forward_file.write(templates.preamble.render(backend=preamble_backend, parameter_file=parameter_file))
         # declare tmp buffers
         output_sizes = [np.prod(layer.output_shape[1:]) for layer in all_layers]
         output_sizes.sort(reverse=True)

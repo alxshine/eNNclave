@@ -62,6 +62,7 @@ class DepthwiseConv2dTests(TensorFlowTestCase):
         ])
         common_test_basis(model, True)
 
+    @unittest.skip
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testHugeEnclave(self):
         raise AssertionError("Causes a segfault in C")
