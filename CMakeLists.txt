@@ -142,6 +142,7 @@ if (DEFINED ENV{SGX_SDK})
         add_library(backend_sgx MODULE
                 backend/sgx/untrusted/src/wrapper.cpp
                 backend/sgx/untrusted/src/EnclaveHandler.cpp
+                backend/sgx/untrusted/src/ocalls.cpp
                 $<TARGET_OBJECTS:backend_sgx_enclave_u>)
         target_include_directories(backend_sgx PRIVATE
                 ${CMAKE_BINARY_DIR}/sgx/untrusted/
@@ -150,6 +151,7 @@ if (DEFINED ENV{SGX_SDK})
                 backend/sgx/inc
                 backend/sgx/untrusted/inc)
         target_link_libraries(backend_sgx backend_sgx_trusted ${URTS_SIM} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
+        add_dependencies(backend_sgx backend_sgx_signed)
 
         add_executable(backend_sgx_tester
                 backend/sgx/untrusted/src/forward_tester.cpp)
