@@ -10,7 +10,7 @@ preamble = Template("""
 
 using namespace eNNclave;
 
-#ifdef _cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 int {{ backend }}_forward(float *m, int s, float *ret, int rs) {
@@ -19,7 +19,7 @@ int {{ backend }}_forward(float *m, int s, float *ret, int rs) {
 postamble = """
     return 0;
 }
-#ifdef _cplusplus
+#if defined(__cplusplus)
 }
 #endif
 """

@@ -8,14 +8,14 @@
 
 using namespace eNNclave;
 
-#ifdef _cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
-int sgx_forward(float *m, int s, float *ret, int rs) {
+int sgx_enclave_forward(float *m, int s, float *ret, int rs) {
     auto parameterLoader = getParameterLoader("");
     print_out("Hello, this is backend sgx\n");
     return 0;
 }
-#ifdef _cplusplus
+#if defined(__cplusplus)
 }
 #endif

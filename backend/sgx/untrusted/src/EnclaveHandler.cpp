@@ -20,7 +20,7 @@ eNNclave::EnclaveHandler::~EnclaveHandler() noexcept{
 
 void eNNclave::EnclaveHandler::forward(float *input, int size, float *ret, int returnSize){
     int returnValue;
-    sgx_status_t status = sgx_forward(enclaveId, &returnValue, input, size, ret, returnSize);
+    sgx_status_t status = sgx_enclave_forward(enclaveId, &returnValue, input, size, ret, returnSize);
     if (status != SGX_SUCCESS)
         throw logic_error{"sgx_forward returned error code: " + to_string(status)};
 }
