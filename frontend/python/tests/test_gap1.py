@@ -27,6 +27,7 @@ class GlobalAveragePooling1D(TensorFlowTestCase):
         ])
         common_test_basis(model, False)
 
+    @unittest.skip
     def testHugeNative(self):
         model = Sequential([
             layers.GlobalAveragePooling1D(input_shape=(1000, 64))
@@ -54,6 +55,7 @@ class GlobalAveragePooling1D(TensorFlowTestCase):
         ])
         common_test_basis(model, True)
 
+    @unittest.skip
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testHugeEnclave(self):
         model = Sequential([

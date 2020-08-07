@@ -58,6 +58,7 @@ class DenseTests(TensorFlowTestCase):
         ])
         common_test_basis(model, True)
 
+    @unittest.skip
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testHugeEnclave(self):
         model = Sequential([

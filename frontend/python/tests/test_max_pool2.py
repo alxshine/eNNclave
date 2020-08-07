@@ -27,6 +27,7 @@ class MaxPooling2D(TensorFlowTestCase):
         ])
         common_test_basis(model, False)
 
+    @unittest.skip
     def testHugeNative(self):
         model = Sequential([
             layers.MaxPooling2D(pool_size=10, input_shape=(1000, 1000, 64))
@@ -54,6 +55,7 @@ class MaxPooling2D(TensorFlowTestCase):
         ])
         common_test_basis(model, True)
 
+    @unittest.skip
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testHugeEnclave(self):
         model = Sequential([
