@@ -5,7 +5,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(GENERATED_DIR "${CMAKE_SOURCE_DIR}/backend/generated")
 
 if(NOT EXISTS ${GENERATED_DIR}/native_forward.cpp OR NOT EXISTS ${GENERATED_DIR}/parameters.bin)
-        message(status "Configuring native dummy files")
+        message(STATUS "Configuring native dummy files")
         file(GLOB NATIVE_DUMMY_FILES "backend/native/dummy_files/*")
         file(COPY ${NATIVE_DUMMY_FILES} DESTINATION ${GENERATED_DIR})
 endif()
@@ -36,7 +36,7 @@ if (DEFINED ENV{SGX_SDK})
         message(STATUS "Configuring SGX backend")
 
         if(NOT EXISTS ${GENERATED_DIR}/sgx_forward.cpp OR NOT EXISTS ${GENERATED_DIR}/sgx_config.xml OR NOT EXISTS ${GENERATED_DIR}/parameters.bin.aes)
-                message(status "Configuring SGX dummy files")
+                message(STATUS "Configuring SGX dummy files")
                 file(GLOB SGX_DUMMY_FILES "backend/sgx/dummy_files/*")
                 file(COPY ${SGX_DUMMY_FILES} DESTINATION ${GENERATED_DIR})
         endif()
@@ -141,7 +141,8 @@ if (DEFINED ENV{SGX_SDK})
 
         add_library(backend_sgx MODULE
                 backend/sgx/untrusted/src/wrapper.cpp
-                backend/sgx/untrusted/src/EnclaveHandler.cpp)
+                backend/sgx/untrusted/src/EnclaveHandler.cpp
+                $<TARGET_OBJECTS:backend_sgx_enclave_u>)
         target_include_directories(backend_sgx PRIVATE
                 ${CMAKE_BINARY_DIR}/sgx/untrusted/
                 $ENV{SGX_SDK}/include
@@ -150,6 +151,12 @@ if (DEFINED ENV{SGX_SDK})
                 backend/sgx/untrusted/inc)
         target_link_libraries(backend_sgx backend_sgx_trusted ${URTS_SIM} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
 
+        add_executable(backend_sgx_tester
+                backend/sgx/untrusted/src/forward_tester.cpp)
+        target_include_directories(backend_sgx_tester PRIVATE
+                inc)
+        target_link_libraries(backend_sgx_tester dl)
+        add_dependencies(backend_sgx_tester backend_sgx)
 else()
         message(WARNING "SGX SDK not found, skipping SGX backend")
 endif ()
