@@ -25,8 +25,13 @@ int main(void)
         return 1;
     }
 
-    float input[10], ret[10];
-    int status = (*sgx_forward)(input, 10, ret, 10);
+    auto input_size = 100, output_size = 100;
+    float input[input_size], ret[output_size];
+    for (size_t i = 0; i < input_size; i++)
+        input[i] = 0;
+    
+
+    int status = (*sgx_forward)(input, input_size, ret, output_size);
     if(status){
         cerr << "Error during SGX forward" << endl;
         return 1;
