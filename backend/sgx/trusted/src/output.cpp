@@ -6,11 +6,13 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 
 using namespace std;
 
 void eNNclave::print_out(const char* fmt, ...)
 {
+    // ocall_stdout(fmt);
     char buf[BUFSIZ] = { '\0' };
     va_list ap;
     va_start(ap, fmt);
@@ -21,12 +23,13 @@ void eNNclave::print_out(const char* fmt, ...)
 
 void eNNclave::print_err(const char* fmt, ...)
 {
-    char buf[BUFSIZ] = { '\0' };
-    va_list ap;
-    va_start(ap, fmt);
-    vsnprintf(buf, BUFSIZ, fmt, ap);
-    va_end(ap);
-    ocall_stderr(buf);
+    ocall_stderr(fmt);
+//     char buf[BUFSIZ] = { '\0' };
+//     va_list ap;
+//     va_start(ap, fmt);
+//     vsnprintf(buf, BUFSIZ, fmt, ap);
+//     va_end(ap);
+//     ocall_stderr(buf);
 }
 
 void eNNclave::dump_matrix(float* m, int r, int c) {

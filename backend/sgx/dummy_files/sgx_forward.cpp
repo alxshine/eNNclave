@@ -12,7 +12,7 @@ using namespace eNNclave;
 extern "C" {
 #endif
 int sgx_enclave_forward(float *m, int s, float *ret, int rs) {
-    auto parameterLoader = getParameterLoader("");
+    auto parameterLoader = getParameterLoader("backend/generated/parameters.bin.aes");
     print_out("Hello, this is backend sgx\n");
     return 0;
 }
