@@ -2,8 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 project(eNNclave)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
+set(GENERATED_DIR "${CMAKE_SOURCE_DIR}/backend/generated")
+
+if(NOT EXISTS ${GENERATED_DIR}/native_forward.cpp OR NOT EXISTS ${GENERATED_DIR}/parameters.bin)
+        message(status "Configuring native dummy files")
+        file(GLOB NATIVE_DUMMY_FILES "backend/native/dummy_files/*")
+        file(COPY ${NATIVE_DUMMY_FILES} DESTINATION ${GENERATED_DIR})
+endif()
+
 add_library(backend_native SHARED
-        backend/generated/native_forward.cpp
+        ${GENERATED_DIR}/native_forward.cpp
         inc/nn.h backend/native/src/output.cpp
         inc/IParameterLoader.h
         backend/native/src/nativeParameterLoader.cpp
@@ -26,6 +34,12 @@ set_target_properties(frontend_python PROPERTIES
 
 if (DEFINED ENV{SGX_SDK})
         message(STATUS "Configuring SGX backend")
+
+        if(NOT EXISTS ${GENERATED_DIR}/sgx_forward.cpp OR NOT EXISTS ${GENERATED_DIR}/sgx_config.xml OR NOT EXISTS ${GENERATED_DIR}/parameters.bin.aes)
+                message(status "Configuring SGX dummy files")
+                file(GLOB SGX_DUMMY_FILES "backend/sgx/dummy_files/*")
+                file(COPY ${SGX_DUMMY_FILES} DESTINATION ${GENERATED_DIR})
+        endif()
 
         set(SGX_LIB64 $ENV{SGX_SDK}/lib64)
         set(ENCLAVE_LINK_SCRIPT "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.lds")
@@ -65,7 +79,7 @@ if (DEFINED ENV{SGX_SDK})
         COMPILE_FLAGS ${ENCLAVE_C_FLAGS})
 
         add_library(backend_sgx_trusted SHARED
-                backend/generated/sgx_forward.cpp
+                ${GENERATED_DIR}/sgx_forward.cpp
                 backend/sgx/trusted/src/sgxParameterLoader.cpp
                 backend/sgx/trusted/src/output.cpp
                 backend/sgx/trusted/src/encryption.cpp
@@ -93,7 +107,7 @@ if (DEFINED ENV{SGX_SDK})
 
         add_custom_target(backend_sgx_signed
         DEPENDS backend_sgx_trusted
-        COMMAND ${SIGN} sign -key ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/debug_signing_key.pem -enclave $<TARGET_FILE:backend_sgx_trusted> -out ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libbackend_sgx_trusted.signed.so -config ${CMAKE_SOURCE_DIR}/backend/generated/sgx_config.xml
+        COMMAND ${SIGN} sign -key ${CMAKE_SOURCE_DIR}/backend/sgx/trusted/debug_signing_key.pem -enclave $<TARGET_FILE:backend_sgx_trusted> -out ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libbackend_sgx_trusted.signed.so -config ${GENERATED_DIR}/sgx_config.xml
         BYPRODUCTS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libbackend_sgx_trusted.signed.so)
 
         add_library(backend_sgx_enclave_u OBJECT
@@ -166,7 +180,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
         EXCLUDE_FROM_ALL)
 
 # Now simply link against gtest or gtest_main as needed. Eg
-add_executable(core_tests backend/generated/core_tests.cpp core/nn.cpp backend/native/src/output.cpp) # TODO: extract to special output.cpp?
+add_executable(core_tests ${GENERATED_DIR}/core_tests.cpp core/nn.cpp backend/native/src/output.cpp) # TODO: extract to special output.cpp?
 target_include_directories(core_tests PRIVATE inc)
 target_link_libraries(core_tests gmock_main)
 #add_test(NAME core_test COMMAND core_tests)
