@@ -44,42 +44,40 @@ class Enclave(Sequential):
             target_dir = os.path.join(cfg.get_ennclave_home(), 'backend', 'generated')
 
         bin_file = os.path.join(target_dir, 'parameters.bin')
-        bf = open(bin_file, 'w+b')
+        with open(bin_file, 'w+b') as bf:
+            for i, l in enumerate(self.layers):
+                if type(l) in [tf_layers.Dense, tf_layers.Conv2D]:
+                    parameters = l.get_weights()
 
-        for i, l in enumerate(self.layers):
-            if type(l) in [tf_layers.Dense, tf_layers.Conv2D]:
-                parameters = l.get_weights()
+                    if len(parameters) > 0:
+                        w = parameters[0]
+                        bf.write(w.astype(np.float32).tobytes())
 
-                if len(parameters) > 0:
-                    w = parameters[0]
-                    bf.write(w.astype(np.float32).tobytes())
+                    if len(parameters) > 1:
+                        b = parameters[1]
+                        bf.write(b.astype(np.float32).tobytes())
 
-                if len(parameters) > 1:
-                    b = parameters[1]
-                    bf.write(b.astype(np.float32).tobytes())
+                elif type(l) in [tf_layers.SeparableConv1D]:
+                    depth_kernels, point_kernels, biases = l.get_weights()
 
-            elif type(l) in [tf_layers.SeparableConv1D]:
-                depth_kernels, point_kernels, biases = l.get_weights()
+                    bf.write(depth_kernels.astype(np.float32).tobytes())
+                    bf.write(point_kernels.astype(np.float32).tobytes())
+                    bf.write(biases.astype(np.float32).tobytes())
 
-                bf.write(depth_kernels.astype(np.float32).tobytes())
-                bf.write(point_kernels.astype(np.float32).tobytes())
-                bf.write(biases.astype(np.float32).tobytes())
+                elif type(l) in [tf_layers.DepthwiseConv2D]:
+                    depth_kernels = l.get_weights()[0]
 
-            elif type(l) in [tf_layers.DepthwiseConv2D]:
-                depth_kernels = l.get_weights()[0]
+                    bf.write(depth_kernels.astype(np.float32).tobytes())
 
-                bf.write(depth_kernels.astype(np.float32).tobytes())
-
-            elif type(l) in [tf_layers.Dropout, tf_layers.GlobalAveragePooling1D, tf_layers.GlobalAveragePooling2D,
-                             tf_layers.MaxPooling1D, tf_layers.MaxPooling2D, tf_layers.Flatten, tf_layers.ZeroPadding2D,
-                             tf_layers.ReLU]:
-                # these layers are either not used during inference or have no parameters
-                continue
-            else:
-                raise NotImplementedError(
-                    "Unknown layer type {}".format(type(l)))
-
-        bf.close()
+                elif type(l) in [tf_layers.Dropout, tf_layers.GlobalAveragePooling1D, tf_layers.GlobalAveragePooling2D,
+                                 tf_layers.MaxPooling1D, tf_layers.MaxPooling2D, tf_layers.Flatten,
+                                 tf_layers.ZeroPadding2D,
+                                 tf_layers.ReLU]:
+                    # these layers are either not used during inference or have no parameters
+                    continue
+                else:
+                    raise NotImplementedError(
+                        "Unknown layer type {}".format(type(l)))
 
     def generate_forward(self, backend: str, target_dir=None):
         if target_dir is None:
@@ -96,8 +94,9 @@ class Enclave(Sequential):
             preamble_backend = 'sgx_enclave'
         else:
             parameter_file = "backend/generated/parameters.bin"
+        parameter_path = os.path.join(cfg.get_ennclave_home(), parameter_file)
 
-        forward_file.write(templates.preamble.render(backend=preamble_backend, parameter_file=parameter_file))
+        forward_file.write(templates.preamble.render(backend=preamble_backend, parameter_file=parameter_path))
         # declare tmp buffers
         output_sizes = [np.prod(layer.output_shape[1:]) for layer in all_layers]
         output_sizes.sort(reverse=True)
