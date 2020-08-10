@@ -45,13 +45,17 @@ def common(backend: str):
             context.run('cmake ..')
             context.run(f'make backend_{backend}')
 
+    if backend == 'native':
+        ennclave.native_forward(b'', 0, 0)
+    else:
+        ennclave.sgx_forward(b'', 0, 0)
 
+
+# noinspection PyMethodMayBeStatic
 class BasicTests(unittest.TestCase):
-    @staticmethod
-    def test_native():
+    def test_native(self):
         common('native')
 
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
-    @staticmethod
-    def test_sgx():
+    def test_sgx(self):
         common('sgx')
