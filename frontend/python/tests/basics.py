@@ -6,7 +6,7 @@ import os
 from invoke.context import Context
 import unittest
 
-from frontend.python import templates
+import templates
 import frontend_python as ennclave
 
 def common(backend: str):
