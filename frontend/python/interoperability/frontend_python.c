@@ -2,10 +2,29 @@
 
 #include <Python.h>
 #include <dlfcn.h>
+#include <stdlib.h>
 
 #include "backends.h"
 
 // TODO: document methods
+
+static void* load_library(const char* library_name) {
+    char library_path[256];
+    char* ennclave_home = getenv("ENNCLAVE_HOME");
+    if (ennclave_home == NULL) {
+        fprintf(stderr, "Environment variable ENNCLAVE_HOME not set, defaulting to current working directory\n");
+        ennclave_home = ".";
+    }
+
+    int num_written = snprintf(library_path, sizeof(library_path), "%s/lib/libbackend_%s.so", ennclave_home,
+                               library_name);
+    if(num_written >= sizeof(library_path)){
+        perror("Library path too long for buffer");
+        exit(1);
+    }
+    printf("Loading library %s\n", library_path);
+    return dlopen(library_path, RTLD_NOW);
+}
 
 static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
     const PyBytesObject* b;
@@ -17,7 +36,7 @@ static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
     float* m = (float*) PyBytes_AsString((PyObject*) b);
     float ret[rs];
 
-    void* native_backend_handle = dlopen("libbackend_native.so", RTLD_LAZY);
+    void* native_backend_handle = load_library("native");
     if (!native_backend_handle) {
         PyErr_SetString(PyExc_IOError, "Could not open native backend library");
         return NULL;
@@ -53,7 +72,7 @@ static PyObject *frontend_sgx_forward(PyObject *self, PyObject *args) {
   float ret[rs];
   printf("Enclave NN forward\n");
 
-  void* sgx_backend_handle = dlopen("libbackend_sgx.so", RTLD_LAZY);
+  void* sgx_backend_handle = load_library("sgx", RTLD_NOW);
     if (!sgx_backend_handle) {
         PyErr_SetString(PyExc_IOError, "Could not open native backend library");
         return NULL;
