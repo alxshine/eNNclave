@@ -4,5 +4,5 @@ setup(name='eNNclave',
       py_modules=['ennclave'],
       ext_modules=[Extension('frontend_python', ['interoperability/frontend_python.c'], libraries=['dl'],
                              include_dirs=['../../inc'])],
-      install_requires=['jinja2', 'tensorflow', 'numpy']
+      install_requires=['jinja2', 'tensorflow==2.2.0', 'numpy', 'invoke']
       )

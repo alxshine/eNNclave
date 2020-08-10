@@ -5,7 +5,7 @@ import tensorflow.keras.layers as layers
 import os
 import unittest
 
-from frontend.python.common import common_test_basis
+from common import common_test_basis
 
 
 class ReLuTests(TensorFlowTestCase):

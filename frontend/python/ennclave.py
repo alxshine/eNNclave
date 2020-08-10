@@ -5,12 +5,17 @@ import utils
 import numpy as np
 import os
 
+import config as cfg
+
 
 class Enclave(Sequential):
     def __init__(self, layers=None, name='Enclave'):
         super().__init__(layers=layers, name=name)
 
-    def generate_config(self, target_dir='backend/generated'):
+    def generate_config(self, target_dir=None):
+        if target_dir is None:
+            target_dir = os.path.join(cfg.get_ennclave_home(), 'backend', 'generated')
+
         all_layers = utils.get_all_layers(self)
         output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
         output_sizes.sort(reverse=True)
@@ -34,7 +39,10 @@ class Enclave(Sequential):
         with open(config_path, 'w+') as config_file:
             config_file.write(config)
 
-    def generate_state(self, target_dir='backend/generated'):
+    def generate_state(self, target_dir=None):
+        if target_dir is None:
+            target_dir = os.path.join(cfg.get_ennclave_home(), 'backend', 'generated')
+
         bin_file = os.path.join(target_dir, 'parameters.bin')
         bf = open(bin_file, 'w+b')
 
@@ -73,7 +81,10 @@ class Enclave(Sequential):
 
         bf.close()
 
-    def generate_forward(self, backend: str, target_dir='backend/generated'):
+    def generate_forward(self, backend: str, target_dir=None):
+        if target_dir is None:
+            target_dir = os.path.join(cfg.get_ennclave_home(), 'backend', 'generated')
+
         target_file = os.path.join(target_dir, f'{backend}_forward.cpp')
         forward_file = open(target_file, 'w+')
         all_layers = utils.get_all_layers(self)

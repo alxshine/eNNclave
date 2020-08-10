@@ -4,8 +4,8 @@ import numpy as np
 import os
 from invoke.context import Context
 
-from frontend.python.enclave_model import Enclave
-import lib.frontend_python as ennclave
+from ennclave import Enclave
+import frontend_python as ennclave
 
 
 def build_library(model: Enclave, mode: str, target_dir="backend/generated"):

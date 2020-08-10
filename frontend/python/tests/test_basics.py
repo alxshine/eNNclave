@@ -8,11 +8,11 @@ import unittest
 
 import templates
 import frontend_python as ennclave
+import config as cfg
+
 
 def common(backend: str):
-    target_dir = join('backend','generated')
-    target_file = f"{backend}_forward.cpp"
-    target_path = join(target_dir, target_file)
+    target_dir = join(cfg.get_ennclave_home(), 'backend', 'generated')
 
     with open(join(target_dir, f'{backend}_forward.cpp'), 'w+') as forward_file:
         forward_file.write(templates.preamble.render(backend=backend))
@@ -42,12 +42,13 @@ def common(backend: str):
     with context.cd('build'):
         # context.run('cmake ..')
         context.run(f'make backend_{backend}')
-    
+
+
 class BasicTests(unittest.TestCase):
     @staticmethod
     def test_native():
         common('native')
-    
+
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     @staticmethod
     def test_sgx():
