@@ -10,47 +10,22 @@
 using namespace std;
 
 void eNNclave::print_out(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-
-    while (*fmt != '\0') {
-        if (*fmt == 'd') {
-            int i = va_arg(args, int);
-            cout << i << '\n';
-        } else if (*fmt == 'c') {
-            // note automatic conversion to integral type
-            int c = va_arg(args, int);
-            cout << static_cast<char>(c) << '\n';
-        } else if (*fmt == 'f') {
-            double d = va_arg(args, double);
-            cout << d << '\n';
-        }
-        ++fmt;
-    }
-
-    va_end(args);
+    char buf[BUFSIZ] = { '\0' };
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, BUFSIZ, fmt, ap);
+    va_end(ap);
+    cout << buf;
 }
 
 void eNNclave::print_err(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
+    char buf[BUFSIZ] = { '\0' };
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, BUFSIZ, fmt, ap);
+    va_end(ap);
 
-    while (*fmt != '\0') {
-        if (*fmt == 'd') {
-            int i = va_arg(args, int);
-            cerr << i << '\n';
-        } else if (*fmt == 'c') {
-            // note automatic conversion to integral type
-            int c = va_arg(args, int);
-            cerr << static_cast<char>(c) << '\n';
-        } else if (*fmt == 'f') {
-            double d = va_arg(args, double);
-            cerr << d << '\n';
-        }
-        ++fmt;
-    }
-
-    va_end(args);
+    cerr << buf;
 }
 
 void eNNclave::dump_matrix(float* m, int r, int c) {
