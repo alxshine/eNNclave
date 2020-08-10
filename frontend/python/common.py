@@ -1,23 +1,24 @@
-from tensorflow.keras.models import Sequential
-import tensorflow.keras.layers as layers
-import numpy as np
-import os
-from invoke.context import Context
-
-from ennclave import Enclave
 import frontend_python as ennclave
+import numpy as np
+import tensorflow.keras.layers as layers
+from invoke.context import Context
+from tensorflow.keras.models import Sequential
+
+import config as cfg
+from ennclave import Enclave
 
 
-def build_library(model: Enclave, mode: str, target_dir="backend/generated"):
-    model.generate_state(target_dir)
-    model.generate_forward(mode, target_dir)
+def build_library(model: Enclave, mode: str):
+    model.generate_state()
+    model.generate_forward(mode, )
     context = Context()
-    if mode == 'sgx':
-        model.generate_config(target_dir)
-        context.run('build/backend_sgx_encryptor')
+    with context.cd(cfg.get_ennclave_home()):
+        if mode == 'sgx':
+            model.generate_config()
+            context.run('build/backend_sgx_encryptor')
 
-    with context.cd("build"):  # TODO: make more robust
-        context.run(f"make backend_{mode}")
+        with context.cd("build"):  # TODO: make more robust
+            context.run(f"make backend_{mode}")
 
 
 def common_test_basis(model: Sequential, use_sgx: bool):

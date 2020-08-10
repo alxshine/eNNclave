@@ -39,9 +39,11 @@ def common(backend: str):
 </EnclaveConfiguration>""")
 
     context = Context()
-    with context.cd('build'):
-        # context.run('cmake ..')
-        context.run(f'make backend_{backend}')
+    with context.cd(cfg.get_ennclave_home()):
+        context.run('mkdir -p build')
+        with context.cd('build'):
+            context.run('cmake ..')
+            context.run(f'make backend_{backend}')
 
 
 class BasicTests(unittest.TestCase):
