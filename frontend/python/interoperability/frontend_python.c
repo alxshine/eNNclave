@@ -16,7 +16,7 @@ static void* load_library(const char* library_name) {
         ennclave_home = ".";
     }
 
-    int num_written = snprintf(library_path, sizeof(library_path), "%s/lib/libbackend_%s.so", ennclave_home,
+    size_t num_written = snprintf(library_path, sizeof(library_path), "%s/lib/libbackend_%s.so", ennclave_home,
                                library_name);
     if(num_written >= sizeof(library_path)){
         perror("Library path too long for buffer");
@@ -60,7 +60,6 @@ static PyObject* frontend_native_forward(PyObject* self, PyObject* args) {
     return Py_BuildValue("y#", ret, rs * sizeof(float));
 }
 
-#ifdef SGX_SDK
 static PyObject *frontend_sgx_forward(PyObject *self, PyObject *args) {
   const PyBytesObject *b;
   int s,rs;
@@ -72,7 +71,7 @@ static PyObject *frontend_sgx_forward(PyObject *self, PyObject *args) {
   float ret[rs];
   printf("Enclave NN forward\n");
 
-  void* sgx_backend_handle = load_library("sgx", RTLD_NOW);
+  void* sgx_backend_handle = load_library("sgx");
     if (!sgx_backend_handle) {
         PyErr_SetString(PyExc_IOError, "Could not open native backend library");
         return NULL;
@@ -94,21 +93,8 @@ static PyObject *frontend_sgx_forward(PyObject *self, PyObject *args) {
   return Py_BuildValue("y#", ret, rs*sizeof(float));
 }
 
-static PyObject *enclave_initialize(PyObject *self, PyObject *args){
-  // enclave_nn_start();
-  return Py_None;
-}
-
-static PyObject *enclave_teardown(PyObject *self, PyObject *args){
-  // enclave_nn_end();
-  return Py_None;
-}
-#endif
-
 static PyMethodDef frontend_methods[] = {
-#ifdef SGX_SDK
         {"sgx_forward", frontend_sgx_forward, METH_VARARGS, "Execute forward pass of all layers moved to TEE"},
-#endif
         {"native_forward", frontend_native_forward, METH_VARARGS, "Execute forward pass of enclave layers in native C"},
         {NULL, NULL, 0, NULL} // Sentinel
 };
