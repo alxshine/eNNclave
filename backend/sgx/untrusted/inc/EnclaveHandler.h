@@ -16,7 +16,6 @@ namespace eNNclave
         void encryptParameterFile(const std::string& parameterFilename);
     private:
         sgx_enclave_id_t enclaveId;
-        const char *enclaveFilename = "lib/libbackend_sgx_trusted.signed.so";
     };
 
 }; // namespace eNNclave
