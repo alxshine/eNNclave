@@ -4,8 +4,23 @@
 ###########################################################
 FROM ubuntu:18.04 as sgx-base
 
+# install conda (taken from conda/miniconda3 Dockerfile)
+RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
+ && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
+ && bash /tmp/miniconda.sh -bfp /usr/local \
+ && rm -rf /tmp/miniconda.sh \
+ && conda install -y python=3 \
+ && conda update conda \
+ && apt-get -qq -y remove curl bzip2 \
+ && apt-get -qq -y autoremove \
+ && apt-get autoclean \
+ && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
+ && conda clean --all --yes
+
+ENV PATH /opt/conda/bin:$PATH
+
 RUN apt-get update && apt-get install -y \
-  make
+  make cmake git
 
 # SGX setup
 WORKDIR /opt/intel
@@ -15,31 +30,25 @@ RUN sh -c 'echo yes | ./sgx_linux_x64_sdk_*.bin'
 
 # build requisites
 RUN apt-get update && apt-get install -y \
-  build-essential python3.8-dev python3-pip
+  build-essential python3.8-dev
 
 WORKDIR /eNNclave
 RUN \
   adduser --disabled-password --gecos "" ennclave && chown ennclave:ennclave -R /eNNclave
 
-COPY --chown=ennclave:ennclave requirements.txt /eNNclave/requirements.txt
-RUN python3.8 -m pip install --upgrade pip && python3.8 -m pip install -r requirements.txt
+COPY --chown=ennclave:ennclave environment.yml /eNNclave/
 
 USER ennclave
+RUN conda env create
 
 COPY --chown=ennclave:ennclave setup_ld_path.sh /eNNclave/
+COPY --chown=ennclave:ennclave frontend /eNNclave/frontend
+COPY --chown=ennclave:ennclave backend /eNNclave/backend
+COPY --chown=ennclave:ennclave core /eNNclave/core
 COPY --chown=ennclave:ennclave inc /eNNclave/inc
-COPY --chown=ennclave:ennclave lib /eNNclave/lib
-COPY --chown=ennclave:ennclave interop /eNNclave/interop
-COPY --chown=ennclave:ennclave Makefile *.py *.sh /eNNclave/
+COPY --chown=ennclave:ennclave CMakeLists.txt googletest_CMakeLists.txt test_docker.sh /eNNclave/
+RUN mkdir /eNNclave/lib && mkdir -p /eNNclave/backend/generated && mkdir /eNNclave/build
 
-ENV MODE=SIM
 
-RUN make clean
-RUN mkdir timing_logs
-
-FROM sgx-base AS tester
-
-COPY --chown=ennclave:ennclave tests/* /eNNclave/tests/
-
-# CMD ["bash"]
-CMD ["bash", "tests/run_tests.sh"]
+#CMD ["bash"]
+CMD ["bash", "test_docker.sh"]
