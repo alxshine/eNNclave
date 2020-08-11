@@ -4,13 +4,16 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 #include "enclave_u.h"
 
 using namespace std;
 
 eNNclave::EnclaveHandler::EnclaveHandler()
 {
-    sgx_status_t status = sgx_create_enclave(EnclaveHandler::enclaveFilename, SGX_DEBUG_FLAG, nullptr, nullptr, &enclaveId, nullptr);
+    string ennclave_home = getenv("ENNCLAVE_HOME");
+    string enclave_filename = ennclave_home + "/lib/libbackend_sgx_trusted.signed.so";
+    sgx_status_t status = sgx_create_enclave(enclave_filename.c_str(), SGX_DEBUG_FLAG, nullptr, nullptr, &enclaveId, nullptr);
     if (status != SGX_SUCCESS)
         throw logic_error{"could not initialize enclave, error code: " + to_string(status)};
 }

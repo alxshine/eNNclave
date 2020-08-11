@@ -4,6 +4,11 @@ cmake-build*
 .pytest_cache
 .vscode
 **/__pycache__
-build
+*build*
+**/*.egg-info
+**/venv*
 CMakeCache.txt
 cmake_install.cmake
+**/.idea
+.dockerignore
+**.so
