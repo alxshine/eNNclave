@@ -2,25 +2,10 @@
 ###########################################################
 #                Testing Environment                      #
 ###########################################################
-FROM ubuntu:18.04 as sgx-base
-
-# install conda (taken from conda/miniconda3 Dockerfile)
-RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
- && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
- && bash /tmp/miniconda.sh -bfp /usr/local \
- && rm -rf /tmp/miniconda.sh \
- && conda install -y python=3 \
- && conda update conda \
- && apt-get -qq -y remove curl bzip2 \
- && apt-get -qq -y autoremove \
- && apt-get autoclean \
- && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
- && conda clean --all --yes
-
-ENV PATH /opt/conda/bin:$PATH
+FROM ubuntu:18.04 as eNNclave
 
 RUN apt-get update && apt-get install -y \
-  make cmake git
+  make cmake git g++ gcc
 
 # SGX setup
 WORKDIR /opt/intel
@@ -38,17 +23,44 @@ RUN \
 
 COPY --chown=ennclave:ennclave environment.yml /eNNclave/
 
-USER ennclave
-RUN conda env create
+# USER ennclave
 
 COPY --chown=ennclave:ennclave setup_ld_path.sh /eNNclave/
 COPY --chown=ennclave:ennclave frontend /eNNclave/frontend
 COPY --chown=ennclave:ennclave backend /eNNclave/backend
 COPY --chown=ennclave:ennclave core /eNNclave/core
 COPY --chown=ennclave:ennclave inc /eNNclave/inc
-COPY --chown=ennclave:ennclave CMakeLists.txt googletest_CMakeLists.txt test_docker.sh /eNNclave/
+COPY --chown=ennclave:ennclave CMakeLists.txt googletest_CMakeLists.txt /eNNclave/
+
+ENV ENNCLAVE_HOME /eNNclave
+ENV LD_LIBRARY_PATH=/eNNclave/lib:$LD_LIBRARY_PATH
+ENV CXX g++
+ENV CC gcc
 RUN mkdir /eNNclave/lib && mkdir -p /eNNclave/backend/generated && mkdir /eNNclave/build
 
 
-#CMD ["bash"]
-CMD ["bash", "test_docker.sh"]
+CMD ["bash"]
+
+FROM eNNclave as eNNclave-tester
+
+# install conda (taken from conda/miniconda3 Dockerfile)
+RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
+ && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh \
+ && bash /tmp/miniconda.sh -bfp /usr/local \
+ && rm -rf /tmp/miniconda.sh \
+ && conda install -y python=3 \
+ && conda update conda \
+ && apt-get -qq -y remove curl bzip2 \
+ && apt-get -qq -y autoremove \
+ && apt-get autoclean \
+ && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log \
+ && conda clean --all --yes
+
+ENV PATH /opt/conda/bin:$PATH
+
+RUN conda env create
+
+COPY test_docker.sh /eNNclave
+
+CMD "bash"
+# CMD ["bash", "test_docker.sh"]
