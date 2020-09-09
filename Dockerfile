@@ -32,7 +32,9 @@ ENV ENNCLAVE_HOME /eNNclave
 ENV LD_LIBRARY_PATH=/eNNclave/lib:$LD_LIBRARY_PATH
 ENV CXX g++
 ENV CC gcc
+
 RUN mkdir /eNNclave/lib && mkdir -p /eNNclave/backend/generated && mkdir /eNNclave/build
+RUN (cd /eNNclave/build && cmake ..)
 
 
 CMD ["bash"]
