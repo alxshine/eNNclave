@@ -244,7 +244,12 @@ class Enclave(Sequential):
         weights = parameters[0]
         weight_name = templates.parameter_offset.render(offset=0)
         h = layer.input_shape[1]
-        w = layer.input_shape[2]
+        try:
+            w = layer.input_shape[2]
+        except IndexError:
+            w = h
+            h = 1
+        
         neurons = weights.shape[1]
 
         if len(parameters) > 1:

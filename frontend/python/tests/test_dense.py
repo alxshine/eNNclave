@@ -10,6 +10,13 @@ from common import common_test_basis
 
 class DenseTests(TensorFlowTestCase):
     @staticmethod
+    def test1DNative():
+        model = Sequential([
+            layers.Dense(5, input_shape=(5,))
+        ])
+        common_test_basis(model, False)
+
+    @staticmethod
     def testSmallNative():
         model = Sequential([
             layers.Dense(5, input_shape=(1, 5))
@@ -36,6 +43,13 @@ class DenseTests(TensorFlowTestCase):
             layers.Dense(1000, input_shape=(1, 1000))
         ])
         common_test_basis(model, False)
+
+    @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
+    def test1DEnclave(self):
+        model = Sequential([
+            layers.Dense(5, input_shape=(5,))
+        ])
+        common_test_basis(model, True)
 
     @unittest.skipIf(os.environ.get('SGX_SDK') is None, "SGX is not available")
     def testSmallEnclave(self):
