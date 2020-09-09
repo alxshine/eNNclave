@@ -62,5 +62,5 @@ RUN conda env create
 
 COPY test_docker.sh /eNNclave
 
-CMD "bash"
-# CMD ["bash", "test_docker.sh"]
+# CMD "bash"
+CMD ["bash", "test_docker.sh"]
