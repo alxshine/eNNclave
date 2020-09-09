@@ -18,19 +18,15 @@ RUN apt-get update && apt-get install -y \
   build-essential python3.8-dev
 
 WORKDIR /eNNclave
-RUN \
-  adduser --disabled-password --gecos "" ennclave && chown ennclave:ennclave -R /eNNclave
 
-COPY --chown=ennclave:ennclave environment.yml /eNNclave/
+COPY environment.yml /eNNclave/
 
-# USER ennclave
-
-COPY --chown=ennclave:ennclave setup_ld_path.sh /eNNclave/
-COPY --chown=ennclave:ennclave frontend /eNNclave/frontend
-COPY --chown=ennclave:ennclave backend /eNNclave/backend
-COPY --chown=ennclave:ennclave core /eNNclave/core
-COPY --chown=ennclave:ennclave inc /eNNclave/inc
-COPY --chown=ennclave:ennclave CMakeLists.txt googletest_CMakeLists.txt /eNNclave/
+COPY setup_ld_path.sh /eNNclave/
+COPY frontend /eNNclave/frontend
+COPY backend /eNNclave/backend
+COPY core /eNNclave/core
+COPY inc /eNNclave/inc
+COPY CMakeLists.txt googletest_CMakeLists.txt /eNNclave/
 
 ENV ENNCLAVE_HOME /eNNclave
 ENV LD_LIBRARY_PATH=/eNNclave/lib:$LD_LIBRARY_PATH
