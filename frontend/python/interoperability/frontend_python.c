@@ -99,9 +99,9 @@ static PyMethodDef frontend_methods[] = {
         {NULL, NULL, 0, NULL} // Sentinel
 };
 
-static struct PyModuleDef frontend_python = {
+static struct PyModuleDef ennclave_inference = {
         PyModuleDef_HEAD_INIT,
-        "frontend_python", // module name
+        "ennclave_inference", // module name
         NULL,        // module documentation, may be NULL
         -1, // size of per-interpreter state of the module,or -1 if the module
         // keeps state in global variables.
@@ -109,6 +109,6 @@ static struct PyModuleDef frontend_python = {
 
 PyMODINIT_FUNC // macro declares return type, special linkage, and "extern C"
 // if needed
-PyInit_frontend_python(void) {
-    return PyModule_Create(&frontend_python);
+PyInit_ennclave_inference(void) {
+    return PyModule_Create(&ennclave_inference);
 }

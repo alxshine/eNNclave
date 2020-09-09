@@ -1,4 +1,3 @@
-import frontend_python as ennclave
 import numpy as np
 import tensorflow.keras.layers as layers
 from invoke.context import Context
@@ -6,6 +5,7 @@ from tensorflow.keras.models import Sequential
 
 import config as cfg
 from ennclave import Enclave
+import ennclave_inference
 
 
 def build_library(model: Enclave, mode: str):
@@ -38,10 +38,10 @@ def common_test_basis(model: Sequential, use_sgx: bool):
     build_library(ennclave_model, "sgx" if use_sgx else "native")
 
     if use_sgx:
-        test_bytes = ennclave.sgx_forward(
+        test_bytes = ennclave_inference.sgx_forward(
             inputs.tobytes(), size, output_size)
     else:
-        test_bytes = ennclave.native_forward(
+        test_bytes = ennclave_inference.native_forward(
             inputs.tobytes(), size, output_size)
 
     test_result = np.frombuffer(test_bytes, dtype=np.float32)
