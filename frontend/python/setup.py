@@ -10,5 +10,5 @@ setup(name='eNNclave',
       py_modules=['ennclave'],
       ext_modules=[Extension('ennclave_inference', ['interoperability/frontend_python.c'], libraries=['dl'],
                              include_dirs=[join(os.getenv('ENNCLAVE_HOME'), 'inc')])],
-      install_requires=['jinja2', 'tensorflow-gpu', 'numpy', 'invoke']
+      install_requires=['jinja2', 'tensorflow', 'numpy', 'invoke']
       )
