@@ -248,6 +248,19 @@ def generate_softmax(test_name='small', size=10):
     operator = 'softmax(ret, size);'
     return {'suite': 'softmax', 'name': test_name, 'declarations': declarations, 'operator': operator}
 
+def generate_sigmoid(test_name='small', size=10):
+    declarations = [parameter_template.render(name='size', value=size)]
+
+    inputs = rng.uniform(-1,1, (1,size))
+    declarations.append(generate_array('ret', inputs))
+
+    layer = tf_layers.Activation('sigmoid', input_shape=inputs)
+    results = layer(inputs).numpy()
+    declarations.append(generate_array('expected', results))
+
+    operator = 'sigmoid(ret, size);'
+    return {'suite': 'sigmoid', 'name': test_name, 'declarations': declarations, 'operator': operator}
+
 
 def generate_global_average_pooling_1d(test_name='small', steps=10, channels=3):
     declarations = [parameter_template.render(name='steps', value=steps),
@@ -403,6 +416,10 @@ if __name__ == "__main__":
         generate_softmax('small', 10),
         generate_softmax('medium', 20),
         generate_softmax('large', 50),
+
+        generate_sigmoid('small', 10),
+        generate_sigmoid('medium', 20),
+        generate_sigmoid('large', 50),
 
         generate_global_average_pooling_1d('small', 10, 3),
         generate_global_average_pooling_1d('medium', 20, 3),
