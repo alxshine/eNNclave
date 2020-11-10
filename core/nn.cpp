@@ -10,9 +10,6 @@
 
 // TODO: make as much compile-time as possible
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "UnusedGlobalDeclarationInspection"
-
 void eNNclave::dense(const float *input, int h, int w, const float *weights, int neurons, const float *biases, float *ret)
 {
     for (int i = 0; i < h; ++i)
