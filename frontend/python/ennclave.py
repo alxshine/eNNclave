@@ -1,3 +1,4 @@
+from typing import Sized
 from tensorflow.keras.models import Sequential
 import tensorflow.keras.layers as tf_layers
 import templates
@@ -14,7 +15,8 @@ class Enclave(Sequential):
 
     def generate_config(self, target_dir=None):
         if target_dir is None:
-            target_dir = os.path.join(cfg.get_ennclave_home(), 'backend', 'generated')
+            target_dir = os.path.join(
+                cfg.get_ennclave_home(), 'backend', 'generated')
 
         all_layers = utils.get_all_layers(self)
         output_sizes = [np.prod(l.output_shape[1:]) for l in all_layers]
@@ -41,7 +43,8 @@ class Enclave(Sequential):
 
     def generate_state(self, target_dir=None):
         if target_dir is None:
-            target_dir = os.path.join(cfg.get_ennclave_home(), 'backend', 'generated')
+            target_dir = os.path.join(
+                cfg.get_ennclave_home(), 'backend', 'generated')
 
         bin_file = os.path.join(target_dir, 'parameters.bin')
         with open(bin_file, 'w+b') as bf:
@@ -81,7 +84,8 @@ class Enclave(Sequential):
 
     def generate_forward(self, backend: str, target_dir=None):
         if target_dir is None:
-            target_dir = os.path.join(cfg.get_ennclave_home(), 'backend', 'generated')
+            target_dir = os.path.join(
+                cfg.get_ennclave_home(), 'backend', 'generated')
 
         target_file = os.path.join(target_dir, f'{backend}_forward.cpp')
         forward_file = open(target_file, 'w+')
@@ -96,9 +100,11 @@ class Enclave(Sequential):
             parameter_file = "backend/generated/parameters.bin"
         parameter_path = os.path.join(cfg.get_ennclave_home(), parameter_file)
 
-        forward_file.write(templates.preamble.render(backend=preamble_backend, parameter_file=parameter_path))
+        forward_file.write(templates.preamble.render(
+            backend=preamble_backend, parameter_file=parameter_path))
         # declare tmp buffers
-        output_sizes = [np.prod(layer.output_shape[1:]) for layer in all_layers]
+        output_sizes = [np.prod(layer.output_shape[1:])
+                        for layer in all_layers]
         output_sizes.sort(reverse=True)
 
         # get required size for weight buffer
@@ -388,16 +394,19 @@ class Enclave(Sequential):
     def generate_activation(layer, target_buffer, input_size):
         if layer.activation.__name__ == 'relu':
             relu = templates.relu.render(
-                m=target_buffer, size=input_size)
+                m=target_buffer, size=input_size
+            )
             return relu
         elif layer.activation.__name__ == 'softmax':
-            raise NotImplementedError("Softmax currently not implemented")
-            # here we compute the actual label
-            # softmax = templates.softmax.render(
-            #     num_labels=input_size, input=target_buffer)
-            # return softmax
+            softmax = templates.softmax.render(
+                m=target_buffer, size=input_size
+            )
+            return softmax
         elif layer.activation.__name__ == 'sigmoid':
-            raise NotImplementedError("Sigmoid currently not implemented")
+            sigmoid = templates.sigmoid.render(
+                m=target_buffer, size=input_size
+            )
+            return sigmoid
             # return templates.sigmoid.render(input=target_buffer)
         elif layer.activation.__name__ == 'linear':
             return '\t//linear activation requires no action\n'

@@ -6,16 +6,19 @@
 #include "output.h"
 
 #include <iostream>
+#include <cmath>
 
 // TODO: make as much compile-time as possible
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedGlobalDeclarationInspection"
 
-void
-eNNclave::dense(const float* input, int h, int w, const float* weights, int neurons, const float* biases, float* ret) {
-    for (int i = 0; i < h; ++i) {
-        for (int j = 0; j < neurons; ++j) {
+void eNNclave::dense(const float *input, int h, int w, const float *weights, int neurons, const float *biases, float *ret)
+{
+    for (int i = 0; i < h; ++i)
+    {
+        for (int j = 0; j < neurons; ++j)
+        {
             ret[i * neurons + j] = biases[j];
 
             for (int mul_i = 0, mul_j = 0; mul_i < w; ++mul_i, ++mul_j)
@@ -24,9 +27,9 @@ eNNclave::dense(const float* input, int h, int w, const float* weights, int neur
     }
 }
 
-void
-eNNclave::sep_conv1(const float* input, int steps, int c, int f, const float* depth_kernels, const float* point_kernels,
-                    int ks, const float* biases, float* ret) {
+void eNNclave::sep_conv1(const float *input, int steps, int c, int f, const float *depth_kernels, const float *point_kernels,
+                         int ks, const float *biases, float *ret)
+{
     int len_ret = steps * f;
     for (int i = 0; i < len_ret; ++i)
         ret[i] = 0;
@@ -35,8 +38,10 @@ eNNclave::sep_conv1(const float* input, int steps, int c, int f, const float* de
     if (ks % 2 == 0)
         min_offset -= 1;
 
-    for (int i = 0; i < steps; ++i) {
-        for (int di = 0; di < ks; ++di) {
+    for (int i = 0; i < steps; ++i)
+    {
+        for (int di = 0; di < ks; ++di)
+        {
             int input_i = i - min_offset + di;
             if (input_i < 0 || input_i >= steps)
                 continue;
@@ -44,7 +49,7 @@ eNNclave::sep_conv1(const float* input, int steps, int c, int f, const float* de
             for (int ci = 0; ci < c; ++ci)
                 for (int fi = 0; fi < f; ++fi)
                     ret[i * f + fi] +=
-                            input[input_i * c + ci] * depth_kernels[di * c + ci] * point_kernels[ci * f + fi];
+                        input[input_i * c + ci] * depth_kernels[di * c + ci] * point_kernels[ci * f + fi];
         }
 
         for (int fi = 0; fi < f; ++fi)
@@ -52,12 +57,13 @@ eNNclave::sep_conv1(const float* input, int steps, int c, int f, const float* de
     }
 }
 
-void
-eNNclave::conv2(const float* input, int h, int w, int c, int f, const float* kernels, int kh, int kw,
-                const float* biases, float* ret) {
-// clear ret
+void eNNclave::conv2(const float *input, int h, int w, int c, int f, const float *kernels, int kh, int kw,
+                     const float *biases, float *ret)
+{
+    // clear ret
     int len_ret = h * w * f;
-    for (int i = 0; i < len_ret; ++i) {
+    for (int i = 0; i < len_ret; ++i)
+    {
         ret[i] = 0;
     }
 
@@ -68,44 +74,52 @@ eNNclave::conv2(const float* input, int h, int w, int c, int f, const float* ker
     if (kw % 2 == 0)
         min_col_offset -= 1;
 
-    for (int i = 0; i < h; ++i) {
-        for (int j = 0; j < w; ++j) {
-            for (int ki = 0; ki < kh; ++ki) {
+    for (int i = 0; i < h; ++i)
+    {
+        for (int j = 0; j < w; ++j)
+        {
+            for (int ki = 0; ki < kh; ++ki)
+            {
                 int input_i = i - min_row_offset + ki;
                 if (input_i < 0 || input_i >= h)
                     continue;
 
-                for (int kj = 0; kj < kw; ++kj) {
+                for (int kj = 0; kj < kw; ++kj)
+                {
                     int input_j = j - min_col_offset + kj;
                     if (input_j < 0 || input_j >= w)
                         continue;
 
-                    for (int ci = 0; ci < c; ++ci) {
-                        for (int fi = 0; fi < f; ++fi) {
+                    for (int ci = 0; ci < c; ++ci)
+                    {
+                        for (int fi = 0; fi < f; ++fi)
+                        {
                             ret[i * w * f + j * f + fi] +=
-                                    input[input_i * w * c + input_j * c + ci] *
-                                    kernels[ki * kw * c * f + kj * c * f + ci * f + fi];
+                                input[input_i * w * c + input_j * c + ci] *
+                                kernels[ki * kw * c * f + kj * c * f + ci * f + fi];
                         }
                     }
                 }
             }
 
-            for (int fi = 0; fi < f; ++fi) {
+            for (int fi = 0; fi < f; ++fi)
+            {
                 ret[i * w * f + j * f + fi] += biases[fi];
             }
         }
     }
 }
 
-void eNNclave::relu(float* m, int size) {
+void eNNclave::relu(float *m, int size)
+{
     for (int i = 0; i < size; i++)
         if (m[i] < 0)
             m[i] = 0;
 }
 
-void
-eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding padding, const float* kernels, int kh,
-                          int kw, float* ret) {
+void eNNclave::depthwise_conv2(const float *input, int h, int w, int c, Padding padding, const float *kernels, int kh,
+                               int kw, float *ret)
+{
     int min_row_offset = kh / 2;
     if (kh % 2 == 0)
         min_row_offset -= 1;
@@ -114,17 +128,22 @@ eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding paddi
         min_col_offset -= 1;
 
     int row_start, row_end, col_start, col_end;
-    if (padding == Padding::SAME) {
+    if (padding == Padding::SAME)
+    {
         row_start = 0;
         row_end = h;
         col_start = 0;
         col_end = w;
-    } else if (padding == Padding::VALID) {
+    }
+    else if (padding == Padding::VALID)
+    {
         row_start = min_row_offset;
         row_end = h - min_row_offset - !(kh % 2); // fix offset in case size is even
         col_start = min_col_offset;
         col_end = h - min_col_offset - !(kw % 2);
-    } else {
+    }
+    else
+    {
         print_err("Unhandled padding type\n");
         return;
     }
@@ -135,22 +154,27 @@ eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding paddi
     for (int i = 0; i < len_ret; ++i)
         ret[i] = 0;
 
-    for (int i = row_start; i < row_end; ++i) {
+    for (int i = row_start; i < row_end; ++i)
+    {
         int output_i = i - row_start;
-        for (int j = col_start; j < col_end; ++j) {
+        for (int j = col_start; j < col_end; ++j)
+        {
             int output_j = j - col_start;
-            for (int ki = 0; ki < kh; ++ki) {
+            for (int ki = 0; ki < kh; ++ki)
+            {
                 int input_i = i - min_row_offset + ki;
                 if (input_i < 0 || input_i >= h)
                     continue;
-                for (int kj = 0; kj < kw; ++kj) {
+                for (int kj = 0; kj < kw; ++kj)
+                {
                     int input_j = j - min_col_offset + kj;
                     if (input_j < 0 || input_j >= w)
                         continue;
-                    for (int ci = 0; ci < c; ++ci) {
+                    for (int ci = 0; ci < c; ++ci)
+                    {
                         ret[output_i * new_width * c + output_j * c + ci] +=
-                                input[input_i * w * c + input_j * c + ci] *
-                                kernels[ki * kw * c + kj * c + ci];
+                            input[input_i * w * c + input_j * c + ci] *
+                            kernels[ki * kw * c + kj * c + ci];
                     }
                 }
             }
@@ -158,45 +182,58 @@ eNNclave::depthwise_conv2(const float* input, int h, int w, int c, Padding paddi
     }
 }
 
-void eNNclave::global_average_pooling_1d(const float* input, int steps, int c, float* ret) {
-    for (int ci = 0; ci < c; ++ci) {
+void eNNclave::global_average_pooling_1d(const float *input, int steps, int c, float *ret)
+{
+    for (int ci = 0; ci < c; ++ci)
+    {
         ret[ci] = 0;
     }
 
     auto fsteps = static_cast<float>(steps);
 
-    for (int i = 0; i < steps; ++i) {
-        for (int ci = 0; ci < c; ++ci) {
+    for (int i = 0; i < steps; ++i)
+    {
+        for (int ci = 0; ci < c; ++ci)
+        {
             ret[ci] += input[i * c + ci] / fsteps;
         }
     }
 }
 
-void eNNclave::global_average_pooling_2d(const float* m, int h, int w, int c, float* ret) {
-    for (int i = 0; i < c; ++i) {
+void eNNclave::global_average_pooling_2d(const float *m, int h, int w, int c, float *ret)
+{
+    for (int i = 0; i < c; ++i)
+    {
         ret[i] = 0;
     }
 
     auto fdiv = static_cast<float>(h * w);
-    for (int i = 0; i < h; ++i) {
-        for (int j = 0; j < w; ++j) {
-            for (int ci = 0; ci < c; ++ci) {
+    for (int i = 0; i < h; ++i)
+    {
+        for (int j = 0; j < w; ++j)
+        {
+            for (int ci = 0; ci < c; ++ci)
+            {
                 ret[ci] += m[i * w * c + j * c + ci] / fdiv;
             }
         }
     }
 }
 
-void eNNclave::max_pooling_1d(const float* m, int steps, int c, int pool_size, float* ret) {
+void eNNclave::max_pooling_1d(const float *m, int steps, int c, int pool_size, float *ret)
+{
     int ret_steps = steps / pool_size;
 
-    for (int i = 0; i < ret_steps; ++i) {
+    for (int i = 0; i < ret_steps; ++i)
+    {
         int input_start = i * pool_size;
 
-        for (int ci = 0; ci < c; ++ci) {
+        for (int ci = 0; ci < c; ++ci)
+        {
             float current_max = m[input_start * c + ci];
 
-            for (int di = 0; di < pool_size; ++di) {
+            for (int di = 0; di < pool_size; ++di)
+            {
                 int current_i = input_start + di;
                 float to_compare = m[current_i * c + ci];
                 current_max = to_compare > current_max ? to_compare : current_max;
@@ -207,20 +244,26 @@ void eNNclave::max_pooling_1d(const float* m, int steps, int c, int pool_size, f
     }
 }
 
-void eNNclave::max_pooling_2d(const float* m, int h, int w, int c, int pool_size, float* ret) {
+void eNNclave::max_pooling_2d(const float *m, int h, int w, int c, int pool_size, float *ret)
+{
     int ret_h = h / pool_size;
     int ret_w = w / pool_size;
 
-    for (int i = 0; i < ret_h; ++i) {
+    for (int i = 0; i < ret_h; ++i)
+    {
         int input_i = i * pool_size;
-        for (int j = 0; j < ret_w; ++j) {
+        for (int j = 0; j < ret_w; ++j)
+        {
             int input_j = j * pool_size;
 
-            for (int ci = 0; ci < c; ++ci) {
+            for (int ci = 0; ci < c; ++ci)
+            {
                 float current_max = m[input_i * w * c + input_j * c + ci];
 
-                for (int di = 0; di < pool_size; ++di) {
-                    for (int dj = 0; dj < pool_size; ++dj) {
+                for (int di = 0; di < pool_size; ++di)
+                {
+                    for (int dj = 0; dj < pool_size; ++dj)
+                    {
                         int current_i = input_i + di;
                         int current_j = input_j + dj;
                         float to_compare = m[current_i * w * c + current_j * c + ci];
@@ -234,8 +277,9 @@ void eNNclave::max_pooling_2d(const float* m, int h, int w, int c, int pool_size
     }
 }
 
-void eNNclave::zero_pad2(const float* m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad,
-                         float* ret) {
+void eNNclave::zero_pad2(const float *m, int h, int w, int c, int top_pad, int bottom_pad, int left_pad, int right_pad,
+                         float *ret)
+{
     int new_width = w + left_pad + right_pad;
     int new_height = h + top_pad + bottom_pad;
 
@@ -250,7 +294,8 @@ void eNNclave::zero_pad2(const float* m, int h, int w, int c, int top_pad, int b
     auto content_bottom = h + top_pad;
     auto content_left = left_pad;
     auto content_right = w + left_pad;
-    for (int i = content_top, input_i = 0; i < content_bottom; ++i, ++input_i) {
+    for (int i = content_top, input_i = 0; i < content_bottom; ++i, ++input_i)
+    {
         //left pad
         for (int lj = 0; lj < left_pad; ++lj)
             for (int ci = 0; ci < c; ++ci)
@@ -271,4 +316,29 @@ void eNNclave::zero_pad2(const float* m, int h, int w, int c, int top_pad, int b
         for (int j = 0; j < new_width; ++j)
             for (int ci = 0; ci < c; ++ci)
                 ret[i * new_width * c + j * c + ci] = 0;
+}
+
+void eNNclave::softmax(float *input, int size)
+{
+    float exp_sum = 0.f;
+    for (int i = 0; i < size; ++i)
+    {
+        auto current_exp = expf(input[i]);
+        exp_sum += current_exp;
+        input[i] = current_exp;
+    }
+
+    for (int i = 0; i < size; ++i)
+    {
+        input[i] /= exp_sum;
+    }
+}
+
+void eNNclave::sigmoid(float *input, int size)
+{
+    for (int i = 0; i < size; ++i)
+    {
+        auto current_exp = expf(-input[i]);
+        input[i] = 1 / (1 + current_exp);
+    }
 }

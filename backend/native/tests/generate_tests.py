@@ -235,6 +235,19 @@ def generate_relu(test_name='small', size=10):
 
     return {'suite': 'relu', 'name': test_name, 'declarations': declarations, 'operator': operator}
 
+def generate_softmax(test_name='small', size=10):
+    declarations = [parameter_template.render(name='size', value=size)]
+
+    inputs = rng.uniform(-1,1, (1,size))
+    declarations.append(generate_array('ret', inputs))
+
+    layer = tf_layers.Softmax(input_shape=inputs)
+    results = layer(inputs).numpy()
+    declarations.append(generate_array('expected', results))
+
+    operator = 'softmax(ret, size);'
+    return {'suite': 'softmax', 'name': test_name, 'declarations': declarations, 'operator': operator}
+
 
 def generate_global_average_pooling_1d(test_name='small', steps=10, channels=3):
     declarations = [parameter_template.render(name='steps', value=steps),
@@ -386,6 +399,10 @@ if __name__ == "__main__":
         generate_relu('small', 10),
         generate_relu('medium', 20),
         generate_relu('large', 50),
+
+        generate_softmax('small', 10),
+        generate_softmax('medium', 20),
+        generate_softmax('large', 50),
 
         generate_global_average_pooling_1d('small', 10, 3),
         generate_global_average_pooling_1d('medium', 20, 3),

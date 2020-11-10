@@ -66,6 +66,8 @@ zero_pad2 = Template(
     """zero_pad2({{input}}, {{h}}, {{w}}, {{channels}}, {{top_pad}}, {{bottom_pad}},
     {{left_pad}}, {{right_pad}}, {{ret}});\n""")
 relu = Template("relu({{m}}, {{size}});\n")
+softmax = Template("softmax({{m}}, {{size}});\n")
+sigmoid = Template("sigmoid({{m}}, {{size}});\n")
 sep_conv1 = Template("""sep_conv1({{input}}, {{steps}}, {{channels}}, {{filters}}, {{depth_kernels}},
     {{point_kernels}}, {{kernel_size}}, {{biases}}, {{ret}});\n""")
 depthwise_conv2 = Template("""depthwise_conv2({{input}}, {{h}}, {{w}}, {{channels}}, {{padding}}, {{kernels}},
