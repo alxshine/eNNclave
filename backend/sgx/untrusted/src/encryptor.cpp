@@ -12,7 +12,7 @@ int main()
     {
         cout << "Creating EnclaveHandler" << endl;
         EnclaveHandler enclaveHandler{};
-        auto path = "backend/generated/parameters.bin";
+        auto path = "backend/generated/parameters.bin"; // TODO: start from ENNCLAVE_HOME
         cout << "Encrypting " << path << endl;
         enclaveHandler.encryptParameterFile(path);
     }
