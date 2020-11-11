@@ -46,8 +46,29 @@ if (DEFINED ENV{SGX_SDK})
     set(SGX_EDL "${CMAKE_SOURCE_DIR}/backend/sgx/trusted/enclave.edl")
     set(ENCLAVE_C_FLAGS "-nostdinc -fvisibility=hidden -fpie -ffunction-sections -fdata-sections")
 
-    find_library(URTS_SIM sgx_urts_sim $ENV{SGX_SDK}/sdk_libs/)
-    find_library(TRTS_SIM sgx_trts_sim ${SGX_LIB64} REQUIRED)
+    if(EXISTS "/dev/isgx")
+        # if the SGX driver is installed, use normal libraries
+        find_library(URTS 
+            sgx_urts 
+            REQUIRED)
+        find_library(TRTS 
+            NAME sgx_trts 
+            HINTS ${SGX_LIB64} 
+            NO_DEFAULT_PATH REQUIRED)
+        message(STATUS "SGX driver found, using libraries ${URTS} and ${TRTS}")
+    else()
+        # if not, use simulator
+        find_library(URTS 
+            NAME sgx_urts_sim 
+            HINTS $ENV{SGX_SDK}/sdk_libs/
+            NO_DEFAULT_PATH REQUIRED)
+        find_library(TRTS 
+            NAME sgx_trts_sim 
+            HINTS ${SGX_LIB64} 
+            NO_DEFAULT_PATH REQUIRED)
+        message(STATUS "SGX driver not found, using simulator libraries ${URTS} and ${TRTS}")
+    endif()
+
     find_library(SGX_STD_C sgx_tstdc ${SGX_LIB64} REQUIRED)
     find_library(SGX_STD_CXX sgx_tcxx ${SGX_LIB64} REQUIRED)
     find_library(SGX_TFS sgx_tprotected_fs ${SGX_LIB64} REQUIRED)
@@ -102,7 +123,7 @@ if (DEFINED ENV{SGX_SDK})
             COMPILE_FLAGS "${ENCLAVE_C_FLAGS} -nostdinc++"
             LINK_DEPENDS ${ENCLAVE_LINK_SCRIPT})
     target_link_libraries(backend_sgx_trusted PRIVATE
-            -Wl,--no-undefined;-nostdlib;-nodefaultlibs;-nostartfiles;-L${SGX_LIB64};-Wl,--whole-archive;${TRTS_SIM};-Wl,--no-whole-archive;-Wl,--start-group;${SGX_STD_C};${SGX_STD_CXX};${SGX_CRYPTO};${SGX_SERVICE};${SGX_TFS};-Wl,--end-group;-Wl,-Bstatic;-Wl,-Bsymbolic;-Wl,--no-undefined;-Wl,-pie,-eenclave_entry;-Wl,--export-dynamic;-Wl,--defsym,__ImageBase=0;-Wl,--gc-sections;-Wl,--version-script=${ENCLAVE_LINK_SCRIPT})
+            -Wl,--no-undefined;-nostdlib;-nodefaultlibs;-nostartfiles;-L${SGX_LIB64};-Wl,--whole-archive;${TRTS};-Wl,--no-whole-archive;-Wl,--start-group;${SGX_STD_C};${SGX_STD_CXX};${SGX_CRYPTO};${SGX_SERVICE};${SGX_TFS};-Wl,--end-group;-Wl,-Bstatic;-Wl,-Bsymbolic;-Wl,--no-undefined;-Wl,-pie,-eenclave_entry;-Wl,--export-dynamic;-Wl,--defsym,__ImageBase=0;-Wl,--gc-sections;-Wl,--version-script=${ENCLAVE_LINK_SCRIPT})
     # TODO: replace libraries with find_library
 
     add_custom_target(backend_sgx_signed
@@ -137,7 +158,9 @@ if (DEFINED ENV{SGX_SDK})
             CXX_STANDARD 14
             THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
-    target_link_libraries(backend_sgx_encryptor backend_sgx_trusted ${URTS_SIM} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
+    target_link_libraries(backend_sgx_encryptor backend_sgx_trusted ${URTS} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
+
+    # TODO: add target for encrypted parameters
 
     add_library(backend_sgx MODULE
             backend/sgx/untrusted/src/wrapper.cpp
@@ -150,7 +173,7 @@ if (DEFINED ENV{SGX_SDK})
             inc
             backend/sgx/inc
             backend/sgx/untrusted/inc)
-    target_link_libraries(backend_sgx backend_sgx_trusted ${URTS_SIM} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
+    target_link_libraries(backend_sgx backend_sgx_trusted ${URTS} ${CMAKE_THREAD_LIBS_INIT} ${SGX_UFS})
     add_dependencies(backend_sgx backend_sgx_signed)
 
     add_executable(backend_sgx_tester
