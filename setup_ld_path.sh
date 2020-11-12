@@ -1,4 +1,4 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH="$(pwd)/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="$(pwd)/lib:$PYTHONPATH"
+export LD_LIBRARY_PATH="${ENNCLAVE_HOME}/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="${ENNCLAVE_HOME}/lib:$PYTHONPATH"

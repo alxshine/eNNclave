@@ -33,6 +33,10 @@ I am currently not 100% confident in the stability of that, but improvements are
 Due to the architecture of this framework the code generation process needs to know where the root of the eNNclave framework is (i.e. the directory that this README is in).
 This should be stored in the `ENNCLAVE_HOME` environment variable.
 
+Also ensure that you add `$ENNCLAVE_HOME/lib` to the `LD_LIBRARY_PATH` and `PYTHON_PATH`.
+The [setup_ld_path.sh](setup_ld_path.sh) script will take care of that for you.
+Just make sure you `source` it instead of simply running it.
+
 ## Compiling the project
 
 You can compile the code wherever you want, the resulting libraries are stored in `$ENNCLAVE_HOME/lib`.
