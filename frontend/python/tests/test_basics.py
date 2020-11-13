@@ -7,7 +7,7 @@ from invoke.context import Context
 import unittest
 
 import templates
-import frontend_python as ennclave
+import ennclave_inference as ennclave
 import config as cfg
 
 
@@ -20,7 +20,8 @@ def common(backend: str):
 
     with open(join(target_dir, f'{backend}_forward.cpp'), 'w+') as forward_file:
         forward_file.write(templates.preamble.render(backend=preamble_backend))
-        forward_file.write(f"print_out(\"Hello, this is backend {backend}\\n\");")
+        forward_file.write(
+            f"print_out(\"Hello, this is backend {backend}\\n\");")
         forward_file.write(templates.postamble)
 
     with open(join(target_dir, 'parameters.bin'), 'w') as parameter_file:
