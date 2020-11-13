@@ -55,7 +55,7 @@ if (DEFINED ENV{SGX_SDK})
             NAME sgx_trts 
             HINTS ${SGX_LIB64} 
             NO_DEFAULT_PATH REQUIRED)
-        message(STATUS "SGX driver found, using libraries ${URTS} and ${TRTS}")
+        # message(STATUS "SGX driver found, using libraries ${URTS} and ${TRTS}")
     else()
         # if not, use simulator
         find_library(URTS 
@@ -66,7 +66,7 @@ if (DEFINED ENV{SGX_SDK})
             NAME sgx_trts_sim 
             HINTS ${SGX_LIB64} 
             NO_DEFAULT_PATH REQUIRED)
-        message(STATUS "SGX driver not found, using simulator libraries ${URTS} and ${TRTS}")
+        message(WARN "SGX driver not found, using simulator libraries ${URTS} and ${TRTS}")
     endif()
 
     find_library(SGX_STD_C sgx_tstdc ${SGX_LIB64} REQUIRED)
