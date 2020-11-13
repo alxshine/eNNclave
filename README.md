@@ -9,6 +9,28 @@ The original paper for it is [eNNclave: Offline Inference with Model Confidentia
 Our experiments presented in the paper are extracted to a separate [repository](https://github.com/alxshine/ennclave-experiments).
 For project specific questions, problems and comments feel free to open an issue or send a mail to [Alexander Schlögl](mailto:alexander.schloegl@uibk.ac.at).
 
+## Citation
+
+If you use this framework for research, please cite the original paper:
+```bibtex
+@inproceedings{10.1145/3411508.3421376,
+    author = {Schl\"{o}gl, Alexander and B\"{o}hme, Rainer},
+    title = {ENNclave: Offline Inference with Model Confidentiality},
+    year = {2020},
+    isbn = {9781450380942},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/3411508.3421376},
+    doi = {10.1145/3411508.3421376},
+    booktitle = {Proceedings of the 13th ACM Workshop on Artificial Intelligence and Security},
+    pages = {93–104},
+    numpages = {12},
+    keywords = {heterogeneous computing, trusted enclaves, machine learning, deep neural networks, privacy, secure function evaluation},
+    location = {Virtual Event, USA},
+    series = {AISec'20}
+}
+```
+
 ## Setup
 
 This section lists the required tools, libraries and SDKs required for compiling and running the project.
