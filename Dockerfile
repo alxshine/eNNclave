@@ -38,11 +38,6 @@ WORKDIR /eNNclave
 COPY environment.yml /eNNclave/
 RUN conda env create
 
-ENV ENNCLAVE_HOME /eNNclave
-ENV LD_LIBRARY_PATH=/eNNclave/lib:$LD_LIBRARY_PATH
-ENV CXX g++
-ENV CC gcc
-
 CMD ["bash"]
 
 ###########################################################
@@ -69,7 +64,9 @@ RUN chmod 700 ${SSH}
 RUN wget "https://github.com/${github_users}.keys" -O ${SSH}/authorized_keys
 RUN chmod 600 ${SSH}/authorized_keys
 
-CMD ["/usr/sbin/sshd"]
+COPY docker.bashrc /root/.bashrc
+
+CMD ["/usr/sbin/sshd", "-D"]
 
 ###########################################################
 #                Testing Environment                      #
