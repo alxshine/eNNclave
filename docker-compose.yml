@@ -1,12 +1,6 @@
 version: "3.8"
 services:
   eNNclave-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: eNNclave-dev
-      args:
-        github_users: alxshine
     image: ennclave-dev:latest
     ports:
       - "2337:22"
