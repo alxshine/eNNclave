@@ -1,5 +1,5 @@
 ###########################################################
-#              Development Environment                    #
+#                Testing Environment                      #
 ###########################################################
 FROM ubuntu:18.04 as eNNclave-dev
 
@@ -36,25 +36,16 @@ WORKDIR /eNNclave
 COPY environment.yml /eNNclave/
 RUN conda env create
 
-RUN apt-get update -y && \
-  apt-get install -y --no-install-recommends wget openssh-server mosh
+COPY frontend /eNNclave/frontend
+COPY backend /eNNclave/backend
+COPY core /eNNclave/core
+COPY inc /eNNclave/inc
+COPY CMakeLists.txt googletest_CMakeLists.txt /eNNclave/
 
-RUN mkdir /var/run/sshd \
-  && echo 'AuthorizedKeysFile %h/.ssh/authorized_keys' >> /etc/ssh/sshd_config \
-  && sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd \
-  && sed -ri 's/^PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config \
-  && sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+RUN mkdir /eNNclave/lib && mkdir -p /eNNclave/backend/generated && mkdir /eNNclave/build
+RUN (cd /eNNclave/build && cmake ..)
 
-ARG github_users
-RUN test -n "$github_users"
+COPY test_docker.sh /eNNclave
 
-ARG SSH=/root/.ssh
-
-RUN mkdir ${SSH}
-RUN chmod 700 ${SSH}
-RUN wget "https://github.com/${github_users}.keys" -O ${SSH}/authorized_keys
-RUN chmod 600 ${SSH}/authorized_keys
-
-COPY docker.bashrc /root/.bashrc
-
-CMD ["/usr/sbin/sshd", "-D"]
+# CMD "bash"
+CMD ["bash", "test_docker.sh"]
