@@ -1,0 +1,20 @@
+{
+  "name": "eNNclave",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+  },
+  "remoteUser": "ennclave",
+  "containerEnv": {
+    "ENNCLAVE_HOME": "${containerWorkspaceFolder}",
+    //   "PATH": "/opt/conda/bin:/opt/intel/sgksdk/bin/:/opt/intel/sgksdk/bin/x64/:${PATH}",
+    // "SGX_SDK": "/opt/intel/sgksdk",
+    "LD_LIBRARY_PATH": "${containerWorkspaceFolder}/lib",
+    "PYTHON_PATH": "${PYTHON_PATH}:${containerWorkspaceFolder}/lib"
+  },
+  "postAttachCommand": [
+    "source initialize.sh"
+  ]
+}

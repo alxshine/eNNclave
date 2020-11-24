@@ -1,8 +1,0 @@
-version: "3.8"
-services:
-  eNNclave-dev:
-    image: ennclave-dev:latest
-    ports:
-      - "2337:22"
-    volumes:
-      - .:/eNNclave
