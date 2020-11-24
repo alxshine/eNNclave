@@ -1,7 +1,7 @@
 ###########################################################
 #                Testing Environment                      #
 ###########################################################
-FROM ubuntu:18.04 as eNNclave-dev
+FROM ubuntu:18.04 as eNNclave-testing
 
 RUN apt-get update && apt-get install -y \
   make cmake git g++ gcc
